@@ -49,7 +49,7 @@ npm packages are checked by the CI licence job and task T060.
 ## Feature 002 notes (2026-11-04)
 
 - **Pinned in the catalogue**: python-build-standalone `20261026` (CPython 3.11.18, `install_only_stripped`) for Windows and macOS on x64 and arm64; FFmpeg `n8.1.3-34-ga35157abb9` LGPL builds for Windows x64 and arm64 from BtbN release `autobuild-2026-11-04-12-51`. Sizes and SHA-256 come from the release pages.
-- **Open: macOS FFmpeg.** No trustworthy prebuilt LGPL macOS build was found. Run the `ffmpeg-macos` workflow (`.github/workflows/ffmpeg-macos.yml`), upload its archives to the project release, and add the two macOS `ffmpeg` entries with the printed size and SHA-256.
+- **macOS FFmpeg** is built from the official `n8.1.3` tag with `--disable-gpl --disable-nonfree --disable-autodetect` and hosted on the project's release `ffmpeg-n8.1.3` (https://github.com/kirykr/FlickFluent/releases/tag/ffmpeg-n8.1.3). Apple Silicon was built natively; the Intel build was cross-compiled on Apple Silicon and run only under Rosetta. The `.github/workflows/ffmpeg-macos.yml` workflow does the same on GitHub but needs billing on the account, so it was not used.
 - **Open: BtbN retention.** Autobuild releases are pruned over time. Before release, mirror the pinned archives to storage we control and update the URLs.
 - **Not yet in the catalogue**: faster-whisper, M2M100, Demucs, sherpa-onnx, Piper, Kokoro and silero-vad model files. Their licences and hashes are verified when each story adds its entry (licences are logged in `specs/002-core-dub-pipeline/research.md`; sizes and hashes are written by T041).
 

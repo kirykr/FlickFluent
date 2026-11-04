@@ -3208,5 +3208,43 @@
       "espeak-ng-data"
     ],
     "licenceNoticeKey": "licence.piperVoice"
+  },
+  {
+    "id": "ffmpeg-macos-arm64",
+    "name": "FFmpeg (arm64 Mac)",
+    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
+    "licence": "LGPL-2.1-or-later",
+    "licenceClass": "copyleftFile",
+    "licenceNoticeKey": "licence.ffmpeg",
+    "sizeBytes": 20658567,
+    "url": "https://github.com/kirykr/FlickFluent/releases/download/ffmpeg-n8.1.3/ffmpeg-n8.1.3-macos-arm64-lgpl.tar.gz",
+    "sha256": "bfb874119831d7f5efb2c5dfaec36aa43e7628bd4ea0efb808848b87225040dd",
+    "fileName": "ffmpeg-n8.1.3-macos-arm64-lgpl.tar.gz",
+    "step": "ffmpeg",
+    "machineClass": "minimum",
+    "platforms": {
+      "macos": [
+        "arm64"
+      ]
+    }
+  },
+  {
+    "id": "ffmpeg-macos-x64",
+    "name": "FFmpeg (x64 Mac)",
+    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
+    "licence": "LGPL-2.1-or-later",
+    "licenceClass": "copyleftFile",
+    "licenceNoticeKey": "licence.ffmpeg",
+    "sizeBytes": 22086368,
+    "url": "https://github.com/kirykr/FlickFluent/releases/download/ffmpeg-n8.1.3/ffmpeg-n8.1.3-macos-x64-lgpl.tar.gz",
+    "sha256": "5ab63f1f0e0f886fc4e8590b619f82e9049cd0c4c994938c50011e27c4a4c31e",
+    "fileName": "ffmpeg-n8.1.3-macos-x64-lgpl.tar.gz",
+    "step": "ffmpeg",
+    "machineClass": "minimum",
+    "platforms": {
+      "macos": [
+        "x64"
+      ]
+    }
   }
 ]
