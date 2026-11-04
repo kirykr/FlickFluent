@@ -1,0 +1,11 @@
+{
+  "language": "fr",
+  "speakerCount": 2,
+  "maxWordErrorRate": 0.35,
+  "lines": [
+    "Bonjour, je m'appelle Thomas. Aujourd'hui nous allons visiter la ville.",
+    "Merci beaucoup. J'ai hâte de voir le grand musée.",
+    "Bonjour, je m'appelle Thomas. Aujourd'hui nous allons visiter la ville."
+  ],
+  "keepTokens": []
+}

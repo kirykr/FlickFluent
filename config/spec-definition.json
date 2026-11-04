@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "provisional": true,
+  "minimum": {
+    "cpuBits": 64,
+    "cpuCores": 4,
+    "ramGb": 8,
+    "freeDiskGb": 10,
+    "os": { "windows": "10", "macos": "12" },
+    "accelerator": "none"
+  },
+  "fullLocal": {
+    "cpuBits": 64,
+    "cpuCores": 8,
+    "ramGb": 16,
+    "freeDiskGb": 40,
+    "os": { "windows": "10", "macos": "12" },
+    "accelerator": "appleSilicon_or_discreteGpu"
+  }
+}

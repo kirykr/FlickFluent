@@ -1,0 +1,8 @@
+{
+  "cpuBits": 64,
+  "cpuCores": 10,
+  "ramGb": 32,
+  "freeDiskGb": 100,
+  "os": { "family": "macos", "version": "15" },
+  "accelerator": "appleSilicon"
+}

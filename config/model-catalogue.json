@@ -1,0 +1,3212 @@
+[
+  {
+    "id": "download-self-test",
+    "name": "Download self-test file",
+    "purpose": "A 1 KB text file (the MIT licence text of Tauri) used to check that downloads work on this computer. It is not an AI model. Real models are added with feature 002.",
+    "licence": "MIT",
+    "sizeBytes": 1090,
+    "url": "https://raw.githubusercontent.com/tauri-apps/tauri/tauri-v2.0.0/LICENSE_MIT",
+    "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
+    "licenceClass": "permissive",
+    "step": "test",
+    "machineClass": "minimum"
+  },
+  {
+    "id": "runtime-windows-x64",
+    "name": "Python runtime (windows x64)",
+    "purpose": "The Python 3.11 program that runs the speech and translation models. It is a one-time download and is not part of the installer.",
+    "licence": "PSF-2.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 25128375,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "sha256": "67215a7bf1643e33d01b17ee3f1e91a8b0b39163746855ee02594bf0608f68b4",
+    "fileName": "cpython-3.11.18+20261026-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "step": "runtime",
+    "machineClass": "minimum",
+    "platforms": {
+      "windows": [
+        "x64"
+      ]
+    },
+    "extraDownloadBytes": 765000000
+  },
+  {
+    "id": "runtime-macos-x64",
+    "name": "Python runtime (macos x64)",
+    "purpose": "The Python 3.11 program that runs the speech and translation models. It is a one-time download and is not part of the installer.",
+    "licence": "PSF-2.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 26699992,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-x86_64-apple-darwin-install_only_stripped.tar.gz",
+    "sha256": "d38edc2df25e7e7f886c802bf2fa552422b097c509dbdcbae828827470356095",
+    "fileName": "cpython-3.11.18+20261026-x86_64-apple-darwin-install_only_stripped.tar.gz",
+    "step": "runtime",
+    "machineClass": "minimum",
+    "platforms": {
+      "macos": [
+        "x64"
+      ]
+    },
+    "extraDownloadBytes": 197000000
+  },
+  {
+    "id": "runtime-macos-arm64",
+    "name": "Python runtime (macos arm64)",
+    "purpose": "The Python 3.11 program that runs the speech and translation models. It is a one-time download and is not part of the installer.",
+    "licence": "PSF-2.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 26776684,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.11.18%2B20261026-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "sha256": "f3e1cd83a7f1d70e58b0d69102c18bd6867d2f973068dc5cbfd5822e445c66df",
+    "fileName": "cpython-3.11.18+20261026-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "step": "runtime",
+    "machineClass": "minimum",
+    "platforms": {
+      "macos": [
+        "arm64"
+      ]
+    },
+    "extraDownloadBytes": 753000000
+  },
+  {
+    "id": "ffmpeg-windows-x64",
+    "name": "FFmpeg (x64 Windows)",
+    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
+    "licence": "LGPL-2.1-or-later",
+    "licenceClass": "copyleftFile",
+    "licenceNoticeKey": "licence.ffmpeg",
+    "sizeBytes": 167779161,
+    "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-11-04-12-51/ffmpeg-n8.1.3-34-ga35157abb9-win64-lgpl-8.1.zip",
+    "sha256": "c966229f0b033a1cf93b3fb139a804358a4ec27a53b8a6213fe08301868a7668",
+    "fileName": "ffmpeg-n8.1.3-34-ga35157abb9-win64-lgpl-8.1.zip",
+    "step": "ffmpeg",
+    "machineClass": "minimum",
+    "platforms": {
+      "windows": [
+        "x64"
+      ]
+    }
+  },
+  {
+    "id": "ffmpeg-windows-arm64",
+    "name": "FFmpeg (arm64 Windows)",
+    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
+    "licence": "LGPL-2.1-or-later",
+    "licenceClass": "copyleftFile",
+    "licenceNoticeKey": "licence.ffmpeg",
+    "sizeBytes": 115919818,
+    "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-11-04-12-51/ffmpeg-n8.1.3-34-ga35157abb9-winarm64-lgpl-8.1.zip",
+    "sha256": "66eac2ed0d08d26d57dc2276e1e852d66e875261b8563dcd667e4cba02461087",
+    "fileName": "ffmpeg-n8.1.3-34-ga35157abb9-winarm64-lgpl-8.1.zip",
+    "step": "ffmpeg",
+    "machineClass": "minimum",
+    "platforms": {
+      "windows": [
+        "arm64"
+      ]
+    }
+  },
+  {
+    "id": "whisper-small",
+    "name": "Speech recognition (small)",
+    "purpose": "Turns speech into text, with times for each line. Larger models are more accurate and slower.",
+    "licence": "MIT",
+    "licenceClass": "permissive",
+    "sizeBytes": 486212372,
+    "files": [
+      {
+        "name": "config.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/config.json",
+        "sha256": "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828",
+        "sizeBytes": 2370
+      },
+      {
+        "name": "model.bin",
+        "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/model.bin",
+        "sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671",
+        "sizeBytes": 483546902
+      },
+      {
+        "name": "tokenizer.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/tokenizer.json",
+        "sha256": "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab",
+        "sizeBytes": 2203239
+      },
+      {
+        "name": "vocabulary.txt",
+        "url": "https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/vocabulary.txt",
+        "sha256": "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913",
+        "sizeBytes": 459861
+      }
+    ],
+    "step": "transcribe",
+    "machineClass": "minimum",
+    "languages": [
+      "af",
+      "am",
+      "ar",
+      "as",
+      "az",
+      "ba",
+      "be",
+      "bg",
+      "bn",
+      "bo",
+      "br",
+      "bs",
+      "ca",
+      "cs",
+      "cy",
+      "da",
+      "de",
+      "el",
+      "en",
+      "es",
+      "et",
+      "eu",
+      "fa",
+      "fi",
+      "fo",
+      "fr",
+      "gl",
+      "gu",
+      "ha",
+      "haw",
+      "he",
+      "hi",
+      "hr",
+      "ht",
+      "hu",
+      "hy",
+      "id",
+      "is",
+      "it",
+      "ja",
+      "jw",
+      "ka",
+      "kk",
+      "km",
+      "kn",
+      "ko",
+      "la",
+      "lb",
+      "ln",
+      "lo",
+      "lt",
+      "lv",
+      "mg",
+      "mi",
+      "mk",
+      "ml",
+      "mn",
+      "mr",
+      "ms",
+      "mt",
+      "my",
+      "ne",
+      "nl",
+      "nn",
+      "no",
+      "oc",
+      "pa",
+      "pl",
+      "ps",
+      "pt",
+      "ro",
+      "ru",
+      "sa",
+      "sd",
+      "si",
+      "sk",
+      "sl",
+      "sn",
+      "so",
+      "sq",
+      "sr",
+      "su",
+      "sv",
+      "sw",
+      "ta",
+      "te",
+      "tg",
+      "th",
+      "tk",
+      "tl",
+      "tr",
+      "tt",
+      "uk",
+      "ur",
+      "uz",
+      "vi",
+      "yi",
+      "yo",
+      "yue",
+      "zh"
+    ]
+  },
+  {
+    "id": "whisper-medium",
+    "name": "Speech recognition (medium)",
+    "purpose": "Turns speech into text, with times for each line. Larger models are more accurate and slower.",
+    "licence": "MIT",
+    "licenceClass": "permissive",
+    "sizeBytes": 1530571735,
+    "files": [
+      {
+        "name": "config.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/config.json",
+        "sha256": "3622a2ddc41ec0e0fd4e68c13c6830f03b90c38d89aaad184de02c8c642cf807",
+        "sizeBytes": 2257
+      },
+      {
+        "name": "model.bin",
+        "url": "https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/model.bin",
+        "sha256": "9b45e1009dcc4ab601eff815b61d80e60ce3fd8c74c1a14f4a282258286b51ae",
+        "sizeBytes": 1527906378
+      },
+      {
+        "name": "tokenizer.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/tokenizer.json",
+        "sha256": "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab",
+        "sizeBytes": 2203239
+      },
+      {
+        "name": "vocabulary.txt",
+        "url": "https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/vocabulary.txt",
+        "sha256": "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913",
+        "sizeBytes": 459861
+      }
+    ],
+    "step": "transcribe",
+    "machineClass": "mid",
+    "languages": [
+      "af",
+      "am",
+      "ar",
+      "as",
+      "az",
+      "ba",
+      "be",
+      "bg",
+      "bn",
+      "bo",
+      "br",
+      "bs",
+      "ca",
+      "cs",
+      "cy",
+      "da",
+      "de",
+      "el",
+      "en",
+      "es",
+      "et",
+      "eu",
+      "fa",
+      "fi",
+      "fo",
+      "fr",
+      "gl",
+      "gu",
+      "ha",
+      "haw",
+      "he",
+      "hi",
+      "hr",
+      "ht",
+      "hu",
+      "hy",
+      "id",
+      "is",
+      "it",
+      "ja",
+      "jw",
+      "ka",
+      "kk",
+      "km",
+      "kn",
+      "ko",
+      "la",
+      "lb",
+      "ln",
+      "lo",
+      "lt",
+      "lv",
+      "mg",
+      "mi",
+      "mk",
+      "ml",
+      "mn",
+      "mr",
+      "ms",
+      "mt",
+      "my",
+      "ne",
+      "nl",
+      "nn",
+      "no",
+      "oc",
+      "pa",
+      "pl",
+      "ps",
+      "pt",
+      "ro",
+      "ru",
+      "sa",
+      "sd",
+      "si",
+      "sk",
+      "sl",
+      "sn",
+      "so",
+      "sq",
+      "sr",
+      "su",
+      "sv",
+      "sw",
+      "ta",
+      "te",
+      "tg",
+      "th",
+      "tk",
+      "tl",
+      "tr",
+      "tt",
+      "uk",
+      "ur",
+      "uz",
+      "vi",
+      "yi",
+      "yo",
+      "yue",
+      "zh"
+    ]
+  },
+  {
+    "id": "whisper-large-v3",
+    "name": "Speech recognition (large-v3)",
+    "purpose": "Turns speech into text, with times for each line. Larger models are more accurate and slower.",
+    "licence": "MIT",
+    "licenceClass": "permissive",
+    "sizeBytes": 3090835702,
+    "files": [
+      {
+        "name": "config.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/config.json",
+        "sha256": "a9306624f5ec14270a014b647e5c316b6e03a662c369758d1b90697a7b0655b9",
+        "sizeBytes": 2394
+      },
+      {
+        "name": "model.bin",
+        "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/model.bin",
+        "sha256": "69f74147e3334731bc3a76048724833325d2ec74642fb52620eda87352e3d4f1",
+        "sizeBytes": 3087284237
+      },
+      {
+        "name": "preprocessor_config.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/preprocessor_config.json",
+        "sha256": "7ccc62c6f2765af1f3b46c00c9b5894426835a05021c8b9c01eecb6dfb542711",
+        "sizeBytes": 340
+      },
+      {
+        "name": "tokenizer.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/tokenizer.json",
+        "sha256": "6d8cbd7cd0d8d5815e478dac67b85a26bbe77c1f5e0c6d76d1ce2abc0e5f21ca",
+        "sizeBytes": 2480617
+      },
+      {
+        "name": "vocabulary.json",
+        "url": "https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/vocabulary.json",
+        "sha256": "c69260f2ab26d659b7c398f9a2b2b48ed0df16c3b47d7326782fd9cba71690c1",
+        "sizeBytes": 1068114
+      }
+    ],
+    "step": "transcribe",
+    "machineClass": "fullLocal",
+    "languages": [
+      "af",
+      "am",
+      "ar",
+      "as",
+      "az",
+      "ba",
+      "be",
+      "bg",
+      "bn",
+      "bo",
+      "br",
+      "bs",
+      "ca",
+      "cs",
+      "cy",
+      "da",
+      "de",
+      "el",
+      "en",
+      "es",
+      "et",
+      "eu",
+      "fa",
+      "fi",
+      "fo",
+      "fr",
+      "gl",
+      "gu",
+      "ha",
+      "haw",
+      "he",
+      "hi",
+      "hr",
+      "ht",
+      "hu",
+      "hy",
+      "id",
+      "is",
+      "it",
+      "ja",
+      "jw",
+      "ka",
+      "kk",
+      "km",
+      "kn",
+      "ko",
+      "la",
+      "lb",
+      "ln",
+      "lo",
+      "lt",
+      "lv",
+      "mg",
+      "mi",
+      "mk",
+      "ml",
+      "mn",
+      "mr",
+      "ms",
+      "mt",
+      "my",
+      "ne",
+      "nl",
+      "nn",
+      "no",
+      "oc",
+      "pa",
+      "pl",
+      "ps",
+      "pt",
+      "ro",
+      "ru",
+      "sa",
+      "sd",
+      "si",
+      "sk",
+      "sl",
+      "sn",
+      "so",
+      "sq",
+      "sr",
+      "su",
+      "sv",
+      "sw",
+      "ta",
+      "te",
+      "tg",
+      "th",
+      "tk",
+      "tl",
+      "tr",
+      "tt",
+      "uk",
+      "ur",
+      "uz",
+      "vi",
+      "yi",
+      "yo",
+      "yue",
+      "zh"
+    ]
+  },
+  {
+    "id": "m2m100-418m",
+    "name": "Translation (M2M100 418M)",
+    "purpose": "Translates text between about 100 languages. Small and quick.",
+    "licence": "MIT",
+    "licenceClass": "permissive",
+    "sizeBytes": 977098831,
+    "files": [
+      {
+        "name": "config.json",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_418M/resolve/06bd83294674f3737eb929e501aa5beafaa229d8/config.json",
+        "sha256": "0c2f6fa2057c7264d052fb4a62ba3476eeae70487acddfa8e779a53a00cbf44c",
+        "sizeBytes": 159
+      },
+      {
+        "name": "model.bin",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_418M/resolve/06bd83294674f3737eb929e501aa5beafaa229d8/model.bin",
+        "sha256": "0b70f12bc9af78a921f2f4b2049aeae745c0a70613a0cd58d3d26bd4571177bd",
+        "sizeBytes": 969807284
+      },
+      {
+        "name": "sentencepiece.bpe.model",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_418M/resolve/06bd83294674f3737eb929e501aa5beafaa229d8/sentencepiece.bpe.model",
+        "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+        "sizeBytes": 2423393
+      },
+      {
+        "name": "shared_vocabulary.txt",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_418M/resolve/06bd83294674f3737eb929e501aa5beafaa229d8/shared_vocabulary.txt",
+        "sha256": "c1e7e97d9ced6091b49036d2c354dd55c6c90fa85175b0536d13305f9f96c919",
+        "sizeBytes": 1159903
+      },
+      {
+        "name": "vocab.json",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_418M/resolve/06bd83294674f3737eb929e501aa5beafaa229d8/vocab.json",
+        "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+        "sizeBytes": 3708092
+      }
+    ],
+    "step": "translate",
+    "machineClass": "minimum",
+    "languages": [
+      "af",
+      "am",
+      "ar",
+      "ast",
+      "az",
+      "ba",
+      "be",
+      "bg",
+      "bn",
+      "br",
+      "bs",
+      "ca",
+      "ceb",
+      "cs",
+      "cy",
+      "da",
+      "de",
+      "el",
+      "en",
+      "es",
+      "et",
+      "fa",
+      "ff",
+      "fi",
+      "fr",
+      "fy",
+      "ga",
+      "gd",
+      "gl",
+      "gu",
+      "ha",
+      "he",
+      "hi",
+      "hr",
+      "ht",
+      "hu",
+      "hy",
+      "id",
+      "ig",
+      "ilo",
+      "is",
+      "it",
+      "ja",
+      "jv",
+      "ka",
+      "kk",
+      "km",
+      "kn",
+      "ko",
+      "lb",
+      "lg",
+      "ln",
+      "lo",
+      "lt",
+      "lv",
+      "mg",
+      "mk",
+      "ml",
+      "mn",
+      "mr",
+      "ms",
+      "my",
+      "ne",
+      "nl",
+      "no",
+      "ns",
+      "oc",
+      "or",
+      "pa",
+      "pl",
+      "ps",
+      "pt",
+      "ro",
+      "ru",
+      "sd",
+      "si",
+      "sk",
+      "sl",
+      "so",
+      "sq",
+      "sr",
+      "ss",
+      "su",
+      "sv",
+      "sw",
+      "ta",
+      "th",
+      "tl",
+      "tn",
+      "tr",
+      "uk",
+      "ur",
+      "uz",
+      "vi",
+      "wo",
+      "xh",
+      "yi",
+      "yo",
+      "zh",
+      "zu"
+    ]
+  },
+  {
+    "id": "m2m100-1.2b",
+    "name": "Translation (M2M100 1.2B)",
+    "purpose": "Translates between about 100 languages with better quality. Needs more memory.",
+    "licence": "MIT",
+    "licenceClass": "permissive",
+    "sizeBytes": 2488128439,
+    "files": [
+      {
+        "name": "config.json",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_1.2B/resolve/081c9b82953d4eeb2309daabf2951e395c5dc979/config.json",
+        "sha256": "0c2f6fa2057c7264d052fb4a62ba3476eeae70487acddfa8e779a53a00cbf44c",
+        "sizeBytes": 159
+      },
+      {
+        "name": "model.bin",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_1.2B/resolve/081c9b82953d4eeb2309daabf2951e395c5dc979/model.bin",
+        "sha256": "773500ab6fdf9abc29bb5fb0e601df2fc21b33b3e45863d04f206e59b89af6a7",
+        "sizeBytes": 2480836892
+      },
+      {
+        "name": "sentencepiece.bpe.model",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_1.2B/resolve/081c9b82953d4eeb2309daabf2951e395c5dc979/sentencepiece.bpe.model",
+        "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+        "sizeBytes": 2423393
+      },
+      {
+        "name": "shared_vocabulary.txt",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_1.2B/resolve/081c9b82953d4eeb2309daabf2951e395c5dc979/shared_vocabulary.txt",
+        "sha256": "c1e7e97d9ced6091b49036d2c354dd55c6c90fa85175b0536d13305f9f96c919",
+        "sizeBytes": 1159903
+      },
+      {
+        "name": "vocab.json",
+        "url": "https://huggingface.co/michaelfeil/ct2fast-m2m100_1.2B/resolve/081c9b82953d4eeb2309daabf2951e395c5dc979/vocab.json",
+        "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+        "sizeBytes": 3708092
+      }
+    ],
+    "step": "translate",
+    "machineClass": "mid",
+    "languages": [
+      "af",
+      "am",
+      "ar",
+      "ast",
+      "az",
+      "ba",
+      "be",
+      "bg",
+      "bn",
+      "br",
+      "bs",
+      "ca",
+      "ceb",
+      "cs",
+      "cy",
+      "da",
+      "de",
+      "el",
+      "en",
+      "es",
+      "et",
+      "fa",
+      "ff",
+      "fi",
+      "fr",
+      "fy",
+      "ga",
+      "gd",
+      "gl",
+      "gu",
+      "ha",
+      "he",
+      "hi",
+      "hr",
+      "ht",
+      "hu",
+      "hy",
+      "id",
+      "ig",
+      "ilo",
+      "is",
+      "it",
+      "ja",
+      "jv",
+      "ka",
+      "kk",
+      "km",
+      "kn",
+      "ko",
+      "lb",
+      "lg",
+      "ln",
+      "lo",
+      "lt",
+      "lv",
+      "mg",
+      "mk",
+      "ml",
+      "mn",
+      "mr",
+      "ms",
+      "my",
+      "ne",
+      "nl",
+      "no",
+      "ns",
+      "oc",
+      "or",
+      "pa",
+      "pl",
+      "ps",
+      "pt",
+      "ro",
+      "ru",
+      "sd",
+      "si",
+      "sk",
+      "sl",
+      "so",
+      "sq",
+      "sr",
+      "ss",
+      "su",
+      "sv",
+      "sw",
+      "ta",
+      "th",
+      "tl",
+      "tn",
+      "tr",
+      "uk",
+      "ur",
+      "uz",
+      "vi",
+      "wo",
+      "xh",
+      "yi",
+      "yo",
+      "zh",
+      "zu"
+    ]
+  },
+  {
+    "id": "htdemucs",
+    "name": "Voice and music separation (htdemucs)",
+    "purpose": "Splits a soundtrack into voices and music, so the music can stay under the dub.",
+    "licence": "MIT",
+    "licenceClass": "permissive",
+    "sizeBytes": 84141932,
+    "files": [
+      {
+        "name": "htdemucs.yaml",
+        "url": "https://raw.githubusercontent.com/adefossez/demucs/main/demucs/remote/htdemucs.yaml",
+        "sha256": "239c445d0b14454d541ad8bd9bb271c9e536d267e8a4625208744cbb2e7bb66c",
+        "sizeBytes": 21
+      },
+      {
+        "name": "955717e8-8726e21a.th",
+        "url": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/955717e8-8726e21a.th",
+        "sha256": "8726e21a993978c7ba086d3872e7608d7d5bfca646ca4aca459ffda844faa8b4",
+        "sizeBytes": 84141911
+      }
+    ],
+    "step": "separate",
+    "machineClass": "minimum",
+    "platforms": {
+      "windows": [
+        "x64"
+      ],
+      "macos": [
+        "arm64"
+      ]
+    }
+  },
+  {
+    "id": "speaker-diarization",
+    "name": "Speaker separation",
+    "purpose": "Tells which person is speaking on each line, so each speaker can get a different voice.",
+    "licence": "MIT (segmentation), Apache-2.0 (embedding)",
+    "licenceClass": "permissive",
+    "sizeBytes": 32479237,
+    "files": [
+      {
+        "name": "segmentation/LICENSE",
+        "url": "https://huggingface.co/csukuangfj/sherpa-onnx-pyannote-segmentation-3-0/resolve/9403a6902bb58e3d5ae8c7e77c3422de279db2e0/LICENSE",
+        "sha256": "14d7016ad68e7394d6e6b78d96cc2ae431c905287b89674cfdf021e79e62b8ba",
+        "sizeBytes": 1061
+      },
+      {
+        "name": "segmentation/model.onnx",
+        "url": "https://huggingface.co/csukuangfj/sherpa-onnx-pyannote-segmentation-3-0/resolve/9403a6902bb58e3d5ae8c7e77c3422de279db2e0/model.onnx",
+        "sha256": "220ad67ca923bef2fa91f2390c786097bf305bceb5e261d4af67b38e938e1079",
+        "sizeBytes": 5992913
+      },
+      {
+        "name": "embedding/3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx",
+        "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx",
+        "sha256": "c59158379255ad66e161679cca6af8d52d51e389e3224ab7d7a7baae295c2db5",
+        "sizeBytes": 26485263
+      }
+    ],
+    "step": "speaker",
+    "machineClass": "minimum"
+  },
+  {
+    "id": "espeak-ng-data",
+    "name": "Pronunciation data (eSpeak NG)",
+    "purpose": "Pronunciation rules the Piper voices need to read text aloud.",
+    "licence": "GPL-3.0-or-later",
+    "licenceClass": "copyleftFile",
+    "sizeBytes": 17991651,
+    "files": [
+      {
+        "name": "espeak-ng-data/af_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/af_dict",
+        "sha256": "25729d3bf4c4a0f08da60aea9eb5a0cf352630f83fab1ab0c3955b7740da1776",
+        "sizeBytes": 121473
+      },
+      {
+        "name": "espeak-ng-data/am_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/am_dict",
+        "sha256": "9954365860682c756c8c4459577d3aa0ab77ad0cba6798b746033ada5c3d4bea",
+        "sizeBytes": 63878
+      },
+      {
+        "name": "espeak-ng-data/an_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/an_dict",
+        "sha256": "6cf38cedb6693aade49e5a5d27a3c92516a5335125bf85fcae58282e66fb82fd",
+        "sizeBytes": 6691
+      },
+      {
+        "name": "espeak-ng-data/ar_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ar_dict",
+        "sha256": "72316426e797777fe4df9420935a3b6a79b37d7e3f3948537ba71cd7b21b2541",
+        "sizeBytes": 478165
+      },
+      {
+        "name": "espeak-ng-data/as_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/as_dict",
+        "sha256": "5bcb74ff4558a60c5ba1a48a2a92c01513ee2d29fe30c5a38dc5308c54f1cf49",
+        "sizeBytes": 5005
+      },
+      {
+        "name": "espeak-ng-data/az_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/az_dict",
+        "sha256": "e352b2dcf811662d79f4beaaa0c7750706cf669c0409fd815a9bd0244b1adfc7",
+        "sizeBytes": 43773
+      },
+      {
+        "name": "espeak-ng-data/ba_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ba_dict",
+        "sha256": "246c8c655ceed43d9ff44a65de5f933f16255489d0b181b1a46a83e1fd5a0354",
+        "sizeBytes": 2098
+      },
+      {
+        "name": "espeak-ng-data/be_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/be_dict",
+        "sha256": "232fb0debfc8fdca9b8f2494770ff23535f7f887bbebb0178abffc243490e798",
+        "sizeBytes": 2652
+      },
+      {
+        "name": "espeak-ng-data/bg_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/bg_dict",
+        "sha256": "8fa3adec8e18a3e695b2bbea1d4780182e17222d8b9f8da9908a237828f6b063",
+        "sizeBytes": 87051
+      },
+      {
+        "name": "espeak-ng-data/bn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/bn_dict",
+        "sha256": "2b59ec34c07955ca5b7814fa5152c33fa357880590703eefab1f3081f031fdef",
+        "sizeBytes": 89979
+      },
+      {
+        "name": "espeak-ng-data/bpy_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/bpy_dict",
+        "sha256": "a4321d9ba80bd60f49e0bee5aae57f1ae9c49b7a1c3d4ba384338fe9bf3b6a92",
+        "sizeBytes": 5226
+      },
+      {
+        "name": "espeak-ng-data/bs_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/bs_dict",
+        "sha256": "d5df564f511af082884719685db86ec4df23467cf012ce25e898540baf9de65b",
+        "sizeBytes": 47068
+      },
+      {
+        "name": "espeak-ng-data/ca_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ca_dict",
+        "sha256": "1be203855ecb0bdfe66578ef5552f83289e39972d78c52714d061b7f7493df4a",
+        "sizeBytes": 45566
+      },
+      {
+        "name": "espeak-ng-data/chr_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/chr_dict",
+        "sha256": "1853980c673015327bed3d4e5f7e88c2ee3bd8a922bcdd232a6497277e903bce",
+        "sizeBytes": 2859
+      },
+      {
+        "name": "espeak-ng-data/cmn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/cmn_dict",
+        "sha256": "109aaa7708d3727382acb3ae41d8e2094a7e2bb9f651a81835be22a6f08071fe",
+        "sizeBytes": 1566335
+      },
+      {
+        "name": "espeak-ng-data/cs_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/cs_dict",
+        "sha256": "5ec02aba90465007f20a5c8aeb889275834cfa8c8f621c3d9bee1ca90d21788d",
+        "sizeBytes": 49645
+      },
+      {
+        "name": "espeak-ng-data/cv_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/cv_dict",
+        "sha256": "8260837c8f18fbe5870905ebb2850dfd18e252150ad6c868b96d9d2c6398ea8a",
+        "sizeBytes": 1344
+      },
+      {
+        "name": "espeak-ng-data/cy_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/cy_dict",
+        "sha256": "31d74ccad218ab80b79566caeb8d21bcf0fe43326ed7c437fa736d39b85e603e",
+        "sizeBytes": 43130
+      },
+      {
+        "name": "espeak-ng-data/da_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/da_dict",
+        "sha256": "fe0c21895b4844868612f9ea846bc6010e30b5dd1f4cb1567459d73d2792a8ac",
+        "sizeBytes": 245287
+      },
+      {
+        "name": "espeak-ng-data/de_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/de_dict",
+        "sha256": "e9ac048df5cde03b74907d591c7b29b45ee9ec5fcd4592b0b894f0083572fcfd",
+        "sizeBytes": 68276
+      },
+      {
+        "name": "espeak-ng-data/el_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/el_dict",
+        "sha256": "5d9f759750131da777d2fd4f06aa602ed746d38f27b84dd9a2d4a550f2cd452e",
+        "sizeBytes": 72841
+      },
+      {
+        "name": "espeak-ng-data/en_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/en_dict",
+        "sha256": "71bd330ba8a2e3e8076e631508208ef49449d6147c17b7bd2b4b1e1468292e35",
+        "sizeBytes": 166944
+      },
+      {
+        "name": "espeak-ng-data/eo_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/eo_dict",
+        "sha256": "849f061abddd5388bac112b32e6f7bf747e15e1b3ae53fe91079381effff4cc9",
+        "sizeBytes": 4666
+      },
+      {
+        "name": "espeak-ng-data/es_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/es_dict",
+        "sha256": "3fa93e251eab80838a2d6207ee58c9c847270a65fe3fae98850e0185b5a2186c",
+        "sizeBytes": 49252
+      },
+      {
+        "name": "espeak-ng-data/et_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/et_dict",
+        "sha256": "1a6734b4e6bc9de9a4c94cfb434873e0a7f4ae4ec89549b3137ae5491cf655da",
+        "sizeBytes": 44263
+      },
+      {
+        "name": "espeak-ng-data/eu_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/eu_dict",
+        "sha256": "762a6eff63552ef72cd88bf1e92dc5a823eb378d50cb85c7917e8c5bba079137",
+        "sizeBytes": 48841
+      },
+      {
+        "name": "espeak-ng-data/fa_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/fa_dict",
+        "sha256": "f92f35ce7eb1d97360016617d97786412a94af55b776a18f1c280dab4f43befd",
+        "sizeBytes": 292423
+      },
+      {
+        "name": "espeak-ng-data/fi_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/fi_dict",
+        "sha256": "dda999437bd4b37a7f7400a2230aace1200a52906ab0b1ff3507d44ab19d64b1",
+        "sizeBytes": 43928
+      },
+      {
+        "name": "espeak-ng-data/fr_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/fr_dict",
+        "sha256": "e399ab924c4d10beef1fc310b30ea56e4ddfd8b4b64b8ed978e9c65394d49b2d",
+        "sizeBytes": 63727
+      },
+      {
+        "name": "espeak-ng-data/ga_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ga_dict",
+        "sha256": "b2db03d21f7900b697d7dbb8bec855cd1117e9867f19884faf11c4df626659f5",
+        "sizeBytes": 52673
+      },
+      {
+        "name": "espeak-ng-data/gd_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/gd_dict",
+        "sha256": "e92b47dcf9a001363ffee1e62863faf264ff5f16e10cd9cf1f1e83ca89ca14aa",
+        "sizeBytes": 49121
+      },
+      {
+        "name": "espeak-ng-data/gn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/gn_dict",
+        "sha256": "7640df272b192a68ba401294bf9197ab46d0b141da7a358ad1986e7f77e7f29a",
+        "sizeBytes": 3248
+      },
+      {
+        "name": "espeak-ng-data/grc_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/grc_dict",
+        "sha256": "488779493993d221b09e713e104a221ac1bb35765f826acc26d3d3c1aa3a35ed",
+        "sizeBytes": 3433
+      },
+      {
+        "name": "espeak-ng-data/gu_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/gu_dict",
+        "sha256": "cb1fbfb53bab2ec6d9e44cd9d12ccb9b80de49f274d772314389c477eef530fd",
+        "sizeBytes": 82480
+      },
+      {
+        "name": "espeak-ng-data/hak_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/hak_dict",
+        "sha256": "e3075c7d281f95a2ce2264c01edbd09e962cb3ed29400766c5d2116a08a185c8",
+        "sizeBytes": 3335
+      },
+      {
+        "name": "espeak-ng-data/haw_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/haw_dict",
+        "sha256": "2b4e77b61cadfc5ee622aa8b1d23941e36101d9bdbf8d809e0fa1b442d2c3f74",
+        "sizeBytes": 2443
+      },
+      {
+        "name": "espeak-ng-data/he_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/he_dict",
+        "sha256": "a8bf0d939d630e9e5097ad361a7765297baf297fd7d06e89f48a79ead980869e",
+        "sizeBytes": 6963
+      },
+      {
+        "name": "espeak-ng-data/hi_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/hi_dict",
+        "sha256": "5a68c9532624e57ac845b26ce1e2e5034c4f6353bede46ecbe57e583ec8effd6",
+        "sizeBytes": 92143
+      },
+      {
+        "name": "espeak-ng-data/hr_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/hr_dict",
+        "sha256": "5f98fcf05f97335a5436a8a9643677da6f158f2a9ee1d41bdda1725b1bb3527e",
+        "sizeBytes": 49388
+      },
+      {
+        "name": "espeak-ng-data/ht_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ht_dict",
+        "sha256": "d577219d15c29396db254aed958358456ec1501cdf62cb4ca5413752f2ee7cc1",
+        "sizeBytes": 1803
+      },
+      {
+        "name": "espeak-ng-data/hu_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/hu_dict",
+        "sha256": "055d563b839d599db40be5b1cc2af9d31793795b328eb8d4f389ec7d38fe7e81",
+        "sizeBytes": 153785
+      },
+      {
+        "name": "espeak-ng-data/hy_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/hy_dict",
+        "sha256": "8b808ad8f1d4cae32b3b785b96d1e27b3af28e32f4dddfed7c93e129d63b2587",
+        "sizeBytes": 62263
+      },
+      {
+        "name": "espeak-ng-data/ia_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ia_dict",
+        "sha256": "1c665603a82beb81e0cef2878c9b44642ae6d519e301fbbd06326e03325febf3",
+        "sizeBytes": 331275
+      },
+      {
+        "name": "espeak-ng-data/id_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/id_dict",
+        "sha256": "8fb3f23f80f71f023219cee7032223f3f6886cc5040eb4c8c507f79d1b84e98d",
+        "sizeBytes": 43458
+      },
+      {
+        "name": "espeak-ng-data/intonations",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/intonations",
+        "sha256": "3f8af65fd3eda9759a10f021d61361c120871f463515229c925995c7f90918cc",
+        "sizeBytes": 2040
+      },
+      {
+        "name": "espeak-ng-data/io_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/io_dict",
+        "sha256": "0d9d6995fead1ccdd5512f7909ec8f9efc8ccc97f5c9d23ecae6b3ba77ffadbf",
+        "sizeBytes": 2165
+      },
+      {
+        "name": "espeak-ng-data/is_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/is_dict",
+        "sha256": "8eeab5b1ca3f75362881fae3de3316fcaff281179a4c51fceb0098f11ead96e0",
+        "sizeBytes": 44354
+      },
+      {
+        "name": "espeak-ng-data/it_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/it_dict",
+        "sha256": "111f968359c9ebe36b107a2565ba9f258bab337d3cbe37e44871980a8f21ce6b",
+        "sizeBytes": 152889
+      },
+      {
+        "name": "espeak-ng-data/ja_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ja_dict",
+        "sha256": "0d1135d3cdfed811d3eac7c90a2e277329fa6f060cdd23af287db161982cab44",
+        "sizeBytes": 47652
+      },
+      {
+        "name": "espeak-ng-data/jbo_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/jbo_dict",
+        "sha256": "71298417de1e5fd07df275270a5d47ca8820cb8c9f5dc2156c070b7a3ae7999c",
+        "sizeBytes": 2243
+      },
+      {
+        "name": "espeak-ng-data/ka_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ka_dict",
+        "sha256": "c8624947110a13bee72d4fc15b06026004df3f40c16c7b917d27e369ca122a32",
+        "sizeBytes": 87775
+      },
+      {
+        "name": "espeak-ng-data/kk_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/kk_dict",
+        "sha256": "88dc0106629a57d0aca5073afb11db1a044799185355088a7ad4331c836affd3",
+        "sizeBytes": 1859
+      },
+      {
+        "name": "espeak-ng-data/kl_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/kl_dict",
+        "sha256": "ec441964d7fbd4622bb628327903d5c6c999c95d539b2e061884decf95ac30e3",
+        "sizeBytes": 2838
+      },
+      {
+        "name": "espeak-ng-data/kn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/kn_dict",
+        "sha256": "c51e0385937b407b36c02fd2c85dfecdc5cac411398ee8a74eca15b35617af64",
+        "sizeBytes": 87828
+      },
+      {
+        "name": "espeak-ng-data/ko_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ko_dict",
+        "sha256": "f629060f27d597e0fd52d8010609f41c8a0ec28f5c2bb0016850e00244950681",
+        "sizeBytes": 47523
+      },
+      {
+        "name": "espeak-ng-data/kok_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/kok_dict",
+        "sha256": "52659dec01d1b119bfef56b622430f5525c50af0144c9f9688cb3c22cc02ed31",
+        "sizeBytes": 6394
+      },
+      {
+        "name": "espeak-ng-data/ku_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ku_dict",
+        "sha256": "65de1c5429e8d193775b36fcf169a60fbbb9964ef13a4a1bab7ff0ce855cad20",
+        "sizeBytes": 2265
+      },
+      {
+        "name": "espeak-ng-data/ky_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ky_dict",
+        "sha256": "def4427fd4070673c073b892c7b229f8c3f17eb1df36bea2ec7188ddcfb4d0ea",
+        "sizeBytes": 64977
+      },
+      {
+        "name": "espeak-ng-data/la_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/la_dict",
+        "sha256": "17818dd567936fde032404fbbd6177844b9f5fc5a915480f567272147936f917",
+        "sizeBytes": 3806
+      },
+      {
+        "name": "espeak-ng-data/lang/aav/vi",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/aav/vi",
+        "sha256": "3199c980f9e23a88a2aa693cd631bf4fcb0f3408c4272bc01b7ac0ff8e79d778",
+        "sizeBytes": 111
+      },
+      {
+        "name": "espeak-ng-data/lang/aav/vi-VN-x-central",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/aav/vi-VN-x-central",
+        "sha256": "b351f13c6ed0da37561df25f45579872ff9863920ad66b94e27327a2c611755b",
+        "sizeBytes": 143
+      },
+      {
+        "name": "espeak-ng-data/lang/aav/vi-VN-x-south",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/aav/vi-VN-x-south",
+        "sha256": "c0a0a2c894cd57b0bbacf9ef4efb8d89bfaf9feb164830e1539f599e7cc4e021",
+        "sizeBytes": 142
+      },
+      {
+        "name": "espeak-ng-data/lang/art/eo",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/eo",
+        "sha256": "0254b93c8af79d9666a7667ca8b33b21a5453012da4ea0acd79660a9695f89d4",
+        "sizeBytes": 41
+      },
+      {
+        "name": "espeak-ng-data/lang/art/ia",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/ia",
+        "sha256": "8fb11718030f8b29146f773ca462b838a6c660f166933eb6f1498c361f2e958b",
+        "sizeBytes": 29
+      },
+      {
+        "name": "espeak-ng-data/lang/art/io",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/io",
+        "sha256": "8e8391c7f40b7f9d2307faff8018a40dd2b448df4bd581a2950ee8393a00cebf",
+        "sizeBytes": 50
+      },
+      {
+        "name": "espeak-ng-data/lang/art/jbo",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/jbo",
+        "sha256": "d9529de82dccbd95f83c1de401f4ea661609bde644546e9ef421241b7043c00e",
+        "sizeBytes": 69
+      },
+      {
+        "name": "espeak-ng-data/lang/art/lfn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/lfn",
+        "sha256": "394874fd9022e37cdc307c3386e81f1c0c133a8e9c5fdff74888b519f2c6d648",
+        "sizeBytes": 135
+      },
+      {
+        "name": "espeak-ng-data/lang/art/piqd",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/piqd",
+        "sha256": "d1a559b714cd8dd0ea9e46c4574e06c4f451957fb17bf39b945a89b9586f8b97",
+        "sizeBytes": 56
+      },
+      {
+        "name": "espeak-ng-data/lang/art/py",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/py",
+        "sha256": "59e54b95e8571417f43db37a7fd7e351af4e22a8c250cfb66af394f8ed6c4e9c",
+        "sizeBytes": 140
+      },
+      {
+        "name": "espeak-ng-data/lang/art/qdb",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/qdb",
+        "sha256": "52b83fc4f294580ebabd71df641ab5beec6b308758a3458b497124737589a7d8",
+        "sizeBytes": 57
+      },
+      {
+        "name": "espeak-ng-data/lang/art/qya",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/qya",
+        "sha256": "78ae3f4d70208a9f69e2c26a6a3b5db28d7e6a58740fae937f51dd7fc9faeb1b",
+        "sizeBytes": 173
+      },
+      {
+        "name": "espeak-ng-data/lang/art/sjn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/art/sjn",
+        "sha256": "61d85974b6841dfbfcc8cb92ad0742696cb87a6a85d5a28fe99895e46ef9de6f",
+        "sizeBytes": 175
+      },
+      {
+        "name": "espeak-ng-data/lang/azc/nci",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/azc/nci",
+        "sha256": "7bf70cb18e969398f74428b91c694a4483eaebd6733ecc437eb8714bbf7fff76",
+        "sizeBytes": 114
+      },
+      {
+        "name": "espeak-ng-data/lang/bat/lt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/bat/lt",
+        "sha256": "7691c7ca1e79fc9728c70a0d22830eb113a0124bf96807e2a1ace3c6bf0c2f89",
+        "sizeBytes": 28
+      },
+      {
+        "name": "espeak-ng-data/lang/bat/ltg",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/bat/ltg",
+        "sha256": "be716cbbdcb5fe319eed88abd4a44c3329a06e1dc468c8363d3f43cca2683a11",
+        "sizeBytes": 312
+      },
+      {
+        "name": "espeak-ng-data/lang/bat/lv",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/bat/lv",
+        "sha256": "f08a801dacccace62f5b90166428e90e088818d92dd5f9333ebbe834b0f21c16",
+        "sizeBytes": 229
+      },
+      {
+        "name": "espeak-ng-data/lang/bnt/sw",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/bnt/sw",
+        "sha256": "271dd28b3ec41adeea53f1146249ba6cab61572963ab2743041114d95784e368",
+        "sizeBytes": 41
+      },
+      {
+        "name": "espeak-ng-data/lang/bnt/tn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/bnt/tn",
+        "sha256": "2243a1fc208dfdc37e154e837c0e782afc325d4acfbacc22718b7f05583ace92",
+        "sizeBytes": 42
+      },
+      {
+        "name": "espeak-ng-data/lang/ccs/ka",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ccs/ka",
+        "sha256": "68788b99dba7b82cdf8fc9dd05134bd72cf21f0b4c07b13b67b6f036e6294cba",
+        "sizeBytes": 124
+      },
+      {
+        "name": "espeak-ng-data/lang/cel/cy",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/cel/cy",
+        "sha256": "67bc33b4a66041e6343dfb98e1950d1089eecb68731f346fcc4f47cd07e79970",
+        "sizeBytes": 37
+      },
+      {
+        "name": "espeak-ng-data/lang/cel/ga",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/cel/ga",
+        "sha256": "29c2cc5736ceb2bd9ef745694d4abf7ed363a33569dfbe745811d4703b7b6cce",
+        "sizeBytes": 66
+      },
+      {
+        "name": "espeak-ng-data/lang/cel/gd",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/cel/gd",
+        "sha256": "7da0ba464579c367089109826ec15c2584a17417cca4a2c66dae0318d33e3128",
+        "sizeBytes": 51
+      },
+      {
+        "name": "espeak-ng-data/lang/cus/om",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/cus/om",
+        "sha256": "b7c563f1effd83c08f3d229fb5a13d074513b85165ce4359a674ef30ca71786b",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/lang/dra/kn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/dra/kn",
+        "sha256": "c988a5226fa27ee6768b45566ce999ced9a4b68f8e79232b323d5903f4bb2258",
+        "sizeBytes": 55
+      },
+      {
+        "name": "espeak-ng-data/lang/dra/ml",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/dra/ml",
+        "sha256": "aa7e1f1f239ba55a8a79ed1f3544e9a51b94efe53925de60d4ff737273660b5c",
+        "sizeBytes": 57
+      },
+      {
+        "name": "espeak-ng-data/lang/dra/ta",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/dra/ta",
+        "sha256": "5bc213eb163bbf069cbfe4f2e9f7e7db71a719d8c0a96e95401d94c992960ed7",
+        "sizeBytes": 51
+      },
+      {
+        "name": "espeak-ng-data/lang/dra/te",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/dra/te",
+        "sha256": "176ca4a81feb2181393edff3e2d5c0253cb52239392c4b809c61501d60c69811",
+        "sizeBytes": 70
+      },
+      {
+        "name": "espeak-ng-data/lang/esx/kl",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/esx/kl",
+        "sha256": "d08cf6ff60b99e6c2ceda549bcbb1a57580915d6a4d50c7f0f5d75289d9fb45a",
+        "sizeBytes": 30
+      },
+      {
+        "name": "espeak-ng-data/lang/eu",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/eu",
+        "sha256": "a16e4e4d9b910a6e25a2a55913c812badc4fc3cbece0b8d49a64af112782d5a5",
+        "sizeBytes": 54
+      },
+      {
+        "name": "espeak-ng-data/lang/gmq/da",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmq/da",
+        "sha256": "e8dd5e0d30ff0694a7ee839faa8ed35c015eb927a737aba1f120c00005692eaf",
+        "sizeBytes": 43
+      },
+      {
+        "name": "espeak-ng-data/lang/gmq/is",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmq/is",
+        "sha256": "16c077e6222acfc7702046fa3579bb5d6b57ece98646229e13be2233f9fdcbd7",
+        "sizeBytes": 27
+      },
+      {
+        "name": "espeak-ng-data/lang/gmq/nb",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmq/nb",
+        "sha256": "d47966621312fb95570539f446982f6deb98fd46d9b71fec4a0005a6bace8f46",
+        "sizeBytes": 87
+      },
+      {
+        "name": "espeak-ng-data/lang/gmq/sv",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmq/sv",
+        "sha256": "02727d3b25fc82409bd2cd1ebb444fdb2d5d3f3de7f76b95fc9ed9164c3e59c3",
+        "sizeBytes": 25
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/af",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/af",
+        "sha256": "fb8ccc05f5eae1754b5aa7e92cb919defdd0810b70eec19f7c77cf836e51db09",
+        "sizeBytes": 123
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/de",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/de",
+        "sha256": "f3cca92f94b70f8c25a29ee0a4c9ce4c7f1022241532e0647fa2b7f698bf104e",
+        "sizeBytes": 42
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en",
+        "sha256": "4605d5330801de3641c6e366d15f129ea1f5ffbce8722642aba01ace07ab9c83",
+        "sizeBytes": 140
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en-029",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en-029",
+        "sha256": "faeb8cb201056775f733acbd908c66555fe57bf01cb063920f178f389cbf85d3",
+        "sizeBytes": 335
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en-GB-scotland",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en-GB-scotland",
+        "sha256": "1ce4282c1f4385dbaf0035e799b2ab1ee9e9a3ab4829100594a3047727b52353",
+        "sizeBytes": 295
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en-GB-x-gbclan",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en-GB-x-gbclan",
+        "sha256": "2040e176f1f7f27bdce81c32d7e2b1662449d54d264afd3c0ed871b8e42b6e46",
+        "sizeBytes": 238
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en-GB-x-gbcwmd",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en-GB-x-gbcwmd",
+        "sha256": "927a5ab891c65b30b4426b151d1623a01024f6b773a38497ba1c90cd77a95747",
+        "sizeBytes": 188
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en-GB-x-rp",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en-GB-x-rp",
+        "sha256": "d0625af7f58561b1b8cf96fd7f93eee6553bcb3eadb9020ae0757bf96e5115e5",
+        "sizeBytes": 249
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en-US",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en-US",
+        "sha256": "41534c2a22df5dd4f1052ff9e1a33a3ea7bff5a26b5c02bdad5ba8ddb7524704",
+        "sizeBytes": 257
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/en-US-nyc",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/en-US-nyc",
+        "sha256": "e8ee9168376d1f7d9e7dcda7c4644c36c529a8bea816e6380895364db46ea2e3",
+        "sizeBytes": 271
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/lb",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/lb",
+        "sha256": "071beb0e769afeba32177796fc0f1386bdc89a3234bed2bf720e76cbf73f5b99",
+        "sizeBytes": 31
+      },
+      {
+        "name": "espeak-ng-data/lang/gmw/nl",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/gmw/nl",
+        "sha256": "56ae04fae28ae9371ed6db28193189e4ee962ba8236f0bcdeef6a06ea4dee374",
+        "sizeBytes": 23
+      },
+      {
+        "name": "espeak-ng-data/lang/grk/el",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/grk/el",
+        "sha256": "0b529c998af07c72bf516b5750709464f6258c56c6916b8b8f0c843be9836fca",
+        "sizeBytes": 23
+      },
+      {
+        "name": "espeak-ng-data/lang/grk/grc",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/grk/grc",
+        "sha256": "319f950b1ad7b1f37efaa390540bf957bddac16d0557a6c3adaff27e0c64e12e",
+        "sizeBytes": 99
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/as",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/as",
+        "sha256": "3f58f5628f792b00a5ae6e8fe3bf8696f64af2838e5723799ddbab6027a0b378",
+        "sizeBytes": 42
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/bn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/bn",
+        "sha256": "bc3ce23384b9d0bb3bac06a09d90f690fae32a492dcbb030f0e56ba67b5d656c",
+        "sizeBytes": 25
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/bpy",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/bpy",
+        "sha256": "e528d1189b995b94966cef4cc182469cc54f7da8efc5860375c4ecf186ce6146",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/gu",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/gu",
+        "sha256": "f938a755d270745188c2cf2aacba06642a96bb73ba2a0325384121b9d5ec5407",
+        "sizeBytes": 42
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/hi",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/hi",
+        "sha256": "3c1c3f916f57f2d6d6cbf7923c0f39a36ac2140e2a69ddffce917d7b8bf3ccab",
+        "sizeBytes": 23
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/kok",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/kok",
+        "sha256": "810ee23fbbe9c186a036bc12f4e5c0de674a132e2e099c9b3dece2a1c9cdb28a",
+        "sizeBytes": 26
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/mr",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/mr",
+        "sha256": "29063ff3a5257d0d3d7c215dfd4c14deed39e1d48f15894202e6712459720efd",
+        "sizeBytes": 41
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/ne",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/ne",
+        "sha256": "d53fda082ec174ef33ed3c3468fc973c43b4ef71aca8c1a28cb344668f4838dc",
+        "sizeBytes": 37
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/or",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/or",
+        "sha256": "9b52ede7d19659f884854de3dff12597a96f4d6ec7cb4146d2f8dad1453c742f",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/pa",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/pa",
+        "sha256": "eed3cf477f81d13559dbb367256f9532b20dad1432c15b206c777217b8f570ca",
+        "sizeBytes": 25
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/sd",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/sd",
+        "sha256": "65bfe0e37799029d42a370eb627cca5aa4108b967fba6c8141878d693c903619",
+        "sizeBytes": 66
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/si",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/si",
+        "sha256": "8f0993b35ba5b075c38ae76640971256e560abfbd721b608d16a48588932596d",
+        "sizeBytes": 55
+      },
+      {
+        "name": "espeak-ng-data/lang/inc/ur",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/inc/ur",
+        "sha256": "5b7af7474fac265c7bd7d269111994a09610f954690698f55a8613f3fa973318",
+        "sizeBytes": 94
+      },
+      {
+        "name": "espeak-ng-data/lang/ine/hy",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ine/hy",
+        "sha256": "b6ad6129079c49ca915c3005ecb74a02bf5d69cbbc8ec3f8e0f6b949cb3a768f",
+        "sizeBytes": 61
+      },
+      {
+        "name": "espeak-ng-data/lang/ine/hyw",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ine/hyw",
+        "sha256": "26f8a863c74b3d19c9c42fcf16ae5151c12ac52ef8fab36cae1e5f0d4ad30e6a",
+        "sizeBytes": 365
+      },
+      {
+        "name": "espeak-ng-data/lang/ine/sq",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ine/sq",
+        "sha256": "865fde9017b5af82acb844e5f9793998fed422a208ad8aaf9dedacad3bf27af1",
+        "sizeBytes": 103
+      },
+      {
+        "name": "espeak-ng-data/lang/ira/fa",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ira/fa",
+        "sha256": "0dc7e93be4d1fbdf7ff52de2fe8bcdc23304e6d86e012b4ab8276d626b5d980c",
+        "sizeBytes": 90
+      },
+      {
+        "name": "espeak-ng-data/lang/ira/fa-Latn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ira/fa-Latn",
+        "sha256": "a04cf8efed8db1ac33b306f1f8c6f42733dace87c9fc9f34a2d227b3bb291e28",
+        "sizeBytes": 269
+      },
+      {
+        "name": "espeak-ng-data/lang/ira/ku",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ira/ku",
+        "sha256": "57db3a210d73412a49e961dbed9b27077f5c7b967a19a0eb9f9363ea4b16cea5",
+        "sizeBytes": 40
+      },
+      {
+        "name": "espeak-ng-data/lang/iro/chr",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/iro/chr",
+        "sha256": "f0e2fb8549306c07f571d3e77c89b1d3e9022d448d58e5d424441e01ccce88be",
+        "sizeBytes": 569
+      },
+      {
+        "name": "espeak-ng-data/lang/itc/la",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/itc/la",
+        "sha256": "b70d13a264352eba2d22a5d0ef21730849509d18f7277320b008a56decc6efc2",
+        "sizeBytes": 297
+      },
+      {
+        "name": "espeak-ng-data/lang/jpx/ja",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/jpx/ja",
+        "sha256": "6fd980445bc52e0f593062929f5b62831448abaae2a92739beba49df27a79743",
+        "sizeBytes": 52
+      },
+      {
+        "name": "espeak-ng-data/lang/ko",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/ko",
+        "sha256": "c2dfbf88d9aa2ac9bf2f30e92e260120e4f2c21123a02265014ae98d59d5774e",
+        "sizeBytes": 51
+      },
+      {
+        "name": "espeak-ng-data/lang/map/haw",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/map/haw",
+        "sha256": "b19f22efb6714354d8d1360f449e05f0f84d50d6fa3c98fcfd619ea1b4ba8996",
+        "sizeBytes": 42
+      },
+      {
+        "name": "espeak-ng-data/lang/miz/mto",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/miz/mto",
+        "sha256": "e33aba5e8159730f62004b22518d627c796f7d039431e5d9217b498f10341976",
+        "sizeBytes": 183
+      },
+      {
+        "name": "espeak-ng-data/lang/myn/quc",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/myn/quc",
+        "sha256": "76a75b77c672c432b56b84d517310d6aa75c4b3f9de580e290199804366174ea",
+        "sizeBytes": 210
+      },
+      {
+        "name": "espeak-ng-data/lang/poz/id",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/poz/id",
+        "sha256": "ce1fcddab3e756a7cdba3dd009ad24cd57e1fde29ce395698355da24e32a6075",
+        "sizeBytes": 134
+      },
+      {
+        "name": "espeak-ng-data/lang/poz/mi",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/poz/mi",
+        "sha256": "2146cf3868c79b853bb5e41ddbf611d51b4b0a14087199f16194313562b98987",
+        "sizeBytes": 367
+      },
+      {
+        "name": "espeak-ng-data/lang/poz/ms",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/poz/ms",
+        "sha256": "8a965182ee0c5a41357197c05cf047d21b96744775a57a344d831a961e30351b",
+        "sizeBytes": 430
+      },
+      {
+        "name": "espeak-ng-data/lang/qu",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/qu",
+        "sha256": "3069e443ecf3421bcb3b35b864e1a89fa9465af072f86eedd46a415990aba6e6",
+        "sizeBytes": 88
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/an",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/an",
+        "sha256": "ff8aa97c55286cc90531cad5df3cd36165abba11502a84d53b0fcd923f965f23",
+        "sizeBytes": 27
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/ca",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/ca",
+        "sha256": "787df034320467236292bb46f1f8781a2998a185f117d350c018b6cfcf360854",
+        "sizeBytes": 25
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/es",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/es",
+        "sha256": "966aa015ea5646d79f0ca4807cf5da7339aabd3782b55cfa5eb0d8c3fc8fc588",
+        "sizeBytes": 63
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/es-419",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/es-419",
+        "sha256": "ff0f84457ac40e3bcf61d6de58028312be74e0e6cbc3b742f31b3ce729c2aa0c",
+        "sizeBytes": 167
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/fr",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/fr",
+        "sha256": "95f44834b48c075dad13eace54d2c98ff79b81aa0074dd67eebaf66c2909eef8",
+        "sizeBytes": 79
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/fr-BE",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/fr-BE",
+        "sha256": "72496a316e47b997f893500b8953dc01a10b86a2d4238e13c1260f50b47d792a",
+        "sizeBytes": 84
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/fr-CH",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/fr-CH",
+        "sha256": "b449b0fd99d9cd93261fe1c6b816448b99b4a10420bee3f301e669568ad0de55",
+        "sizeBytes": 86
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/ht",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/ht",
+        "sha256": "389bdf3e984a2f93b7060baad82452dac65b83bf4482d3884525a176ae0e0524",
+        "sizeBytes": 140
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/it",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/it",
+        "sha256": "0d9069eb9a96db1c55c131b2bb7d1f5255c68fbddc2199ffd3295b52519a3256",
+        "sizeBytes": 109
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/pap",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/pap",
+        "sha256": "41a5b5e91482a5498a66711c05873a634bbd418786b0ba037032df846344cfc1",
+        "sizeBytes": 62
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/pt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/pt",
+        "sha256": "a44060072f790e41912c57b7d52f7b6438c4383e0dabdb052f6fdb7aacc23493",
+        "sizeBytes": 95
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/pt-BR",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/pt-BR",
+        "sha256": "84dd4e34c970fadbe32211eadecfdfaab52432479c0911e43300da88a33398ba",
+        "sizeBytes": 109
+      },
+      {
+        "name": "espeak-ng-data/lang/roa/ro",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/roa/ro",
+        "sha256": "b12af10ffc3f89cb87767ca701c6fea0def8a712de63426a9c3d0bf2432467f8",
+        "sizeBytes": 26
+      },
+      {
+        "name": "espeak-ng-data/lang/sai/gn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sai/gn",
+        "sha256": "ff82d2d163d3e06adb580254d89012e689b2615c46579883562838ab401fb5d5",
+        "sizeBytes": 47
+      },
+      {
+        "name": "espeak-ng-data/lang/sem/am",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sem/am",
+        "sha256": "5970b16bf865528ee96a78c08498244bc8f54218fc2add499716b0e0c09969fb",
+        "sizeBytes": 41
+      },
+      {
+        "name": "espeak-ng-data/lang/sem/ar",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sem/ar",
+        "sha256": "43f418f8140e5a7bd7096963da20ccba9247f6be1fcdb08cb53dd7967dd72eee",
+        "sizeBytes": 50
+      },
+      {
+        "name": "espeak-ng-data/lang/sem/he",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sem/he",
+        "sha256": "de9195e743b91fb7fbef7493bd5ddccad14c380a58d5aeb7c1d11d3419ef3b86",
+        "sizeBytes": 40
+      },
+      {
+        "name": "espeak-ng-data/lang/sem/mt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sem/mt",
+        "sha256": "d23f38fae3253b6fb42e3336760ab482e676893692455465448bc9fbc0ac3e83",
+        "sizeBytes": 41
+      },
+      {
+        "name": "espeak-ng-data/lang/sit/cmn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sit/cmn",
+        "sha256": "a130a38e3b622735c2401cb37f6719f46995e84a133729185cef9a543ec0b072",
+        "sizeBytes": 686
+      },
+      {
+        "name": "espeak-ng-data/lang/sit/cmn-Latn-pinyin",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sit/cmn-Latn-pinyin",
+        "sha256": "14c2fc097db280416b688c2bf97de2e5da532c279754020fde7bf6cd624cdd10",
+        "sizeBytes": 161
+      },
+      {
+        "name": "espeak-ng-data/lang/sit/hak",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sit/hak",
+        "sha256": "c03c30b43e0b0abdfa689445baf9f442664a0373154a5d0ca75a33d30f46aeed",
+        "sizeBytes": 128
+      },
+      {
+        "name": "espeak-ng-data/lang/sit/my",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sit/my",
+        "sha256": "4b5ae2566cbf30aa59207020469e09832e66a7883818788f253996c534303dca",
+        "sizeBytes": 56
+      },
+      {
+        "name": "espeak-ng-data/lang/sit/yue",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sit/yue",
+        "sha256": "83f3dac92af5b4aaecc119515698a6979524be236b28ea8f1024ec707d99ea5b",
+        "sizeBytes": 194
+      },
+      {
+        "name": "espeak-ng-data/lang/sit/yue-Latn-jyutping",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/sit/yue-Latn-jyutping",
+        "sha256": "c56d45bb9a9cd97efb38edabe31c7dd3feb0518cc900aac6a891dcb6bd8eb428",
+        "sizeBytes": 213
+      },
+      {
+        "name": "espeak-ng-data/lang/tai/shn",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/tai/shn",
+        "sha256": "f16bf2de219d3ae9a6aec263ce9c684d9cd3e61258d04c7948db0757c67e2c96",
+        "sizeBytes": 92
+      },
+      {
+        "name": "espeak-ng-data/lang/tai/th",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/tai/th",
+        "sha256": "6c8ac809868de659e06673f1fc2b56dbf4637ff9980da7a4726b846478b4cfe6",
+        "sizeBytes": 37
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/az",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/az",
+        "sha256": "52b424332de4c443f3e9c5ce4de5aed6fbfd421269fc825756dfc6bcbd7e1ad8",
+        "sizeBytes": 45
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/ba",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/ba",
+        "sha256": "a0cc3a06293962093c66533f9c1cffbccf083a2eb666751f2778a02a5316d98c",
+        "sizeBytes": 25
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/cv",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/cv",
+        "sha256": "94baf6bacf581cc20337471c599f85ecbbe211f0b8476351ff19450c6541ea92",
+        "sizeBytes": 40
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/kk",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/kk",
+        "sha256": "2219f4d6de0fbb1dc9982157c6f3cc5f4c8abe5fcb605908a9d1054b9880cd51",
+        "sizeBytes": 40
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/ky",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/ky",
+        "sha256": "8239dfe8bdc6d4725880f5192b4eaf645f839e40cadfd145a4409c8387ac2d59",
+        "sizeBytes": 43
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/nog",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/nog",
+        "sha256": "e0e27fe61d406b6f4a4879fb8f81a14bc65997106666933991b818c7d79fabc1",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/tk",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/tk",
+        "sha256": "d78263398c135119909ad63a3ecb6ffe3aff08383212934dd03695222a9786d0",
+        "sizeBytes": 25
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/tr",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/tr",
+        "sha256": "490eb5a2f777a2f3396f3a824ed8021bd77a94be801214411461bde6689738c9",
+        "sizeBytes": 25
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/tt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/tt",
+        "sha256": "8b9617a9b6c56f4a2fe2f59d9ce55426837196567962716f9330f70948f8f9b0",
+        "sizeBytes": 23
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/ug",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/ug",
+        "sha256": "65d0cdbc96efab4d9e3cd0095440752a31dc7f425edd3ba0a53c4dd33eac5d63",
+        "sizeBytes": 24
+      },
+      {
+        "name": "espeak-ng-data/lang/trk/uz",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/trk/uz",
+        "sha256": "04fd711dfda1e00d17dc8b1b250c24d70cc3c498b27e35d31065ac47441a6759",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/lang/urj/et",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/urj/et",
+        "sha256": "59c77747c4774e54a63ab74d2c6a95bc3c5b5b0a50d3781f187bd1fc3a613de5",
+        "sizeBytes": 237
+      },
+      {
+        "name": "espeak-ng-data/lang/urj/fi",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/urj/fi",
+        "sha256": "61f58ec3bba5b55a392aff7ecf8a84d024200aeaa404b5553fcfb47770936928",
+        "sizeBytes": 237
+      },
+      {
+        "name": "espeak-ng-data/lang/urj/hu",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/urj/hu",
+        "sha256": "c575421d2ae397065d35af0eb4f79dff4e85f3435ccf45da874f46b3fee1338b",
+        "sizeBytes": 73
+      },
+      {
+        "name": "espeak-ng-data/lang/urj/smj",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/urj/smj",
+        "sha256": "3d709dec77bb633af0d57b89668dbaaa72d9be8688118d6909f7d457bec12a50",
+        "sizeBytes": 45
+      },
+      {
+        "name": "espeak-ng-data/lang/zle/be",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zle/be",
+        "sha256": "5beb002d15a36bf3d0d764ed0d483c75a1df6909eaa3b10fe5f6546700c9bfec",
+        "sizeBytes": 52
+      },
+      {
+        "name": "espeak-ng-data/lang/zle/ru",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zle/ru",
+        "sha256": "9f52d00a279aaeaa45a786b4fd3a98b34e95fedbf823f8cdb9fecc1339751d3a",
+        "sizeBytes": 57
+      },
+      {
+        "name": "espeak-ng-data/lang/zle/ru-LV",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zle/ru-LV",
+        "sha256": "980e379667ccb94abe33b9c9c660c08800e3f31e36fe4a939551398ab98457ae",
+        "sizeBytes": 280
+      },
+      {
+        "name": "espeak-ng-data/lang/zle/ru-cl",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zle/ru-cl",
+        "sha256": "200ea345b505ec9e7b8838490aeaf1822af41033429aeae4ea68159047f59f90",
+        "sizeBytes": 91
+      },
+      {
+        "name": "espeak-ng-data/lang/zle/uk",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zle/uk",
+        "sha256": "df3d1a9f77bac0531e72f87be398d9eb1e903bd6f839d4f04ffec5abb4e34634",
+        "sizeBytes": 97
+      },
+      {
+        "name": "espeak-ng-data/lang/zls/bg",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zls/bg",
+        "sha256": "9b91accccb0d53bb2a7bf21922846ba58c74bc082ba71ae32bf12cb0d092f853",
+        "sizeBytes": 111
+      },
+      {
+        "name": "espeak-ng-data/lang/zls/bs",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zls/bs",
+        "sha256": "0820e7c78b68fbdaf86d83c782cdde1901b642d1cdbeae4181c6f5f5e21e5e89",
+        "sizeBytes": 230
+      },
+      {
+        "name": "espeak-ng-data/lang/zls/hr",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zls/hr",
+        "sha256": "cef3ef0411c66f154e6c82f7decd95beffa8cbfbe953335658df9f125bdd6096",
+        "sizeBytes": 262
+      },
+      {
+        "name": "espeak-ng-data/lang/zls/mk",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zls/mk",
+        "sha256": "6dbc2cfb8999141bd0782cd463d4880468161088190c6b4c9412f43552dc39e2",
+        "sizeBytes": 28
+      },
+      {
+        "name": "espeak-ng-data/lang/zls/sl",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zls/sl",
+        "sha256": "e1c2bd1f75c0eeb86f64182472d5f597ce23e64ad7478c248c2f75b694655942",
+        "sizeBytes": 43
+      },
+      {
+        "name": "espeak-ng-data/lang/zls/sr",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zls/sr",
+        "sha256": "0e076528d3566f6e59b807e16e274dee505e88a6d477da188ab8ec442eae44f4",
+        "sizeBytes": 250
+      },
+      {
+        "name": "espeak-ng-data/lang/zlw/cs",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zlw/cs",
+        "sha256": "1477cdba5ba3bce85db559accbbd8a24b86b3f6d9d9988bc587e89357c1c4431",
+        "sizeBytes": 23
+      },
+      {
+        "name": "espeak-ng-data/lang/zlw/pl",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zlw/pl",
+        "sha256": "83c586a2b724b24b9f98d21ade5022112c465ac446ca09930286980ceae1c781",
+        "sizeBytes": 38
+      },
+      {
+        "name": "espeak-ng-data/lang/zlw/sk",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lang/zlw/sk",
+        "sha256": "f46ff673c7d58c1646096c174d58da34047d893d0d2993dbca260ce54abe77ef",
+        "sizeBytes": 24
+      },
+      {
+        "name": "espeak-ng-data/lb_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lb_dict",
+        "sha256": "d819a062b9722334f187540d3530fac1de365cd200d4a466f5ecccd7e3c05772",
+        "sizeBytes": 687931
+      },
+      {
+        "name": "espeak-ng-data/lfn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lfn_dict",
+        "sha256": "10281bc404f429165a330b800eb64674e37a135d1b4c689e57fb1d9e827d6924",
+        "sizeBytes": 2793
+      },
+      {
+        "name": "espeak-ng-data/lt_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lt_dict",
+        "sha256": "68ef55aba9545d27ce73e7d4aca1c2fa51d2c3d3d626152fbc22bf5a90fbff11",
+        "sizeBytes": 49890
+      },
+      {
+        "name": "espeak-ng-data/lv_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/lv_dict",
+        "sha256": "3e246c76b7da924235ffb75925070865e669da2ce3e41e98395e99be1f8db9f7",
+        "sizeBytes": 66337
+      },
+      {
+        "name": "espeak-ng-data/mi_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/mi_dict",
+        "sha256": "401621fdf61da47d0513e80279134a3515ced898aaadd5205b82cced0f2df042",
+        "sizeBytes": 1346
+      },
+      {
+        "name": "espeak-ng-data/mk_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/mk_dict",
+        "sha256": "e4960ff4e74e1096ff1c3bccab62ce0429fa4faa725e546cd5d33e43f45225be",
+        "sizeBytes": 63859
+      },
+      {
+        "name": "espeak-ng-data/ml_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ml_dict",
+        "sha256": "b12687557c38f9bcd17417854253ddde3781e3b0c16f9470d732205818e7cd38",
+        "sizeBytes": 92345
+      },
+      {
+        "name": "espeak-ng-data/mr_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/mr_dict",
+        "sha256": "f712a7525db108ef9769aee53fdd1cd141f0df372778924691b89623aa6fc22f",
+        "sizeBytes": 87391
+      },
+      {
+        "name": "espeak-ng-data/ms_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ms_dict",
+        "sha256": "74b01897385ba1f018de44c0268048fa5be588bbbb702a900bb35c691a466707",
+        "sizeBytes": 53541
+      },
+      {
+        "name": "espeak-ng-data/mt_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/mt_dict",
+        "sha256": "1f76761bdfd481a984b15d07522df23c9444f4ac21ea9671917e08bbffa7f8d3",
+        "sizeBytes": 4384
+      },
+      {
+        "name": "espeak-ng-data/mto_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/mto_dict",
+        "sha256": "6d51cb6be959dba045d41d3d63ff662a7363e1287cce2c633b071295ce55d560",
+        "sizeBytes": 3960
+      },
+      {
+        "name": "espeak-ng-data/my_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/my_dict",
+        "sha256": "e7f9c2dc672e1388f6941ac6def956b8ab2d622adb00d0ed6640dee4b7acc96b",
+        "sizeBytes": 95948
+      },
+      {
+        "name": "espeak-ng-data/nci_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/nci_dict",
+        "sha256": "38c7201e7726c8d508f8f8611349cbc44fcc4684a0fee4db7285d83e808a5b69",
+        "sizeBytes": 1534
+      },
+      {
+        "name": "espeak-ng-data/ne_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ne_dict",
+        "sha256": "43831c3f53ea6e939cac37b5ae5bd7a2ea8237aa46f0e7f2441ab772a3c51dba",
+        "sizeBytes": 95377
+      },
+      {
+        "name": "espeak-ng-data/nl_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/nl_dict",
+        "sha256": "d28641049f98c76b460c3dddde3e2edecb7782c4eb9a3f242391301ff526c83f",
+        "sizeBytes": 65979
+      },
+      {
+        "name": "espeak-ng-data/no_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/no_dict",
+        "sha256": "43b828f8c1709e7abb23a0cc6416fb32e4814e3f1ff1db4baf2935bf7c77c9ff",
+        "sizeBytes": 4178
+      },
+      {
+        "name": "espeak-ng-data/nog_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/nog_dict",
+        "sha256": "8b921398a2f1907b43c07b96a72277d8d3d8545e385955eebae5f340aae33bd2",
+        "sizeBytes": 3294
+      },
+      {
+        "name": "espeak-ng-data/om_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/om_dict",
+        "sha256": "3624e67ef8d9c20d894db0adccaccc61ee852977cb77d5fe5801e7b4a528fcf5",
+        "sizeBytes": 2302
+      },
+      {
+        "name": "espeak-ng-data/or_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/or_dict",
+        "sha256": "e0dd737e9104da63a27d86cd464cf7764837625b1513169b8d28fca1bd3c8c3b",
+        "sizeBytes": 89246
+      },
+      {
+        "name": "espeak-ng-data/pa_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/pa_dict",
+        "sha256": "cee0e2a2bfb166e602ff84e185351a8ac311571ccdf46e1831c7a25245563c10",
+        "sizeBytes": 79953
+      },
+      {
+        "name": "espeak-ng-data/pap_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/pap_dict",
+        "sha256": "770039bbf4ea8c5a3ffddd98c4831ca02c9f39e1ff6b3de7729fa71a8f3bc0f1",
+        "sizeBytes": 2128
+      },
+      {
+        "name": "espeak-ng-data/phondata",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/phondata",
+        "sha256": "4e0288957874029a8c3c9f41a8f517ad4bf18127046decbdd4b9d1d6807ce3a3",
+        "sizeBytes": 550424
+      },
+      {
+        "name": "espeak-ng-data/phondata-manifest",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/phondata-manifest",
+        "sha256": "7b387af0702c7cf0b61f0bead68feded0bd8e1620729b0b252e76acbc30d3813",
+        "sizeBytes": 21821
+      },
+      {
+        "name": "espeak-ng-data/phonindex",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/phonindex",
+        "sha256": "3ca7b8fa3b42624e4b0f152707e7a39245fce569aa99ea47c055d9e622fcf0c4",
+        "sizeBytes": 39074
+      },
+      {
+        "name": "espeak-ng-data/phontab",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/phontab",
+        "sha256": "886f3fa402cb0ba73d483aa8ad000af47a6b7cc06293c75a97913fba68a530f6",
+        "sizeBytes": 55796
+      },
+      {
+        "name": "espeak-ng-data/piqd_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/piqd_dict",
+        "sha256": "33004a36210c33291aef8a838d477667eed7af52ff5093152891379b1774188d",
+        "sizeBytes": 1710
+      },
+      {
+        "name": "espeak-ng-data/pl_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/pl_dict",
+        "sha256": "0e0ce6cfe4eba41a1223362a046390dca359a3e597af8243adaac84d624ef18f",
+        "sizeBytes": 76730
+      },
+      {
+        "name": "espeak-ng-data/pt_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/pt_dict",
+        "sha256": "7e8398f15fa4a21db39a213381f28ec0d302b22663c644e865abb61a09c1b004",
+        "sizeBytes": 67817
+      },
+      {
+        "name": "espeak-ng-data/py_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/py_dict",
+        "sha256": "2255348879547940e8b49e0ca1b80452748f142cb6e267e49cab0560c720129a",
+        "sizeBytes": 2409
+      },
+      {
+        "name": "espeak-ng-data/qdb_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/qdb_dict",
+        "sha256": "c9b7f307ffe54f4aaf323290eca1c620572919035b0eb268e5c94f5d7a430058",
+        "sizeBytes": 3028
+      },
+      {
+        "name": "espeak-ng-data/qu_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/qu_dict",
+        "sha256": "d50659c2a14f43e01fdef0b668eb083025a00cac481b49dfb068e0220e0ed945",
+        "sizeBytes": 1919
+      },
+      {
+        "name": "espeak-ng-data/quc_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/quc_dict",
+        "sha256": "458c1ca6dcfa288ea2584915d206c5127512501174d82655de2cf031378e6dfd",
+        "sizeBytes": 1450
+      },
+      {
+        "name": "espeak-ng-data/qya_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/qya_dict",
+        "sha256": "e56ae297ebac26ed6c77a9718812e087f0bd198241dac3c0d964f36510984783",
+        "sizeBytes": 1939
+      },
+      {
+        "name": "espeak-ng-data/ro_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ro_dict",
+        "sha256": "b14f68866b0440c4b0d95fb7da3b7ffd3c59b693e8593d188474fabfc9a1117d",
+        "sizeBytes": 68538
+      },
+      {
+        "name": "espeak-ng-data/ru_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ru_dict",
+        "sha256": "f0f6181bbbf9e53cd1e8f9d26bde8fc62119c4f78181948f961cb29866e5e585",
+        "sizeBytes": 8532392
+      },
+      {
+        "name": "espeak-ng-data/sd_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sd_dict",
+        "sha256": "398c876b52213a6e7dd54c68d0560d2a1c164c6bfb23b9ec1c044266cdcf2217",
+        "sizeBytes": 59928
+      },
+      {
+        "name": "espeak-ng-data/shn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/shn_dict",
+        "sha256": "121b6682a9b49700232b3a05cc2289d8d4b9c1027e6c2db5c3f552804ad3d04a",
+        "sizeBytes": 88172
+      },
+      {
+        "name": "espeak-ng-data/si_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/si_dict",
+        "sha256": "a241437d4b64fd328ac4a3e786c9465c60488f6fa31cbba04153f628cdc61f27",
+        "sizeBytes": 85384
+      },
+      {
+        "name": "espeak-ng-data/sjn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sjn_dict",
+        "sha256": "eb70510144230f6791574d86bae0918b4191b076dd66c555e6ae3d5637daadf7",
+        "sizeBytes": 1783
+      },
+      {
+        "name": "espeak-ng-data/sk_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sk_dict",
+        "sha256": "58b9bc11c9a95d81e96966242367009f8d02ab7a3f8f4fd77e3581ed4159f0a8",
+        "sizeBytes": 50002
+      },
+      {
+        "name": "espeak-ng-data/sl_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sl_dict",
+        "sha256": "9cb2bcbf616a5e7dd7ca769e7d222a48c613299ef1d76e44c08b002f8c22861a",
+        "sizeBytes": 45047
+      },
+      {
+        "name": "espeak-ng-data/smj_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/smj_dict",
+        "sha256": "815270ce38a59c192ef5aa8801119d9b3ed973d9e23dfa6da8d5d27ded5a9cd6",
+        "sizeBytes": 35095
+      },
+      {
+        "name": "espeak-ng-data/sq_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sq_dict",
+        "sha256": "6b74bef94c3319407c27e44d944e765d036a88b30b4c17f30bbc182dbffcc4ce",
+        "sizeBytes": 45003
+      },
+      {
+        "name": "espeak-ng-data/sr_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sr_dict",
+        "sha256": "770cae9c516e48af7896629faf4abefaf041e1fd4ae184011aad07b97196f613",
+        "sizeBytes": 46832
+      },
+      {
+        "name": "espeak-ng-data/sv_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sv_dict",
+        "sha256": "565f058b14f1c89c6bfa44fc3700793886a39c7818f1037ad1f4961fa7517509",
+        "sizeBytes": 47836
+      },
+      {
+        "name": "espeak-ng-data/sw_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/sw_dict",
+        "sha256": "375fab2ccd0d669177ad406b20b0cdb5851a1e86f093672f24f72c29fec8a815",
+        "sizeBytes": 47804
+      },
+      {
+        "name": "espeak-ng-data/ta_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ta_dict",
+        "sha256": "8f3d855c8d7a35ad0e2b22bc7c15a8830e5fc235492894e5db40458655076ecd",
+        "sizeBytes": 209553
+      },
+      {
+        "name": "espeak-ng-data/te_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/te_dict",
+        "sha256": "640407c66a5bb975671243325de616c221f90bb2842d3a36278facb68c0772f8",
+        "sizeBytes": 94837
+      },
+      {
+        "name": "espeak-ng-data/th_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/th_dict",
+        "sha256": "dd5d3e6268a381920f21c769f52daf3a8e610ae83f7995e56f15e9d4de18d653",
+        "sizeBytes": 2301
+      },
+      {
+        "name": "espeak-ng-data/tk_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/tk_dict",
+        "sha256": "b3cd4a246f014f0564ec9efae79731c0fe73ffe1cd1617359dd8d5344ee3f9c8",
+        "sizeBytes": 20868
+      },
+      {
+        "name": "espeak-ng-data/tn_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/tn_dict",
+        "sha256": "67f68dc336e7c65b946c95414cc8ae96cd10d241783bf857b3f990ac73221b2b",
+        "sizeBytes": 3072
+      },
+      {
+        "name": "espeak-ng-data/tr_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/tr_dict",
+        "sha256": "311b0557059f2dab5ee2faabb51361f5033368f0e2a54c4bdfe45e730674f26e",
+        "sizeBytes": 46793
+      },
+      {
+        "name": "espeak-ng-data/tt_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/tt_dict",
+        "sha256": "60d138d38330e44a78b4224cbea452bfca22bce6734c8ce3f640c0216ce14001",
+        "sizeBytes": 2121
+      },
+      {
+        "name": "espeak-ng-data/ug_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ug_dict",
+        "sha256": "7c4567ffe6bd8d5224b6b3fd8fab65b1343254636e6228d738ae3a708428e8e7",
+        "sizeBytes": 2070
+      },
+      {
+        "name": "espeak-ng-data/uk_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/uk_dict",
+        "sha256": "a779bb0f51ce5cebb650a4e2282162fc8c44609210a2baa700f81f3e83e6e10c",
+        "sizeBytes": 3492
+      },
+      {
+        "name": "espeak-ng-data/ur_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/ur_dict",
+        "sha256": "74b60e4331f532810ccfc70751ad07ab440647550a2d25823f44663a0dfa86fb",
+        "sizeBytes": 133556
+      },
+      {
+        "name": "espeak-ng-data/uz_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/uz_dict",
+        "sha256": "790d42ac417b26dd7b1bbfed4be72329c16ed1839dd75f55f7c962eb7bd5857a",
+        "sizeBytes": 2540
+      },
+      {
+        "name": "espeak-ng-data/vi_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/vi_dict",
+        "sha256": "bbf7cab4ba733b2f5d9d3b61eb1194ef745232fa3adebb4bc92456e948cb3722",
+        "sizeBytes": 52608
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Alex",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Alex",
+        "sha256": "1cf9874567f4fa8109329f084e9ad9ed788fb2362298921d0a04a57b24f1141f",
+        "sizeBytes": 128
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Alicia",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Alicia",
+        "sha256": "6d3f60ec866706e9d4ab7da2a79eedb8c11b50f63620f87e58317f316ea3d58e",
+        "sizeBytes": 474
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Andrea",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Andrea",
+        "sha256": "6ca52734ec2cf7c419d2d3ad7c3449cd1a1776342c4d152ea12c5b1e72801e89",
+        "sizeBytes": 357
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Andy",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Andy",
+        "sha256": "0e13ba1a940cd9df7e65358c36445c9740f3d75f1360c7f7c71ab9f74b45edca",
+        "sizeBytes": 320
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Annie",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Annie",
+        "sha256": "40f0f829c5c6e7abf4a02a21f128a572756d6f6693014c26d09a5c29ede5ec33",
+        "sizeBytes": 315
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/AnxiousAndy",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/AnxiousAndy",
+        "sha256": "7dfe126f517b76cc78269618dbee2c30d324bea9460b400938756ec93995eaf8",
+        "sizeBytes": 361
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Demonic",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Demonic",
+        "sha256": "241b0e78362bd3208bb586b65bdf52330e1e8322f8f226c4790c4abeb47cfb09",
+        "sizeBytes": 3858
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Denis",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Denis",
+        "sha256": "a09fe9f7a4e478d2ba1e139c2995633e2b99de9abdaaa82307954599b0e3d6fd",
+        "sizeBytes": 305
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Diogo",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Diogo",
+        "sha256": "a4a17c453d13242b48783c247816bff8d2cf7bc8931c3f8237887d88a2881b18",
+        "sizeBytes": 379
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Gene",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Gene",
+        "sha256": "06258dae680cde2122a4939dbd4f23ed4ea145b7475068bf7dd4d466090afd2a",
+        "sizeBytes": 281
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Gene2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Gene2",
+        "sha256": "bcdb3039296eea37398e4423dc9bb6849cda9c5c812b83702ebc49682c649f57",
+        "sizeBytes": 283
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Henrique",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Henrique",
+        "sha256": "5c6bf1cf5b6bc7c7d48f2a8368ae348c6ff64232c047f40f9d9a6e6824b4ce6a",
+        "sizeBytes": 381
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Hugo",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Hugo",
+        "sha256": "906acbef890dc4da67cb54b5b0ddc2cab7ee308a95d350c899f0b0cb6a83dd5f",
+        "sizeBytes": 378
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Jacky",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Jacky",
+        "sha256": "41884ed9b66160aeb5a0dc418370a59fe39ead0013d93e023e6d607ef01c1a6e",
+        "sizeBytes": 267
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Lee",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Lee",
+        "sha256": "a1584887cddb40c10e04992fb770025b52e66b70504656094f80975f1d6bbf6b",
+        "sizeBytes": 338
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Marco",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Marco",
+        "sha256": "04025677360c0270f094bbb6716b83c8284902f6da9b496bedbbf590963835fb",
+        "sizeBytes": 467
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Mario",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Mario",
+        "sha256": "a94ac65d132030df496e8aa364d5cde5f2eafa4b6b3ae361a2901d512c6029d8",
+        "sizeBytes": 270
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Michael",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Michael",
+        "sha256": "4409be23ef5fedf4c8bffbfaa8a802a342824d7e97f1d92938336a25f92f0ebe",
+        "sizeBytes": 270
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Mike",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Mike",
+        "sha256": "8999b264606c0af23d346a877e10ca05aa757f7ea433e6cfcb3bef50a56ba2cf",
+        "sizeBytes": 112
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Mr serious",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Mr%20serious",
+        "sha256": "794abd78deb07ce9b03419d20f7744df4c0151d5abff7981217e9d0926a2f240",
+        "sizeBytes": 3193
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Nguyen",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Nguyen",
+        "sha256": "4f3d557d9c045080f56022a96e5b3659c4d1caa5fa1d702e12d3ef6bec2e3a45",
+        "sizeBytes": 280
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Reed",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Reed",
+        "sha256": "727dbc3f6bff0be4dd7d0438f66d3bb82cff68ed148cf52cb58e73314aaec1e4",
+        "sizeBytes": 202
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/RicishayMax",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/RicishayMax",
+        "sha256": "7ddc7a57711ccd7a736540f14271adadf1e2e0422941ecaa7cc43ab87f8e2017",
+        "sizeBytes": 233
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/RicishayMax2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/RicishayMax2",
+        "sha256": "3de5e414d4b2ef082a7b974bb7ede94937e93b5b873d2b2f7928b19d30745180",
+        "sizeBytes": 435
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/RicishayMax3",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/RicishayMax3",
+        "sha256": "36d20550b68a8c229d34d956657b7d642929962f7e5d4fddd6396af9e5378b56",
+        "sizeBytes": 435
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Storm",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Storm",
+        "sha256": "e817c7d1ce10de527ebc19c0835f580cb584c3ae7d36d30a4f414482602e7b89",
+        "sizeBytes": 420
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/Tweaky",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/Tweaky",
+        "sha256": "c34d1c1d8b7922ceb886b95ad6ab534ca048f9c47e19698ec2aae5cf0c32cdbc",
+        "sizeBytes": 3189
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/UniRobot",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/UniRobot",
+        "sha256": "23dba52c2d1cb332db6225304818d85488f110a668ddcdbfd7f0438afe37794b",
+        "sizeBytes": 417
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/adam",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/adam",
+        "sha256": "b21efbf56fd7d58470e7ce4759c6ef9f23949706b269f2d777832204658ee0dd",
+        "sizeBytes": 75
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/anika",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/anika",
+        "sha256": "228771ce84cad16a089e0b23efe2e69edf25f1ab7c0cb3a50d366ac70e82fbbd",
+        "sizeBytes": 493
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/anikaRobot",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/anikaRobot",
+        "sha256": "3ba724be6aab2fc1a084b25cdb16f469250eb9de4c6c0924a18788d0246fc32f",
+        "sizeBytes": 512
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/announcer",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/announcer",
+        "sha256": "4af6a6748c720cbbaac1e3dcac17bb3bc7a4c553499ec7ee69e054db51a50de3",
+        "sizeBytes": 300
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/antonio",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/antonio",
+        "sha256": "c90477080cd9aa9c384770c0ec18901d01e9851f1bc7d15526a2565a3b0c4da5",
+        "sizeBytes": 381
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/aunty",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/aunty",
+        "sha256": "0aede4d1ca614f32c348f3d728eab58322ccd016e8531234fdc3dfcf00e32bf1",
+        "sizeBytes": 358
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/belinda",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/belinda",
+        "sha256": "9bd791b7115820e25ada82b4911134d5116e8238b4fd4d214dfccf162576141c",
+        "sizeBytes": 340
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/benjamin",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/benjamin",
+        "sha256": "3fa10b0d865fc751fd9c8ed1dabac4bb9b011ea2b95064d4d25a8c719f7785d8",
+        "sizeBytes": 201
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/boris",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/boris",
+        "sha256": "f23d0a6ee2eeb7e3340506d61d422b691fb04f4e98977ea15c1e0ee5715846d5",
+        "sizeBytes": 224
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/caleb",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/caleb",
+        "sha256": "bcde145ec713eae6d3451a6f25dbbdc0b6756fd44e9e092b7aef89f2cff25be8",
+        "sizeBytes": 57
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/croak",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/croak",
+        "sha256": "2906a2c6f7b7687db2f1c862164a9b80435d5afc3ba16d74619728bf8c3a8ca7",
+        "sizeBytes": 93
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/david",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/david",
+        "sha256": "50b5cb5f61a50f5ff5299dd22e5d645446746dbc36909595f6ae47bac0bda9c3",
+        "sizeBytes": 112
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/ed",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/ed",
+        "sha256": "12ddb6355b40a2e39a3b6cef66a2bf4db15a25045769b330a9a3b344a608026d",
+        "sizeBytes": 287
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/edward",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/edward",
+        "sha256": "b7a12bcb2af280c40e4be4280b675001024619ed529262dbf3e819db53b5b310",
+        "sizeBytes": 151
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/edward2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/edward2",
+        "sha256": "59d166f7adfee4515a492993405e95432889050aaa47b6cd7eaeeb457fbca227",
+        "sizeBytes": 152
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/f1",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/f1",
+        "sha256": "7cdef453c6b0391d50a02b8f35392e6f41249cea65df1021affd68a64917b85f",
+        "sizeBytes": 324
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/f2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/f2",
+        "sha256": "62b17f6c8f94add0310db032f5e463c13510c5ff83ef1f21e8894ccbf00b00e3",
+        "sizeBytes": 357
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/f3",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/f3",
+        "sha256": "d0342ee8ceebe3047831774634d234e90281ec73ce2aed8dd0bdd915ccf500fc",
+        "sizeBytes": 375
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/f4",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/f4",
+        "sha256": "ff9e2907a818920e3b976232c90eabaf270fff0de0b8a479af9a3633e9b7921f",
+        "sizeBytes": 350
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/f5",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/f5",
+        "sha256": "6c76406d94540d59dee16de11520c37124a1f6dfc236981e483877075f0271b3",
+        "sizeBytes": 432
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/fast",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/fast",
+        "sha256": "fa2f9c2918f351499037f6bffb25294d9b781b2785d9772a8ae3293c0c0037fe",
+        "sizeBytes": 149
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/grandma",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/grandma",
+        "sha256": "e033d57ba9b098971fdb995c13830f9c709206add081c586daaec323ff69a392",
+        "sizeBytes": 263
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/grandpa",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/grandpa",
+        "sha256": "f25627887b95e8bccac5e6ce99cb97c6e34290ff0bf919febe64a9987138796d",
+        "sizeBytes": 256
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/gustave",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/gustave",
+        "sha256": "5fa89cf8625cd460b9309748eca019ab5b325a04dccbd29f1a9b2a00caa2e848",
+        "sizeBytes": 253
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/ian",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/ian",
+        "sha256": "c0722c7954d3e6582e3f5b3f584140675ab060ac3c6cac5dd11a74592db5550a",
+        "sizeBytes": 3168
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/iven",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/iven",
+        "sha256": "10ab9de8365ff7bf5a20621d08f1a2019d4bf5521f3c6f65447c9256057406c8",
+        "sizeBytes": 261
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/iven2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/iven2",
+        "sha256": "f94830e5abe118dc4c0909630d66637ba2a7c94957279c31fd78e313374054cd",
+        "sizeBytes": 279
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/iven3",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/iven3",
+        "sha256": "27ccf2d2f7bb8f1ff28c705c39cf6ff575eb2458c39a518ed33741ad9c1af252",
+        "sizeBytes": 262
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/iven4",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/iven4",
+        "sha256": "11b3d46c01d4307eedcb60bd8dbcc73a40f3eb86c289176d6fd5bb418223b92f",
+        "sizeBytes": 261
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/john",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/john",
+        "sha256": "bfbcc1cec33ef0581fdeb4955fbcd0d824a5d4be5493d731e4a2ef7f8f3ba670",
+        "sizeBytes": 3186
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/kaukovalta",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/kaukovalta",
+        "sha256": "b9f6016145835c3999bcd5872b8a53442729bd903591781ea3340746b3b4956b",
+        "sizeBytes": 361
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/klatt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/klatt",
+        "sha256": "9abb6d05d0ca354831c570e14323dd4e821459b53166d96395875a48bacdbde2",
+        "sizeBytes": 38
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/klatt2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/klatt2",
+        "sha256": "afab662a55953532ff8d6f9c615b824ecec87f7aef6790a58c4ccbc4505a742a",
+        "sizeBytes": 38
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/klatt3",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/klatt3",
+        "sha256": "f1c0cd147bd656f6c4830b3341c9694483438c43aea15c982dcc1945dbb334b9",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/klatt4",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/klatt4",
+        "sha256": "3459c15aa8fa7d7218ac34388dfc0833c850ffc923013949308c2f643f3daad2",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/klatt5",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/klatt5",
+        "sha256": "44397d8282454a2974078d25509caa470bceb093e484e727843a5147b4193e60",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/klatt6",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/klatt6",
+        "sha256": "7d3930cd97ef7a0732f2e19f53f84e480f2d441d263390647b92bb0b4c645d05",
+        "sizeBytes": 39
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/linda",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/linda",
+        "sha256": "df06b4c29f5953034e7815ea7062e356917266f8fab576f76c036045525c8e28",
+        "sizeBytes": 350
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m1",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m1",
+        "sha256": "7f2de023bdfe18651d2d0453d2e7ff5e8ade9f094912a79247336ddc90fd7783",
+        "sizeBytes": 335
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m2",
+        "sha256": "6eb925eb6691621a6de66c87596c6ed879c80a04215a9a8437dffc28fcfa14dd",
+        "sizeBytes": 264
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m3",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m3",
+        "sha256": "7a4ac872387439814ddd65f5e1ff73017122975911df6b5dc62c5709e6fdb611",
+        "sizeBytes": 300
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m4",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m4",
+        "sha256": "6bef82cea3538da1246b7a2c203206e90155cbb4af86faa8ef03366c3119ceee",
+        "sizeBytes": 290
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m5",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m5",
+        "sha256": "08590ef7ce37630a6875d9cbe200dc473a9054b4184287808a4fd1c8e27dd02a",
+        "sizeBytes": 262
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m6",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m6",
+        "sha256": "fc0e01af458a96d43f55878010d3abcbbda85e846922b25361a78d27c3a9ca00",
+        "sizeBytes": 188
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m7",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m7",
+        "sha256": "bdfc54a3558ca98f9ca082479c5211034a824d8721db91804f9d77867db6fab3",
+        "sizeBytes": 254
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/m8",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/m8",
+        "sha256": "060130540e2fae5f8acfb19bcd4ef3dc5dc8f8d2134c502bb57af277fd4cc491",
+        "sizeBytes": 284
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/marcelo",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/marcelo",
+        "sha256": "3238a933a17c40c61cdd385c0e742bf54c42c008f4110d4b0353a6ae72a5d1a0",
+        "sizeBytes": 251
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/max",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/max",
+        "sha256": "c88f70a60a19e76a6774dfbd7664be639b9aa8aa587c680834c305ffa434aaaf",
+        "sizeBytes": 225
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/michel",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/michel",
+        "sha256": "c0068ad9cb792dfb78aedbdff9c3cec68e5083736bae0c33bf19088186101087",
+        "sizeBytes": 404
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/miguel",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/miguel",
+        "sha256": "9c8c2bbe9fba6d1f06eb63ee67d98d7ebb8846b2bf13847a9b359c90ba9fa8fe",
+        "sizeBytes": 382
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/mike2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/mike2",
+        "sha256": "274ebc5df252b3258e8996f1276137b2cf9d6e5006e1145a5172997284f1dba0",
+        "sizeBytes": 188
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/norbert",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/norbert",
+        "sha256": "35b9923e15caf36280542270282bd2392c6d86ef5db9a8be7be92ce2241a46cb",
+        "sizeBytes": 3189
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/pablo",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/pablo",
+        "sha256": "053a85c8a6d7e7a0f6432a3158fe73fa9accf06202e5d69c273d4e5bae8bafc8",
+        "sizeBytes": 3142
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/paul",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/paul",
+        "sha256": "75fb8098bea28859513de6ce033092307382d6f20455e71b051193dfc0793d5e",
+        "sizeBytes": 284
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/pedro",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/pedro",
+        "sha256": "7429792ba833fa2446bec6db790068f5862b9ed099392002cd0e724ec6ab2a66",
+        "sizeBytes": 352
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/quincy",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/quincy",
+        "sha256": "e9945bee7b4f3240221866f497bf2511a886ed7702d8389688a03c2ea120caf0",
+        "sizeBytes": 354
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/rob",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/rob",
+        "sha256": "fbfffcdb0afb2e3b70f886c02282feae22509d77fe6e7103daf907f7a356595d",
+        "sizeBytes": 265
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robert",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robert",
+        "sha256": "72604f85afe5bb52a5ce7e3427b196e1e3e426a14a64e2d93b6617e248a46417",
+        "sizeBytes": 274
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft",
+        "sha256": "ce2820edd349f3fbc734bfe94095518f10ecbefdb304560109f37106f9f4d2fa",
+        "sizeBytes": 451
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft2",
+        "sha256": "249a44f4069b323640e6b532ff6a9bc30dca35f5f9a5f666b647937cbc58c685",
+        "sizeBytes": 454
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft3",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft3",
+        "sha256": "f8543efe18019c735ebad99d1cab4e06e0efd565ac269a895415dfebf342c383",
+        "sizeBytes": 455
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft4",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft4",
+        "sha256": "d5f728e0d0a9d27f604f34e835e059590fd01411fd467c91328b573c7597bb2d",
+        "sizeBytes": 447
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft5",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft5",
+        "sha256": "39da0efe1768e14eefe05a7019fab416795bbffb222fce23ad7f963991447f7b",
+        "sizeBytes": 445
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft6",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft6",
+        "sha256": "46426971d76c34266580133fad2c26ab829395a71c1713e6205d9d46b0871672",
+        "sizeBytes": 287
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft7",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft7",
+        "sha256": "e19c1045259d9cfb078c229d5d1372f7c5af971d0e2536a41b89c40ca3e23ede",
+        "sizeBytes": 410
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/robosoft8",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/robosoft8",
+        "sha256": "389230461647836c1b66c51939c0a493e3fbc81e2b7afc01c6f88b8f9da21e2b",
+        "sizeBytes": 243
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/sandro",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/sandro",
+        "sha256": "1b8c36a3ce35a27cbbabf4679df0264cd37f4c79b66aa1f4c310eb31b9c80490",
+        "sizeBytes": 530
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/shelby",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/shelby",
+        "sha256": "5e96565045bcdd5b42e7ad0eab2bbd670c67cf5c9e3f2ac6b50b30580fb92be4",
+        "sizeBytes": 280
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/steph",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/steph",
+        "sha256": "78186aeddce4c449348f368046b2665375b1a492e948d739249b0c964f082861",
+        "sizeBytes": 364
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/steph2",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/steph2",
+        "sha256": "ca88414b48553fed1fd409389548a94ea90cf282d6340e3cb968c8538a2ac2ec",
+        "sizeBytes": 367
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/steph3",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/steph3",
+        "sha256": "a7d796211b6969ba92213f89de54b053890306af774424ee38fb02ace45e852d",
+        "sizeBytes": 377
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/travis",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/travis",
+        "sha256": "7d5a34be05778ee850d97b0491a62db7683c058d660ff2afc71c08c87360f30d",
+        "sizeBytes": 383
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/victor",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/victor",
+        "sha256": "a880a8083ac5eaadf94f71c63b51f34c1426d4bfe0a26f6761ddec5c6e9a5c76",
+        "sizeBytes": 253
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/whisper",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/whisper",
+        "sha256": "1e3534c843768898cea47a3f83b2fd91720c0775b438ea5c0134676940a66e96",
+        "sizeBytes": 186
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/whisperf",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/whisperf",
+        "sha256": "7fea42b10114f1bfd2004181e6b0eb626997cca987893e23d24b5c616aac89d7",
+        "sizeBytes": 392
+      },
+      {
+        "name": "espeak-ng-data/voices/!v/zac",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/voices/%21v/zac",
+        "sha256": "edaf508b2cfbfd6088a163dcc78d5f6a26850a7d39a5a0e5128b09526f56b6db",
+        "sizeBytes": 275
+      },
+      {
+        "name": "espeak-ng-data/yue_dict",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/espeak-ng-data/yue_dict",
+        "sha256": "1d26afa203034698772107abfff1b53acbee30434700a4d2b75dee98951588f8",
+        "sizeBytes": 563571
+      }
+    ],
+    "step": "data",
+    "machineClass": "minimum",
+    "licenceNoticeKey": "licence.espeak"
+  },
+  {
+    "id": "piper-en-us-ljspeech-medium",
+    "name": "Voice: English (US), LJ Speech voice",
+    "purpose": "Reads the translated text aloud.",
+    "licence": "Public domain",
+    "licenceClass": "permissive",
+    "sizeBytes": 63532964,
+    "files": [
+      {
+        "name": "MODEL_CARD",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-en_US-ljspeech-medium/resolve/34f390d13b9edbaa30c339127de0f9c4c5948c90/MODEL_CARD",
+        "sha256": "fbee1529c89d36b3fe76d7e9f3f832dce17f44900a52d76a9bda735654766b4d",
+        "sizeBytes": 517
+      },
+      {
+        "name": "en_US-ljspeech-medium.onnx",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-en_US-ljspeech-medium/resolve/34f390d13b9edbaa30c339127de0f9c4c5948c90/en_US-ljspeech-medium.onnx",
+        "sha256": "8ceba58a4b540d4e7e7e24ad079cf0d92762a4fd334e059f12940787c6c37b3d",
+        "sizeBytes": 63531507
+      },
+      {
+        "name": "tokens.txt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-en_US-ljspeech-medium/resolve/34f390d13b9edbaa30c339127de0f9c4c5948c90/tokens.txt",
+        "sha256": "ef3a7e4a8d1af0c9d4dc45aaae1a6242ebe24a7ed6f3d025a49eb29682784c6d",
+        "sizeBytes": 940
+      }
+    ],
+    "step": "speak",
+    "machineClass": "minimum",
+    "languages": [
+      "en"
+    ],
+    "gender": "female",
+    "requires": [
+      "espeak-ng-data"
+    ],
+    "licenceNoticeKey": "licence.piperVoice"
+  },
+  {
+    "id": "piper-en-gb-alba-medium",
+    "name": "Voice: English (UK), Alba voice",
+    "purpose": "Reads the translated text aloud.",
+    "licence": "CC-BY-4.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 63202675,
+    "files": [
+      {
+        "name": "MODEL_CARD",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-en_GB-alba-medium/resolve/7e469a54c7a4f5bd191cae788e197266e2c9c5ac/MODEL_CARD",
+        "sha256": "fa166b1779404c470b0b6b4ba0238bc4a35bf89d2cd130c6788f697188b737d6",
+        "sizeBytes": 324
+      },
+      {
+        "name": "en_GB-alba-medium.onnx",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-en_GB-alba-medium/resolve/7e469a54c7a4f5bd191cae788e197266e2c9c5ac/en_GB-alba-medium.onnx",
+        "sha256": "c904d007a8047ab13628b021351b983d0a2627c0d7a81c64a6fe9ad661adb1cf",
+        "sizeBytes": 63201430
+      },
+      {
+        "name": "tokens.txt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-en_GB-alba-medium/resolve/7e469a54c7a4f5bd191cae788e197266e2c9c5ac/tokens.txt",
+        "sha256": "87c8ef66eae5473ed0cc0366b3964c736ca6c5f676c979522ea31234e47430b9",
+        "sizeBytes": 921
+      }
+    ],
+    "step": "speak",
+    "machineClass": "minimum",
+    "languages": [
+      "en"
+    ],
+    "gender": "female",
+    "requires": [
+      "espeak-ng-data"
+    ],
+    "licenceNoticeKey": "licence.piperVoice"
+  },
+  {
+    "id": "piper-fr-fr-siwis-medium",
+    "name": "Voice: French, Siwis voice",
+    "purpose": "Reads the translated text aloud.",
+    "licence": "CC-BY-4.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 63202626,
+    "files": [
+      {
+        "name": "MODEL_CARD",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/MODEL_CARD",
+        "sha256": "bd8b8d079d4d3d2c4cc20345889bbcd586d72f021a132f93357a763eb5232cce",
+        "sizeBytes": 284
+      },
+      {
+        "name": "fr_FR-siwis-medium.onnx",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/fr_FR-siwis-medium.onnx",
+        "sha256": "830f55d861ce7c8a442fd5593890ff5ee50c9d5efd4c4f42d24d537fe46d2d52",
+        "sizeBytes": 63201421
+      },
+      {
+        "name": "tokens.txt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-fr_FR-siwis-medium/resolve/6b956227093bc8f9c05e5549508c4a510e97ef26/tokens.txt",
+        "sha256": "87c8ef66eae5473ed0cc0366b3964c736ca6c5f676c979522ea31234e47430b9",
+        "sizeBytes": 921
+      }
+    ],
+    "step": "speak",
+    "machineClass": "minimum",
+    "languages": [
+      "fr"
+    ],
+    "gender": "female",
+    "requires": [
+      "espeak-ng-data"
+    ],
+    "licenceNoticeKey": "licence.piperVoice"
+  },
+  {
+    "id": "piper-de-de-thorsten-medium",
+    "name": "Voice: German, Thorsten voice",
+    "purpose": "Reads the translated text aloud.",
+    "licence": "CC0-1.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 63202613,
+    "files": [
+      {
+        "name": "MODEL_CARD",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-de_DE-thorsten-medium/resolve/da8bed7888b27d17e1aa8fbd53e6703ab939583a/MODEL_CARD",
+        "sha256": "5196b5ab0794e6056263a1f37c18bec407b61ac187529bee29d1c366871e5c9e",
+        "sizeBytes": 285
+      },
+      {
+        "name": "de_DE-thorsten-medium.onnx",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-de_DE-thorsten-medium/resolve/da8bed7888b27d17e1aa8fbd53e6703ab939583a/de_DE-thorsten-medium.onnx",
+        "sha256": "1c305abe13dda2f50a9783da3e7645396833cdf2d09f24fa9a823c91293d65a6",
+        "sizeBytes": 63201421
+      },
+      {
+        "name": "tokens.txt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-de_DE-thorsten-medium/resolve/da8bed7888b27d17e1aa8fbd53e6703ab939583a/tokens.txt",
+        "sha256": "2619c1a9de1bcf928162f40c583caf39368cfd6b2340c7bcad51dc634411ec36",
+        "sizeBytes": 907
+      }
+    ],
+    "step": "speak",
+    "machineClass": "minimum",
+    "languages": [
+      "de"
+    ],
+    "gender": "male",
+    "requires": [
+      "espeak-ng-data"
+    ],
+    "licenceNoticeKey": "licence.piperVoice"
+  },
+  {
+    "id": "piper-es-es-davefx-medium",
+    "name": "Voice: Spanish (Spain), DaveFX voice",
+    "purpose": "Reads the translated text aloud.",
+    "licence": "CC0-1.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 63202604,
+    "files": [
+      {
+        "name": "MODEL_CARD",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-es_ES-davefx-medium/resolve/d5cddb304d484989611c1684db8878d4ef2fc506/MODEL_CARD",
+        "sha256": "17523d253d605b262341aac23226b49686c31992af90236bd0abb7d4d154774d",
+        "sizeBytes": 275
+      },
+      {
+        "name": "es_ES-davefx-medium.onnx",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-es_ES-davefx-medium/resolve/d5cddb304d484989611c1684db8878d4ef2fc506/es_ES-davefx-medium.onnx",
+        "sha256": "329fc723ef304f8688df9ef819eea169a4181f60a77f53e087b19dbca07b09f8",
+        "sizeBytes": 63201422
+      },
+      {
+        "name": "tokens.txt",
+        "url": "https://huggingface.co/csukuangfj/vits-piper-es_ES-davefx-medium/resolve/d5cddb304d484989611c1684db8878d4ef2fc506/tokens.txt",
+        "sha256": "2619c1a9de1bcf928162f40c583caf39368cfd6b2340c7bcad51dc634411ec36",
+        "sizeBytes": 907
+      }
+    ],
+    "step": "speak",
+    "machineClass": "minimum",
+    "languages": [
+      "es"
+    ],
+    "gender": "male",
+    "requires": [
+      "espeak-ng-data"
+    ],
+    "licenceNoticeKey": "licence.piperVoice"
+  }
+]

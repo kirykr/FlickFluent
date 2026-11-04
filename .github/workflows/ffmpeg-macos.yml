@@ -1,0 +1,51 @@
+name: ffmpeg-macos
+
+# Builds an LGPL-only FFmpeg for macOS (no GPL or non-free parts) from the official source tag,
+# and prints the size and SHA-256 for `config/model-catalogue.json`. Run by hand when the pinned
+# version changes, then mirror the archive (see docs/dependencies.md).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: FFmpeg release tag
+        default: n8.1.3
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: macos-15-intel, arch: x64 }
+          - { runner: macos-latest, arch: arm64 }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - run: brew install nasm pkg-config
+      - run: git clone --depth 1 --branch ${{ inputs.tag }} https://git.ffmpeg.org/ffmpeg.git ffmpeg-src
+      - name: Configure and build
+        working-directory: ffmpeg-src
+        run: |
+          ./configure --prefix="$PWD/out" --disable-gpl --disable-nonfree --disable-autodetect \
+            --enable-videotoolbox --enable-audiotoolbox --disable-doc --disable-debug \
+            --disable-ffplay --enable-static --disable-shared
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+      - name: Check the build is LGPL
+        working-directory: ffmpeg-src
+        run: |
+          out/bin/ffmpeg -version | tee version.txt
+          grep -q -- "--disable-gpl" version.txt
+          ! grep -q -- "--enable-gpl" version.txt
+      - name: Archive
+        run: |
+          name="ffmpeg-${{ inputs.tag }}-macos-${{ matrix.arch }}-lgpl.tar.gz"
+          mkdir -p pack/ffmpeg/bin
+          cp ffmpeg-src/out/bin/ffmpeg ffmpeg-src/out/bin/ffprobe pack/ffmpeg/bin/
+          cp ffmpeg-src/COPYING.LGPLv2.1 pack/ffmpeg/
+          tar -C pack -czf "$name" ffmpeg
+          echo "name=$name size=$(stat -f%z "$name") sha256=$(shasum -a 256 "$name" | cut -d' ' -f1)" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "ARCHIVE=$name" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARCHIVE }}
+          path: ${{ env.ARCHIVE }}

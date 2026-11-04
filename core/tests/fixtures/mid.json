@@ -1,0 +1,8 @@
+{
+  "cpuBits": 64,
+  "cpuCores": 4,
+  "ramGb": 8,
+  "freeDiskGb": 20,
+  "os": { "family": "macos", "version": "14" },
+  "accelerator": "none"
+}

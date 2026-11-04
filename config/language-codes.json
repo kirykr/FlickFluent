@@ -1,0 +1,18 @@
+{
+  "_comment": "One place that maps language codes seen in the wild to the code the models use. Keys are lower case.",
+  "iw": "he",
+  "in": "id",
+  "ji": "yi",
+  "mo": "ro",
+  "zh-cn": "zh",
+  "zh-sg": "zh",
+  "zh-hans": "zh",
+  "zh-tw": "zh",
+  "zh-hk": "zh",
+  "zh-hant": "zh",
+  "pt-br": "pt",
+  "pt-pt": "pt",
+  "nb": "no",
+  "nn": "no",
+  "km-kh": "km"
+}

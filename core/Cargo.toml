@@ -1,0 +1,33 @@
+[package]
+name = "flickfluent-core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[features]
+default = ["gpu"]
+# GPU adapter listing through wgpu. Without it the accelerator is reported as unknown.
+gpu = ["dep:wgpu"]
+
+[dependencies]
+sysinfo = "0.33"
+wgpu = { version = "22.1", optional = true, default-features = false, features = ["dx12", "metal"] }
+reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "time", "io-util", "process", "sync"] }
+sha2 = "0.10"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+regex = "1"
+flate2 = "1"
+tar = "0.4"
+time = { version = "0.3", features = ["serde", "formatting"] }
+
+[dev-dependencies]
+jsonschema = "0.26"
+tempfile = "3"
+
+[lints]
+workspace = true

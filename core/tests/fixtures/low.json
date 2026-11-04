@@ -1,0 +1,8 @@
+{
+  "cpuBits": 64,
+  "cpuCores": 2,
+  "ramGb": 4,
+  "freeDiskGb": 5,
+  "os": { "family": "windows", "version": "10" },
+  "accelerator": "none"
+}

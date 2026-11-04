@@ -1,0 +1,10 @@
+node_modules/
+dist/
+target/
+package-lock.json
+specs/
+.specify/
+.claude/
+src/components/ai-elements
+src/components/ui
+src/lib/utils.ts

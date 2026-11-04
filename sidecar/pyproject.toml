@@ -1,0 +1,18 @@
+[project]
+name = "flickfluent_sidecar"
+version = "0.1.0"
+description = "FlickFluent model workers (ML only, no orchestration)"
+requires-python = ">=3.11"
+license = { text = "MIT OR Apache-2.0" }
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+# Real model dependencies are installed into the runtime pack, pinned in requirements.lock.
+workers = ["faster-whisper", "demucs", "ctranslate2", "sentencepiece", "sherpa-onnx<2", "silero-vad", "numpy", "soundfile"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools]
+packages = ["flickfluent_sidecar", "flickfluent_sidecar.workers"]

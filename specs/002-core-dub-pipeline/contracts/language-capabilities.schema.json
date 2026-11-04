@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flickfluent/model-catalogue-v2",
+  "title": "Model catalogue (feature 002 extension)",
+  "description": "Each entry extends the feature 001 record. The language dropdown is the union of these entries; adding one needs no interface change.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "purpose", "licence", "licenceClass", "sizeBytes", "step", "machineClass"],
+    "properties": {
+      "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+      "name": { "type": "string" },
+      "purpose": { "type": "string" },
+      "licence": { "type": "string", "description": "SPDX id or short text" },
+      "licenceClass": { "enum": ["permissive", "copyleftFile", "nonCommercial"] },
+      "licenceNoticeKey": { "type": "string", "description": "i18n key; required when licenceClass is not permissive" },
+      "sizeBytes": { "type": "integer", "minimum": 1 },
+      "extraDownloadBytes": { "type": "integer", "minimum": 0, "description": "Bytes fetched after the files above, such as the Python packages a runtime pack installs. Shown with sizeBytes before any download." },
+      "url": { "type": "string", "format": "uri" },
+      "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+      "step": { "enum": ["runtime", "ffmpeg", "separate", "transcribe", "translate", "speak", "vad", "speaker", "data", "test"] },
+      "fileName": { "type": "string" },
+      "files": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["name", "url", "sha256", "sizeBytes"],
+          "properties": {
+            "name": { "type": "string" },
+            "url": { "type": "string", "format": "uri" },
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "sizeBytes": { "type": "integer", "minimum": 1 }
+          }
+        }
+      },
+      "languages": {
+        "type": "array",
+        "items": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)?$" },
+        "description": "Required for transcribe, translate and speak."
+      },
+      "gender": { "enum": ["male", "female", null] },
+      "machineClass": { "enum": ["minimum", "mid", "fullLocal"] },
+      "qualityByLanguage": {
+        "type": "object",
+        "additionalProperties": { "enum": ["good", "fair", "weak"] }
+      },
+      "requires": { "type": "array", "items": { "type": "string" } },
+      "platforms": {
+        "type": "object",
+        "properties": {
+          "windows": { "type": "array", "items": { "enum": ["x64", "arm64"] } },
+          "macos": { "type": "array", "items": { "enum": ["x64", "arm64"] } }
+        }
+      },
+      "defaultEnabled": { "type": "boolean", "description": "False for every nonCommercial entry." }
+    },
+    "allOf": [
+      {
+        "anyOf": [
+          { "required": ["url", "sha256"] },
+          { "required": ["files"] }
+        ]
+      },
+      {
+        "if": { "properties": { "step": { "enum": ["transcribe", "translate", "speak"] } }, "required": ["step"] },
+        "then": { "required": ["languages"] }
+      },
+      {
+        "if": { "properties": { "licenceClass": { "enum": ["copyleftFile", "nonCommercial"] } }, "required": ["licenceClass"] },
+        "then": { "required": ["licenceNoticeKey"] }
+      },
+      {
+        "if": { "properties": { "licenceClass": { "const": "nonCommercial" } }, "required": ["licenceClass"] },
+        "then": { "properties": { "defaultEnabled": { "const": false } } }
+      }
+    ]
+  }
+}
