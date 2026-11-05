@@ -11,7 +11,9 @@ use flickfluent_core::hardware;
 use flickfluent_core::models::{bundled_catalogue, installed};
 use flickfluent_core::pipeline::ffmpeg::{Ffmpeg, SourceInfo};
 use flickfluent_core::pipeline::plan::{machine_class, plan_models_full};
-use flickfluent_core::pipeline::preflight::{check_start, preflight, Preflight};
+use flickfluent_core::pipeline::preflight::{
+    check_cloud, check_start, cloud_preflight, preflight, Preflight,
+};
 use flickfluent_core::pipeline::run::{run_dub, CancelToken, Mode, RunConfig, RunEvent};
 use flickfluent_core::pipeline::stages::{
     export, fingerprint, probe_source, ExportRequest, ExportResult,
@@ -37,6 +39,7 @@ pub mod event {
     pub const ERROR: &str = "dub:error";
     pub const DONE: &str = "dub:done";
     pub const DETECTED: &str = "dub:detected";
+    pub const CLOUD: &str = "dub:cloud";
 }
 
 /// Lines go out at most this often, so a long transcript does not flood the window.
@@ -121,7 +124,7 @@ fn ffmpeg_for(models: &Path) -> Result<Ffmpeg, AppError> {
 }
 
 /// The project data, its file, and its stable id (not the window handle).
-fn dub_of(state: &ProjectState, handle: &str) -> Result<(DubData, PathBuf, String), AppError> {
+pub fn dub_of(state: &ProjectState, handle: &str) -> Result<(DubData, PathBuf, String), AppError> {
     state.with(handle, |s| {
         Ok((
             read_from(&s.project.data),
@@ -255,8 +258,31 @@ fn plan_for(
     (plan, class, source)
 }
 
-fn preflight_for(state: &ProjectState, handle: &str, models: &Path) -> Result<Preflight, AppError> {
+/// A step goes to a cloud service when this run chose one, or else when the settings did. Local
+/// is the default; nothing is ever switched to the cloud on its own.
+fn with_settings_engines(mut dub: DubData, settings: &SettingsState) -> DubData {
+    use flickfluent_core::cloud::services::Step as CloudStep;
+    let from_settings = settings.engines();
+    for step in [CloudStep::Translate, CloudStep::Speak] {
+        if dub.options.fallbacks.engines.cloud(step).is_none() {
+            dub.options
+                .fallbacks
+                .engines
+                .set(step, from_settings.get(step));
+        }
+    }
+    dub
+}
+
+fn preflight_for(
+    state: &ProjectState,
+    handle: &str,
+    models: &Path,
+    settings: &SettingsState,
+    cloud: &super::cloud::CloudState,
+) -> Result<Preflight, AppError> {
     let (dub, path, _) = dub_of(state, handle)?;
+    let dub = with_settings_engines(dub, settings);
     let source = dub.source.clone().ok_or_else(|| {
         AppError::new(
             flickfluent_core::error::INVALID_PROJECT,
@@ -265,7 +291,7 @@ fn preflight_for(state: &ProjectState, handle: &str, models: &Path) -> Result<Pr
     })?;
     let (plan, class, src) = plan_for(&dub, models);
     let work = WorkFolder::folder_for(&path);
-    Ok(preflight(
+    let mut pre = preflight(
         &bundled_catalogue(),
         &plan,
         models,
@@ -277,7 +303,9 @@ fn preflight_for(state: &ProjectState, handle: &str, models: &Path) -> Result<Pr
         &dub.target_language,
         dub.options.quality == Quality::Fast,
         source.duration_ms,
-    ))
+    );
+    pre.cloud = cloud_preflight(&dub, Some(&cloud.runtime()))?;
+    Ok(pre)
 }
 
 #[tauri::command]
@@ -285,10 +313,11 @@ pub fn dub_preflight(
     app: tauri::AppHandle,
     projects: tauri::State<ProjectState>,
     settings: tauri::State<SettingsState>,
+    cloud: tauri::State<super::cloud::CloudState>,
     handle: String,
 ) -> Result<Preflight, AppError> {
     let models = models_dir(&app, &settings)?;
-    preflight_for(&projects, &handle, &models)
+    preflight_for(&projects, &handle, &models, &settings, &cloud)
 }
 
 fn payload(run_id: &str, event: &RunEvent) -> Option<(&'static str, Value)> {
@@ -324,6 +353,18 @@ fn payload(run_id: &str, event: &RunEvent) -> Option<(&'static str, Value)> {
             event::DETECTED,
             json!({ "runId": run_id, "language": language }),
         ),
+        RunEvent::Cloud(note) => (
+            event::CLOUD,
+            json!({
+                "runId": run_id,
+                "kind": note.kind,
+                "step": note.step,
+                "serviceId": note.service_id,
+                "keyLabel": note.key_label,
+                "reason": note.reason,
+                "waitSeconds": note.wait_seconds,
+            }),
+        ),
         RunEvent::Done(_) | RunEvent::Stat(_) => return None,
         RunEvent::Line(_) => return None, // sent by the line queue
     })
@@ -335,10 +376,12 @@ fn build_config(
     project_path: &Path,
     project_id: &str,
     work: &Path,
+    cloud: std::sync::Arc<flickfluent_core::cloud::runtime::CloudRuntime>,
 ) -> RunConfig {
     let machine = hardware::probe();
     let allow: Vec<&Path> = vec![models, work];
     RunConfig {
+        cloud: Some(cloud),
         project_path: project_path.to_path_buf(),
         project_id: project_id.to_string(),
         models_dir: models.to_path_buf(),
@@ -367,6 +410,7 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
     let projects = app.state::<ProjectState>();
     let dubs = app.state::<DubState>();
     let settings = app.state::<SettingsState>();
+    let cloud = app.state::<super::cloud::CloudState>();
     if dubs.running_for(&handle) {
         return Err(AppError::new(
             flickfluent_core::error::IN_USE,
@@ -374,18 +418,28 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
         ));
     }
     let models = models_dir(&app, &settings)?;
-    let (dub, path, project_id) = dub_of(&projects, &handle)?;
+    let (mut dub, path, project_id) = dub_of(&projects, &handle)?;
     if mode == Mode::Fresh {
-        check_start(&preflight_for(&projects, &handle, &models)?)?;
+        // The engines of this run are fixed now, so a resume uses the same ones.
+        dub = with_settings_engines(dub, &settings);
+        store(&projects, &handle, &dub)?;
+        check_start(&preflight_for(
+            &projects, &handle, &models, &settings, &cloud,
+        )?)?;
     } else if WorkFolder::open_for(&path, &project_id).is_none() {
         return Err(AppError::new(
             NOTHING_TO_RESUME,
             "dub.error.nothingToResume",
         ));
+    } else {
+        // A resume still needs a key and an agreement for every cloud step. Say so now, not
+        // after the run has started.
+        let pre = cloud_preflight(&dub, Some(&cloud.runtime()))?;
+        check_cloud(&pre)?;
     }
     let work = WorkFolder::folder_for(&path);
     std::fs::create_dir_all(&work).map_err(AppError::io)?;
-    let cfg = build_config(&app, &models, &path, &project_id, &work);
+    let cfg = build_config(&app, &models, &path, &project_id, &work, cloud.runtime());
 
     let run_id = uuid::Uuid::new_v4().to_string();
     let cancel = CancelToken::default();

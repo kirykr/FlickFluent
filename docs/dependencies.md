@@ -83,3 +83,24 @@ Piper voices run through sherpa-onnx, and sherpa-onnx uses eSpeak NG (GPL-3.0) f
 ## Package lists (2026-11-04)
 
 `sidecar/locks/` holds hashed package lists for the runtime pack, made with `uv pip compile --generate-hashes --only-binary :all:`: `macos-arm64` (full), `windows-x64` (full), `macos-x64` (no `demucs`/`torch`: `sphn` has no wheel). Windows on ARM has none: `ctranslate2` has no wheel. `sherpa-onnx` is pinned below 2 because 2.0.1 cannot phonemize for Piper voices. Installing a pack runs `pip install --require-hashes --only-binary=:all: --no-deps`, so nothing is built or swapped on the way. Packages are fetched from PyPI at install time and the pack is verified by hash like any download (about 0.75 GB with `torch`, 0.2 GB on Intel Macs). The catalogue records the packages as `extraDownloadBytes`, and the size shown to the user is the pack plus the packages.
+
+## Feature 003: cloud engines and API keys (2026-11-05)
+
+| Item | Purpose | Version | Licence | Why |
+|------|---------|---------|---------|-----|
+| `keyring-core` | One interface to the operating system secure storage | 1.0.1 | MIT OR Apache-2.0 | Constitution IX asks for the OS keychain; it is the maintained core of `keyring` 4 |
+| `apple-native-keyring-store` | macOS Keychain behind `keyring-core` (macOS builds only) | 1.0.2 | MIT OR Apache-2.0 | Only the store we ship |
+| `windows-native-keyring-store` | Windows Credential Manager behind `keyring-core` (Windows builds only) | 1.1.0 | MIT OR Apache-2.0 | Only the store we ship |
+| `base64` | Read and write the audio and the base64 form of a key in tests | 0.22 | MIT OR Apache-2.0 | Already in the lock file through `reqwest` |
+| `zeroize` | Clear a key from memory when it is dropped | 1 | MIT OR Apache-2.0 | Already in the lock file through other crates |
+
+`cargo deny check licenses` passes with these added (2026-11-05).
+
+Cloud services (the user's own key, billed to the user; the service's own terms apply):
+
+| Service | Steps | Terms | Date checked |
+|---------|-------|-------|--------------|
+| Google Gemini API | translation, speech | https://ai.google.dev/gemini-api/terms | 2026-11-05 |
+| Azure AI services (Translator, Speech) | translation, speech | https://www.microsoft.com/licensing/terms | 2026-11-05 |
+
+Model ids, voice genders and language lists in `config/cloud-services.json` come from vendor documents and stay marked unverified until tasks T071 and T072.

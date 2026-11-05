@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { dubExport } from "../../app/ipc";
+import { UsageList } from "../cloud/UsageList";
 import { asAppError } from "../projects/errors";
 import { formatBytes } from "../models/format";
 import { baseName, dubError, FLAG_KEYS, fileName, formatClock } from "./format";
@@ -140,6 +141,7 @@ export function Result({ handle, dub, lines, noSpeech, detected, hasDubAudio }: 
           </Button>
         </CardContent>
       </Card>
+      <UsageList usage={dub.cloudUsage ?? []} />
 
       {err && (
         <Alert variant="destructive" role="alert" data-testid="export-error">

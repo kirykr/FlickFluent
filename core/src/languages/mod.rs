@@ -10,7 +10,9 @@ use serde::Serialize;
 
 use crate::models::{CatalogueEntry, LicenceClass, Quality, Step};
 
-pub use pair::{check_pair, Fallback, FallbackKind, PairCheck, StepCheck, StepKind};
+pub use pair::{
+    check_pair, check_pair_with_cloud, Fallback, FallbackKind, PairCheck, StepCheck, StepKind,
+};
 
 /// `pt-BR` and `pt` are the same language here.
 pub fn primary(code: &str) -> String {
@@ -35,6 +37,9 @@ pub struct Language {
     pub translate_to: bool,
     pub speak: SpeakSupport,
     pub quality: Qualities,
+    /// Ids of cloud services (with a verified key) that offer this language. Empty for a language
+    /// the local models cover alone.
+    pub cloud_services: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
@@ -55,6 +60,57 @@ fn better(old: Option<Quality>, new: Option<Quality>) -> Option<Quality> {
         (Some(a), Some(b)) => Some(if b.rank() > a.rank() { b } else { a }),
         (a, b) => a.or(b),
     }
+}
+
+/// What one cloud service offers, for the language list and the pair check. Built from the
+/// service data, or from the live list after a key was verified.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CloudOffer {
+    pub service_id: String,
+    pub service_name: String,
+    pub translate: Vec<String>,
+    pub speak: Vec<String>,
+    /// The user has a verified key for this service.
+    pub has_verified_key: bool,
+}
+
+/// [`list`], plus the languages of every cloud service that has a verified key. A language only a
+/// service offers appears here with no change to any screen (SC-008).
+pub fn list_with_cloud(
+    catalogue: &[CatalogueEntry],
+    opt_in: &[String],
+    cloud: &[CloudOffer],
+) -> Vec<Language> {
+    let mut map: BTreeMap<String, Language> = list(catalogue, opt_in)
+        .into_iter()
+        .map(|l| (l.code.clone(), l))
+        .collect();
+    for offer in cloud.iter().filter(|o| o.has_verified_key) {
+        let mut touch = |code: &str, translate: bool, speak: bool| {
+            let code = primary(code);
+            let row = map.entry(code.clone()).or_insert_with(|| Language {
+                code,
+                ..Default::default()
+            });
+            if translate {
+                row.translate_from = true;
+                row.translate_to = true;
+            }
+            if speak {
+                row.speak.voices = row.speak.voices.max(1);
+            }
+            if !row.cloud_services.contains(&offer.service_id) {
+                row.cloud_services.push(offer.service_id.clone());
+            }
+        };
+        for l in &offer.translate {
+            touch(l, true, false);
+        }
+        for l in &offer.speak {
+            touch(l, false, true);
+        }
+    }
+    map.into_values().collect()
 }
 
 /// Every language any enabled catalogue entry mentions, sorted by code.

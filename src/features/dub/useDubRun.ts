@@ -23,6 +23,17 @@ export interface RunView {
   state: RunState | null;
   /** Spoken language found by auto-detect, once known. */
   detected: string | null;
+  /** The latest thing a cloud step wants the user to know (a key switch, a wait). */
+  cloud: CloudNote | null;
+}
+
+export interface CloudNote {
+  kind: "switched" | "setAside" | "waiting" | "resumed";
+  step: "translate" | "speak";
+  serviceId: string;
+  keyLabel: string | null;
+  reason: string | null;
+  waitSeconds: number | null;
 }
 
 const EMPTY: RunView = {
@@ -35,6 +46,7 @@ const EMPTY: RunView = {
   error: null,
   state: null,
   detected: null,
+  cloud: null,
 };
 
 /** Follows one project's dub: loads its saved state, then applies the events the core sends. */
@@ -59,18 +71,26 @@ export function useDubRun(handle: string) {
     void refresh();
   }, [refresh]);
 
-  const follow = useCallback((runId: string) => {
-    runRef.current = runId;
-    setView((v) => ({
-      ...v,
-      runId,
-      lines: [],
-      error: null,
-      progress: null,
-      stageStatus: {},
-      state: "running",
-    }));
-  }, []);
+  const follow = useCallback(
+    (runId: string) => {
+      runRef.current = runId;
+      setView((v) => ({
+        ...v,
+        runId,
+        lines: [],
+        cloud: null,
+        error: null,
+        progress: null,
+        stageStatus: {},
+        state: "running",
+      }));
+      // The project now holds this run's engines, which name the cloud stages.
+      void refresh().then(() =>
+        setView((v) => (runRef.current === runId ? { ...v, state: "running" } : v)),
+      );
+    },
+    [refresh],
+  );
 
   useEffect(() => {
     const unlisten: UnlistenFn[] = [];
@@ -118,6 +138,10 @@ export function useDubRun(handle: string) {
           details: p.details ?? null,
         },
       }));
+    });
+    void add<CloudNote & { runId: string }>("dub:cloud", (p) => {
+      if (!mine(p)) return;
+      setView((v) => ({ ...v, cloud: p }));
     });
     void add<{ runId: string; language: string }>("dub:detected", (p) => {
       if (!mine(p)) return;

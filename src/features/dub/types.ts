@@ -26,6 +26,8 @@ export interface Blocker {
   detail: string;
 }
 
+import type { CloudPreflight, CloudUsage, Engines } from "../cloud/types";
+
 export interface Preflight {
   missingModels: MissingModel[];
   downloadBytes: number;
@@ -34,6 +36,8 @@ export interface Preflight {
   machineClass: "minimum" | "mid" | "fullLocal";
   warnings: string[];
   blockers: Blocker[];
+  /** One entry per step that will use a cloud service. Empty when everything is local. */
+  cloud: CloudPreflight[];
 }
 
 export interface FallbackChoices {
@@ -42,6 +46,8 @@ export interface FallbackChoices {
   pivotViaEnglish: boolean;
   /** Non-commercial models the user turned on after reading their notice. */
   optIn: string[];
+  /** Cloud service chosen for a step in this run; "local" leaves it to the settings. */
+  engines?: Engines;
 }
 
 export const NO_FALLBACKS: FallbackChoices = {
@@ -68,6 +74,8 @@ export interface Language {
   translateFrom: boolean;
   translateTo: boolean;
   speak: { voices: number; permissiveVoices: number };
+  /** Cloud services with a verified key that offer this language. */
+  cloudServices?: string[];
   quality: {
     transcribe: QualityLevel | null;
     translate: QualityLevel | null;
@@ -77,7 +85,12 @@ export interface Language {
 
 export type StepKind = "transcribe" | "translate" | "speak";
 export type FallbackKind =
-  "subtitlesOnly" | "genericVoice" | "pivotViaEnglish" | "optInNonCommercial";
+  | "subtitlesOnly"
+  | "genericVoice"
+  | "pivotViaEnglish"
+  | "optInNonCommercial"
+  | "cloudEngine"
+  | "setupCloudKey";
 
 export interface PairStep {
   step: StepKind;
@@ -91,6 +104,10 @@ export interface PairFallback {
   labelKey: string;
   modelIds: string[];
   noticeKeys: string[];
+  /** Cloud services that would do the step (cloud kinds only). */
+  serviceIds?: string[];
+  /** The step a cloud fallback is for. */
+  step?: StepKind | null;
 }
 
 export interface PairCheck {
@@ -137,6 +154,8 @@ export interface DubData {
   targetLanguage: string;
   options: DubOptions;
   lines: TranscriptLine[];
+  /** What each cloud step used in the last run. Empty for a local run. */
+  cloudUsage?: CloudUsage[];
 }
 
 export interface DubStatus {

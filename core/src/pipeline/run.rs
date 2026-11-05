@@ -20,14 +20,19 @@ use super::progress::{Eta, Pacer};
 use super::sections::plan as plan_sections;
 use super::stages::{extract, fingerprint};
 use super::state::{input_hash, WorkFolder};
+use crate::cloud::engine::{CloudEngine, SpeakJob};
+use crate::cloud::estimate::estimate_chars;
+use crate::cloud::rotation::PoolEvent;
+use crate::cloud::runtime::CloudRuntime;
+use crate::cloud::services::{Gender as CloudGender, Step as CloudStep};
 use crate::error::{
-    AppError, CANCELLED, MODELS_MISSING, NOTHING_TO_RESUME, NO_SPACE, NO_SPEECH_FOUND,
-    SAME_LANGUAGE, SOURCE_CHANGED, STAGE_FAILED,
+    AppError, CANCELLED, CLOUD_CONSENT_REQUIRED, CLOUD_NO_KEY, MODELS_MISSING, NOTHING_TO_RESUME,
+    NO_SPACE, NO_SPEECH_FOUND, SAME_LANGUAGE, SOURCE_CHANGED, STAGE_FAILED,
 };
 use crate::models::{CatalogueEntry, Gender, MachineClass};
 use crate::project::dub::{
-    DubData, LineFlag, LineStatus, PipelineRun, Quality, RunError, RunState, Section, Speaker,
-    SpeakerGender, Stage, StageState, StageStatus, TranscriptLine,
+    CloudUsage, DubData, LineFlag, LineStatus, PipelineRun, Quality, RunError, RunState, Section,
+    Speaker, SpeakerGender, Stage, StageState, StageStatus, TranscriptLine,
 };
 use crate::sidecar::{Event, Request, Sidecar, SidecarConfig};
 
@@ -71,6 +76,8 @@ pub struct RunConfig {
     pub code_map: Value,
     /// `threads`, `device`, `computeType`, `ramCeilingMb` and the like, sent to every worker.
     pub params: Value,
+    /// Keys, consent and adapters for cloud steps. `None` means every step is local.
+    pub cloud: Option<Arc<CloudRuntime>>,
 }
 
 /// What one worker call cost, for the benchmark.
@@ -101,9 +108,94 @@ pub enum RunEvent {
     },
     Line(TranscriptLine),
     Error(RunError),
+    /// Something the user should hear about a cloud step: a key switch, a key set aside, a wait.
+    Cloud(CloudNote),
     /// The spoken language found by auto-detect, as soon as it is known.
     Detected(String),
     Done(RunState),
+}
+
+/// `dub:cloud` payload (`contracts/ipc-commands.md`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CloudNote {
+    /// `switched`, `setAside`, `waiting` or `resumed`.
+    pub kind: &'static str,
+    pub step: &'static str,
+    pub service_id: String,
+    pub key_label: Option<String>,
+    pub reason: Option<String>,
+    pub wait_seconds: Option<u64>,
+}
+
+fn cloud_note(event: PoolEvent, step: &'static str, service_id: &str) -> RunEvent {
+    let mut note = CloudNote {
+        kind: "resumed",
+        step,
+        service_id: service_id.to_string(),
+        key_label: None,
+        reason: None,
+        wait_seconds: None,
+    };
+    match event {
+        PoolEvent::Switched { label } => {
+            note.kind = "switched";
+            note.key_label = Some(label);
+        }
+        PoolEvent::SetAside { label, reason } => {
+            note.kind = "setAside";
+            note.key_label = Some(label);
+            note.reason = Some(reason);
+        }
+        PoolEvent::Waiting { seconds } => {
+            note.kind = "waiting";
+            note.wait_seconds = Some(seconds);
+        }
+        PoolEvent::Resumed => {}
+    }
+    RunEvent::Cloud(note)
+}
+
+/// The engines for the cloud steps of this run, after checking that the user agreed to each.
+/// Nothing is sent before this passes, and a step that is not cloud costs nothing here.
+fn prepare_cloud(
+    cfg: &RunConfig,
+    dub: &DubData,
+) -> Result<(Option<CloudEngine>, Option<CloudEngine>), AppError> {
+    let engines = &dub.options.fallbacks.engines;
+    let estimate = estimate_chars(dub.source.as_ref().map(|s| s.duration_ms).unwrap_or(0));
+    let wanted: Vec<(CloudStep, String)> = [CloudStep::Translate, CloudStep::Speak]
+        .into_iter()
+        .filter(|step| !(*step == CloudStep::Speak && dub.options.fallbacks.subtitles_only))
+        .filter_map(|step| engines.cloud(step).map(|id| (step, id.to_string())))
+        .collect();
+    if wanted.is_empty() {
+        return Ok((None, None));
+    }
+    let rt = cfg
+        .cloud
+        .as_ref()
+        .ok_or_else(|| AppError::new(CLOUD_NO_KEY, "dub.error.cloudNoKey"))?;
+    let mut missing = Vec::new();
+    for (step, id) in &wanted {
+        if rt.consent.needs(id, *step, estimate)?.is_some() {
+            missing.push(json!({ "step": step.as_str(), "serviceId": id }));
+        }
+    }
+    if !missing.is_empty() {
+        return Err(
+            AppError::new(CLOUD_CONSENT_REQUIRED, "dub.error.cloudConsentRequired")
+                .with_details(json!({ "steps": missing })),
+        );
+    }
+    let (mut translate, mut speak) = (None, None);
+    for (step, id) in wanted {
+        let engine = rt.engine(&id, step)?;
+        match step {
+            CloudStep::Translate => translate = Some(engine),
+            CloudStep::Speak => speak = Some(engine),
+        }
+    }
+    Ok((translate, speak))
 }
 
 fn now() -> String {
@@ -190,6 +282,10 @@ struct Runner<'a> {
     pacer: Pacer,
     on_event: &'a mut (dyn FnMut(RunEvent) + Send),
     eta: Eta,
+    translate_engine: Option<CloudEngine>,
+    speak_engine: Option<CloudEngine>,
+    /// Usage from before this process (a resumed run adds to it).
+    usage_base: Vec<CloudUsage>,
 }
 
 /// Run (or resume) the dub. Returns the project data with `run` and `lines` filled in. A
@@ -267,6 +363,16 @@ pub async fn run_dub(
         &dub.options.fallbacks,
     );
     dub.lines.clear();
+    let (translate_engine, speak_engine) = prepare_cloud(cfg, &dub)?;
+    let usage_base = if mode == Mode::Resume {
+        read_json(&work.path().join("cloud-usage.json"))
+            .filter(|v| v["runId"] == run.id.as_str())
+            .and_then(|v| serde_json::from_value(v["usage"].clone()).ok())
+            .unwrap_or_default()
+    } else {
+        let _ = std::fs::remove_file(work.path().join("cloud-usage.json"));
+        Vec::new()
+    };
 
     let mut runner = Runner {
         cfg,
@@ -281,6 +387,9 @@ pub async fn run_dub(
         pacer: Pacer::default(),
         on_event,
         eta: Eta::default(),
+        translate_engine,
+        speak_engine,
+        usage_base,
     };
     runner.save()?;
     let outcome = runner.drive().await;
@@ -290,6 +399,62 @@ pub async fn run_dub(
 impl Runner<'_> {
     fn save(&mut self) -> Result<(), AppError> {
         self.work.save_run(&self.run)
+    }
+
+    /// What the cloud steps used so far, including before a restart.
+    fn merged_usage(&self) -> Vec<CloudUsage> {
+        let mut out = self.usage_base.clone();
+        for e in [&self.translate_engine, &self.speak_engine]
+            .into_iter()
+            .flatten()
+        {
+            let u = e.usage();
+            match out
+                .iter_mut()
+                .find(|b| b.step == u.step && b.service_id == u.service_id)
+            {
+                Some(b) => {
+                    b.chars += u.chars;
+                    b.requests += u.requests;
+                    b.switches += u.switches;
+                    b.waited_seconds += u.waited_seconds;
+                    for k in u.keys_used {
+                        if !b.keys_used.contains(&k) {
+                            b.keys_used.push(k);
+                        }
+                    }
+                }
+                None => out.push(CloudUsage {
+                    run_id: self.run.id.clone(),
+                    ..u
+                }),
+            }
+        }
+        out
+    }
+
+    /// Keep the usage next to the run, so a stop or a crash does not lose the count.
+    fn save_usage(&self) {
+        if self.translate_engine.is_none() && self.speak_engine.is_none() {
+            return;
+        }
+        let body = json!({ "runId": self.run.id, "usage": self.merged_usage() });
+        if let Ok(bytes) = serde_json::to_vec(&body) {
+            let _ = crate::fsutil::write_atomic(&self.work.path().join("cloud-usage.json"), &bytes);
+        }
+    }
+
+    fn cloud_gender(&self, speaker_id: &str) -> CloudGender {
+        match self
+            .dub
+            .speakers
+            .iter()
+            .find(|s| s.id == speaker_id)
+            .map(|s| s.gender)
+        {
+            Some(SpeakerGender::Male) => CloudGender::Male,
+            _ => CloudGender::Female,
+        }
     }
 
     fn emit(&mut self, event: RunEvent) {
@@ -945,7 +1110,11 @@ impl Runner<'_> {
             self.record_hash(index, Stage::Translate, "empty");
             return Ok(lines);
         }
-        let model = self.plan.translate.clone().unwrap_or_default();
+        let model = self
+            .translate_engine
+            .as_ref()
+            .map(|e| format!("cloud:{}", e.service_id()))
+            .unwrap_or_else(|| self.plan.translate.clone().unwrap_or_default());
         let same = self.source_lang.split('-').next() == self.dub.target_language.split('-').next();
         let hash = input_hash(&[
             "translate",
@@ -974,6 +1143,28 @@ impl Runner<'_> {
         }
         let translated: Vec<String> = if same {
             lines.iter().map(|l| l.text.clone()).collect()
+        } else if let Some(mut engine) = self.translate_engine.take() {
+            let texts: Vec<String> = lines.iter().map(|l| l.text.clone()).collect();
+            let (source, target) = (self.source_lang.clone(), self.dub.target_language.clone());
+            let cancel = self.cancel.clone();
+            let stop = move || cancel.is_cancelled();
+            let service = engine.service_id().to_string();
+            let result = {
+                let on_event = &mut *self.on_event;
+                engine
+                    .translate_batches(
+                        &source,
+                        &target,
+                        &texts,
+                        &dir.join("translated.partial.json"),
+                        &mut |pe| on_event(cloud_note(pe, "translate", &service)),
+                        &stop,
+                    )
+                    .await
+            };
+            self.translate_engine = Some(engine);
+            self.save_usage();
+            result?
         } else if let Some(second) = self.plan.pivot.clone() {
             // Through English: source to English, then English to the target.
             let texts: Vec<String> = lines.iter().map(|l| l.text.clone()).collect();
@@ -1059,6 +1250,9 @@ impl Runner<'_> {
                 .iter()
                 .map(|v| format!("{}#{}#{}", v.model, v.speaker_id, v.lang)),
         );
+        if let Some(e) = &self.speak_engine {
+            parts.push(format!("cloud:{}", e.service_id()));
+        }
         // Speakers and their genders are in this section's transcript file.
         parts.push(file_hash(&dir.join("sec.json")));
         let refs: Vec<&str> = parts.iter().map(String::as_str).collect();
@@ -1075,6 +1269,57 @@ impl Runner<'_> {
             }
         }
         std::fs::create_dir_all(&clips).map_err(AppError::io)?;
+
+        if let Some(mut engine) = self.speak_engine.take() {
+            let language = self
+                .dub
+                .target_language
+                .split(['-', '_'])
+                .next()
+                .unwrap_or_default()
+                .to_string();
+            let jobs: Vec<SpeakJob> = lines
+                .iter()
+                .map(|l| SpeakJob {
+                    id: l.id.clone(),
+                    text: l.translated.clone().unwrap_or_else(|| l.text.clone()),
+                    language: language.clone(),
+                    gender: self.cloud_gender(&l.speaker_id),
+                    target_ms: l.end_ms.saturating_sub(l.start_ms),
+                })
+                .collect();
+            let cancel = self.cancel.clone();
+            let stop = move || cancel.is_cancelled();
+            let service = engine.service_id().to_string();
+            let ffmpeg = &self.cfg.ffmpeg;
+            let result = {
+                let on_event = &mut *self.on_event;
+                engine
+                    .speak_lines(
+                        &jobs,
+                        &clips,
+                        ffmpeg,
+                        &mut |pe| on_event(cloud_note(pe, "speak", &service)),
+                        &stop,
+                    )
+                    .await
+            };
+            self.speak_engine = Some(engine);
+            self.save_usage();
+            let done = result?;
+            let items: Vec<Value> = done
+                .iter()
+                .map(|c| json!({ "id": c.id, "audioMs": c.audio_ms }))
+                .collect();
+            crate::fsutil::write_atomic(
+                &done_marker,
+                &serde_json::to_vec(&items).map_err(|e| AppError::io(e.into()))?,
+            )?;
+            self.apply_clips(&mut lines, &items, &clips);
+            self.save_lines(&sec, &lines)?;
+            self.record_hash(index, Stage::Synthesize, &hash);
+            return Ok(lines);
+        }
 
         let mut models = serde_json::Map::new();
         for id in &voices {
@@ -1240,6 +1485,7 @@ impl Runner<'_> {
         let _ = self.save();
         self.emit(RunEvent::Done(self.run.state));
         self.dub.run = Some(self.run.clone());
+        self.dub.cloud_usage = self.merged_usage();
         match result {
             Ok(()) => Ok(self.dub),
             Err(e) => Err(e),

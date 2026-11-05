@@ -45,6 +45,7 @@ async fn french_clip_becomes_an_english_dub_with_real_models() {
         args.push(a);
     }
     let cfg = RunConfig {
+        cloud: None,
         project_path: root.path().join("real.flick"),
         project_id: "real".into(),
         models_dir: models.clone(),

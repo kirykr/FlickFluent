@@ -1,0 +1,391 @@
+[
+  {
+    "id": "google-gemini",
+    "name": "Google Gemini API",
+    "_comment": "UNVERIFIED until task T072: voice genders, model ids and language lists were taken from vendor documents, not from a live call.",
+    "steps": [
+      "translate",
+      "speak"
+    ],
+    "needsRegion": false,
+    "termsUrl": "https://ai.google.dev/gemini-api/terms",
+    "dataNotice": {
+      "translate": "cloud.notice.translate",
+      "speak": "cloud.notice.speak"
+    },
+    "endpoints": {
+      "check": "https://generativelanguage.googleapis.com/v1beta/models",
+      "translate": "https://generativelanguage.googleapis.com/v1beta/models",
+      "speak": "https://generativelanguage.googleapis.com/v1beta/models"
+    },
+    "languages": {
+      "translate": [
+        "ar",
+        "bg",
+        "bn",
+        "ca",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "en",
+        "es",
+        "et",
+        "fa",
+        "fi",
+        "fr",
+        "gu",
+        "he",
+        "hi",
+        "hr",
+        "hu",
+        "id",
+        "it",
+        "ja",
+        "km",
+        "kn",
+        "ko",
+        "lt",
+        "lv",
+        "ml",
+        "mr",
+        "ms",
+        "nl",
+        "no",
+        "pa",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sr",
+        "sv",
+        "sw",
+        "ta",
+        "te",
+        "th",
+        "tr",
+        "uk",
+        "ur",
+        "vi",
+        "zh"
+      ],
+      "speak": [
+        "ar",
+        "bg",
+        "bn",
+        "ca",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "en",
+        "es",
+        "et",
+        "fa",
+        "fi",
+        "fr",
+        "gu",
+        "he",
+        "hi",
+        "hr",
+        "hu",
+        "id",
+        "it",
+        "ja",
+        "km",
+        "kn",
+        "ko",
+        "lt",
+        "lv",
+        "ml",
+        "mr",
+        "ms",
+        "nl",
+        "no",
+        "pa",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sr",
+        "sv",
+        "sw",
+        "ta",
+        "te",
+        "th",
+        "tr",
+        "uk",
+        "ur",
+        "vi",
+        "zh"
+      ],
+      "checkedOn": "2026-11-05"
+    },
+    "models": {
+      "translate": "gemini-3.8-flash",
+      "speak": "gemini-3.8-flash-tts"
+    },
+    "voices": [
+      {
+        "id": "Zephyr",
+        "gender": "female"
+      },
+      {
+        "id": "Kore",
+        "gender": "female"
+      },
+      {
+        "id": "Leda",
+        "gender": "female"
+      },
+      {
+        "id": "Aoede",
+        "gender": "female"
+      },
+      {
+        "id": "Callirrhoe",
+        "gender": "female"
+      },
+      {
+        "id": "Autonoe",
+        "gender": "female"
+      },
+      {
+        "id": "Despina",
+        "gender": "female"
+      },
+      {
+        "id": "Erinome",
+        "gender": "female"
+      },
+      {
+        "id": "Laomedeia",
+        "gender": "female"
+      },
+      {
+        "id": "Achernar",
+        "gender": "female"
+      },
+      {
+        "id": "Gacrux",
+        "gender": "female"
+      },
+      {
+        "id": "Pulcherrima",
+        "gender": "female"
+      },
+      {
+        "id": "Vindemiatrix",
+        "gender": "female"
+      },
+      {
+        "id": "Sulafat",
+        "gender": "female"
+      },
+      {
+        "id": "Puck",
+        "gender": "male"
+      },
+      {
+        "id": "Charon",
+        "gender": "male"
+      },
+      {
+        "id": "Fenrir",
+        "gender": "male"
+      },
+      {
+        "id": "Orus",
+        "gender": "male"
+      },
+      {
+        "id": "Enceladus",
+        "gender": "male"
+      },
+      {
+        "id": "Iapetus",
+        "gender": "male"
+      },
+      {
+        "id": "Umbriel",
+        "gender": "male"
+      },
+      {
+        "id": "Algieba",
+        "gender": "male"
+      },
+      {
+        "id": "Algenib",
+        "gender": "male"
+      },
+      {
+        "id": "Rasalgethi",
+        "gender": "male"
+      },
+      {
+        "id": "Alnilam",
+        "gender": "male"
+      },
+      {
+        "id": "Schedar",
+        "gender": "male"
+      },
+      {
+        "id": "Achird",
+        "gender": "male"
+      },
+      {
+        "id": "Zubenelgenubi",
+        "gender": "male"
+      },
+      {
+        "id": "Sadachbia",
+        "gender": "male"
+      },
+      {
+        "id": "Sadaltager",
+        "gender": "male"
+      }
+    ],
+    "limits": {
+      "batchLines": 50,
+      "batchChars": 4000
+    }
+  },
+  {
+    "id": "azure-ai",
+    "name": "Azure AI services",
+    "_comment": "UNVERIFIED until task T072: language lists were taken from vendor documents; the live lists replace them after a key is verified. {region} in an endpoint is replaced by the key's region.",
+    "steps": [
+      "translate",
+      "speak"
+    ],
+    "needsRegion": true,
+    "termsUrl": "https://www.microsoft.com/licensing/terms",
+    "dataNotice": {
+      "translate": "cloud.notice.translate",
+      "speak": "cloud.notice.speak"
+    },
+    "endpoints": {
+      "check": "https://{region}.api.cognitive.microsoft.com/sts/v1.0/issueToken",
+      "translate": "https://api.cognitive.microsofttranslator.com",
+      "speak": "https://{region}.tts.speech.microsoft.com/cognitiveservices/v1",
+      "voices": "https://{region}.tts.speech.microsoft.com/cognitiveservices/voices/list",
+      "languages": "https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=translation"
+    },
+    "languages": {
+      "translate": [
+        "ar",
+        "bg",
+        "bn",
+        "ca",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "en",
+        "es",
+        "et",
+        "fa",
+        "fi",
+        "fr",
+        "gu",
+        "he",
+        "hi",
+        "hr",
+        "hu",
+        "id",
+        "it",
+        "ja",
+        "km",
+        "kn",
+        "ko",
+        "lt",
+        "lv",
+        "ml",
+        "mr",
+        "ms",
+        "nl",
+        "no",
+        "pa",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sr",
+        "sv",
+        "sw",
+        "ta",
+        "te",
+        "th",
+        "tr",
+        "uk",
+        "ur",
+        "vi",
+        "zh"
+      ],
+      "speak": [
+        "ar",
+        "bg",
+        "bn",
+        "ca",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "en",
+        "es",
+        "et",
+        "fa",
+        "fi",
+        "fr",
+        "gu",
+        "he",
+        "hi",
+        "hr",
+        "hu",
+        "id",
+        "it",
+        "ja",
+        "km",
+        "kn",
+        "ko",
+        "lt",
+        "lv",
+        "ml",
+        "mr",
+        "ms",
+        "nl",
+        "no",
+        "pa",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "sw",
+        "ta",
+        "te",
+        "th",
+        "tr",
+        "uk",
+        "ur",
+        "vi",
+        "zh"
+      ],
+      "checkedOn": "2026-11-05"
+    },
+    "limits": {
+      "batchLines": 50,
+      "batchChars": 4000
+    }
+  }
+]

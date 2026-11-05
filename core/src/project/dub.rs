@@ -43,6 +43,9 @@ pub struct FallbackChoices {
     pub pivot_via_english: bool,
     /// Non-commercial models the user turned on after reading their notice.
     pub opt_in: Vec<String>,
+    /// The engine for each heavy step in this run. Copied from the settings when the run starts,
+    /// so a resume uses the same ones. `local` means no data leaves the computer.
+    pub engines: crate::cloud::choice::Engines,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -254,6 +257,25 @@ pub struct DubData {
     pub speakers: Vec<Speaker>,
     pub lines: Vec<TranscriptLine>,
     pub run: Option<PipelineRun>,
+    /// What each cloud step sent, if any step used a cloud service. Never holds a key or text.
+    pub cloud_usage: Vec<CloudUsage>,
+}
+
+/// What one cloud step used in a project. A resumed run adds to the same record.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct CloudUsage {
+    pub step: String,
+    pub service_id: String,
+    pub service_name: String,
+    /// Characters actually sent (summed over requests, not counting retries).
+    pub chars: u64,
+    pub requests: u64,
+    /// Labels of the keys used, in the order they were first used.
+    pub keys_used: Vec<String>,
+    pub switches: u64,
+    pub waited_seconds: u64,
+    pub run_id: String,
 }
 
 impl DubData {

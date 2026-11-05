@@ -208,6 +208,7 @@ pub mod run_fixture {
         let script =
             Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/support/fake_models_sidecar.py");
         RunConfig {
+            cloud: None,
             project_path: root.join(project),
             project_id: "p1".into(),
             models_dir: models,
@@ -277,3 +278,6 @@ pub mod run_fixture {
         out
     }
 }
+
+pub mod cloud_run;
+pub mod fake_cloud;

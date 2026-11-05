@@ -216,3 +216,121 @@ fn the_shipped_catalogue_gives_a_real_list_and_honest_pair_checks() {
         .iter()
         .any(|f| f.kind == FallbackKind::SubtitlesOnly));
 }
+
+// ---- cloud engines (feature 003) -----------------------------------------------------------
+
+use flickfluent_core::languages::{check_pair_with_cloud, list_with_cloud, CloudOffer};
+
+fn offer(id: &str, translate: &[&str], speak: &[&str], key: bool) -> CloudOffer {
+    CloudOffer {
+        service_id: id.into(),
+        service_name: id.into(),
+        translate: translate.iter().map(|s| s.to_string()).collect(),
+        speak: speak.iter().map(|s| s.to_string()).collect(),
+        has_verified_key: key,
+    }
+}
+
+#[test]
+fn a_verified_key_adds_a_cloud_fallback_for_a_step_the_local_models_cannot_do() {
+    // No local voice for Khmer, and no translator that is on by default.
+    let cloud = [offer("google-gemini", &["km", "en"], &["km", "en"], true)];
+    let check = check_pair_with_cloud(&catalogue(), "fr", "km", &[], &cloud);
+    let speak = check
+        .fallbacks
+        .iter()
+        .find(|f| f.kind == FallbackKind::CloudEngine && f.step == Some(StepKind::Speak))
+        .expect("a cloud fallback for speech");
+    assert_eq!(speak.service_ids, vec!["google-gemini".to_string()]);
+    assert_eq!(speak.label_key, "languages.fallback.cloudEngine");
+    // The local fallbacks are still there.
+    assert!(check
+        .fallbacks
+        .iter()
+        .any(|f| f.kind == FallbackKind::SubtitlesOnly));
+}
+
+#[test]
+fn a_service_without_a_verified_key_gives_a_set_up_hint_instead() {
+    let cloud = [offer("google-gemini", &["km", "fr"], &["km"], false)];
+    let check = check_pair_with_cloud(&catalogue(), "fr", "km", &[], &cloud);
+    let hint = check
+        .fallbacks
+        .iter()
+        .find(|f| f.kind == FallbackKind::SetupCloudKey && f.step == Some(StepKind::Speak))
+        .expect("a set-up hint");
+    assert_eq!(hint.service_ids, vec!["google-gemini".to_string()]);
+    assert!(!check
+        .fallbacks
+        .iter()
+        .any(|f| f.kind == FallbackKind::CloudEngine));
+}
+
+#[test]
+fn no_service_covering_the_pair_adds_nothing_and_a_working_local_pair_is_never_nudged() {
+    let none = [offer("google-gemini", &["ja"], &["ja"], true)];
+    let check = check_pair_with_cloud(&catalogue(), "fr", "km", &[], &none);
+    assert!(!check.fallbacks.iter().any(|f| matches!(
+        f.kind,
+        FallbackKind::CloudEngine | FallbackKind::SetupCloudKey
+    )));
+
+    // French to English works locally; a service that also covers it adds no fallback.
+    let all = [offer("google-gemini", &["fr", "en"], &["fr", "en"], true)];
+    let check = check_pair_with_cloud(&catalogue(), "fr", "en", &[], &all);
+    assert!(check.ok && check.fallbacks.is_empty());
+}
+
+#[test]
+fn a_translation_gap_also_gets_a_cloud_fallback() {
+    // French to Khmer needs a translator; the only local one is non-commercial and off.
+    let cloud = [offer("azure-ai", &["fr", "km"], &[], true)];
+    let check = check_pair_with_cloud(&catalogue(), "fr", "km", &[], &cloud);
+    assert!(check
+        .fallbacks
+        .iter()
+        .any(|f| f.kind == FallbackKind::CloudEngine && f.step == Some(StepKind::Translate)));
+}
+
+#[test]
+fn a_language_only_a_service_offers_appears_once_it_has_a_verified_key() {
+    let cat = catalogue();
+    let before = list_with_cloud(
+        &cat,
+        &[],
+        &[offer("google-gemini", &["lo"], &["lo"], false)],
+    );
+    assert!(before.iter().all(|l| l.code != "lo"));
+
+    let after = list_with_cloud(&cat, &[], &[offer("google-gemini", &["lo"], &["lo"], true)]);
+    let lo = find(&after, "lo");
+    assert!(lo.translate_to && lo.translate_from && lo.speak.voices >= 1 && !lo.transcribe);
+    assert_eq!(lo.cloud_services, vec!["google-gemini".to_string()]);
+    // A language the local models already cover keeps its local facts and gains the service.
+    let fr = find(&after, "fr");
+    assert!(fr.transcribe && fr.cloud_services.is_empty());
+}
+
+#[test]
+fn adding_a_language_to_a_service_in_the_data_file_adds_it_to_the_list_with_no_other_change() {
+    // SC-008: the offer comes straight from `config/cloud-services.json`.
+    let mut services = flickfluent_core::cloud::services::load().unwrap();
+    let gemini = services
+        .iter_mut()
+        .find(|s| s.id == "google-gemini")
+        .unwrap();
+    gemini.languages.translate.push("zz".into());
+    let offers: Vec<CloudOffer> = services
+        .iter()
+        .map(|s| CloudOffer {
+            service_id: s.id.clone(),
+            service_name: s.name.clone(),
+            translate: s.languages.translate.clone(),
+            speak: s.languages.speak.clone(),
+            has_verified_key: s.id == "google-gemini",
+        })
+        .collect();
+    assert!(list_with_cloud(&catalogue(), &[], &offers)
+        .iter()
+        .any(|l| l.code == "zz"));
+}

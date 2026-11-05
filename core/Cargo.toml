@@ -12,7 +12,7 @@ gpu = ["dep:wgpu"]
 [dependencies]
 sysinfo = "0.33"
 wgpu = { version = "22.1", optional = true, default-features = false, features = ["dx12", "metal"] }
-reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls", "json"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "time", "io-util", "process", "sync"] }
 sha2 = "0.10"
 zip = { version = "2", default-features = false, features = ["deflate"] }
@@ -23,7 +23,16 @@ uuid = { version = "1", features = ["v4", "serde"] }
 regex = "1"
 flate2 = "1"
 tar = "0.4"
-time = { version = "0.3", features = ["serde", "formatting"] }
+time = { version = "0.3", features = ["serde", "formatting", "parsing"] }
+keyring-core = "1.0.1"
+zeroize = "1"
+base64 = "0.22"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+apple-native-keyring-store = { version = "1.0.2", features = ["keychain"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-native-keyring-store = "1.1.0"
 
 [dev-dependencies]
 jsonschema = "0.26"

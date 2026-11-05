@@ -2,6 +2,7 @@
 
 pub mod bench;
 pub mod cli;
+pub mod cloud;
 pub mod error;
 pub mod fsutil;
 pub mod hardware;

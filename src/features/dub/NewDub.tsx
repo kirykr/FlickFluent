@@ -13,9 +13,12 @@ import {
   dubProbeSource,
   dubStart,
   languagesCheckPair,
+  cloudServices,
   languagesList,
 } from "../../app/ipc";
 import { asAppError } from "../projects/errors";
+import { ConsentDialog } from "../cloud/ConsentDialog";
+import { roundChars, type CloudPreflight } from "../cloud/types";
 import { formatBytes } from "../models/format";
 import type { AppErrorShape } from "../projects/types";
 import { baseName, dubError, formatClock } from "./format";
@@ -59,6 +62,10 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [pair, setPair] = useState<PairCheckResult | null>(null);
+  // Cloud steps that still need the user's yes before the run starts (one question at a time).
+  const [asking, setAsking] = useState<CloudPreflight[]>([]);
+  const [declined, setDeclined] = useState(false);
+  const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
   const [fallbacks, setFallbacks] = useState<FallbackChoices>(
     saved?.options.fallbacks ?? NO_FALLBACKS,
   );
@@ -108,6 +115,12 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [optInKey]);
 
+  useEffect(() => {
+    cloudServices()
+      .then((list) => setServiceNames(Object.fromEntries((list ?? []).map((s) => [s.id, s.name]))))
+      .catch(() => setServiceNames({}));
+  }, []);
+
   // What the chosen pair needs, shown before anything is processed.
   useEffect(() => {
     languagesCheckPair(source, target, fallbacks.optIn)
@@ -148,18 +161,40 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
     }
   };
 
-  const start = async () => {
+  const go = async () => {
     setBusy(true);
     const runId = await attempt(() => dubStart(handle));
     setBusy(false);
     if (runId) onStarted(runId);
   };
 
+  const start = async () => {
+    setDeclined(false);
+    const need = (pre?.cloud ?? []).filter((c) => c.needsConsent);
+    // Nothing is sent before the notice has been read and agreed to.
+    if (need.length > 0) return setAsking(need);
+    await go();
+  };
+
+  const agreed = () => {
+    const rest = asking.slice(1);
+    setAsking(rest);
+    if (rest.length === 0) void go();
+  };
+
+  const declinedNow = () => {
+    setAsking([]);
+    setDeclined(true);
+  };
+
   const sameLanguage = source !== "auto" && source === target && !sameOk;
   // Language limits are shown by the pair panel; only machine limits are listed separately.
   const machineBlockers = (pre?.blockers ?? []).filter((b) => b.reason === "machine");
+  const cloud = pre?.cloud ?? [];
+  const missingKey = cloud.find((c) => !c.hasKey);
   const ready =
     !!pre &&
+    !missingKey &&
     machineBlockers.length === 0 &&
     pairResolved(pair, fallbacks) &&
     pre.missingModels.length === 0 &&
@@ -248,7 +283,13 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
         </CardContent>
       </Card>
 
-      <PairCheck check={pair} choices={fallbacks} onChoices={setFallbacks} readOnly={readOnly} />
+      <PairCheck
+        check={pair}
+        choices={fallbacks}
+        onChoices={setFallbacks}
+        readOnly={readOnly}
+        serviceNames={serviceNames}
+      />
 
       {sameLanguage && (
         <Alert role="alert">
@@ -264,6 +305,37 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
       {err && (
         <Alert variant="destructive" role="alert" data-testid="dub-error">
           <AlertDescription>{t(err.key, err.params)}</AlertDescription>
+        </Alert>
+      )}
+
+      {cloud.length > 0 && (
+        <ul className="flex flex-col gap-1 text-sm" data-testid="cloud-amounts">
+          {cloud.map((c) => (
+            <li key={c.step}>
+              {t("cloud.amount", {
+                step: t(`cloud.stepLabel.${c.step}`),
+                chars: roundChars(c.estimatedChars),
+                service: c.serviceName,
+              })}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {missingKey && (
+        <Alert variant="destructive" role="alert">
+          <AlertDescription>
+            {t("dub.new.cloudNoKey", {
+              service: missingKey.serviceName,
+              step: t(`cloud.stepLabel.${missingKey.step}`),
+            })}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {declined && (
+        <Alert role="status">
+          <AlertDescription>{t("cloud.declined")}</AlertDescription>
         </Alert>
       )}
 
@@ -308,6 +380,7 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
           {t("dub.new.start")}
         </Button>
       </div>
+      <ConsentDialog item={asking[0] ?? null} onAgree={agreed} onDecline={declinedNow} />
     </section>
   );
 }

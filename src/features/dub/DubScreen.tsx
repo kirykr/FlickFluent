@@ -9,6 +9,7 @@ import { Result } from "./Result";
 import { RunProgress } from "./Progress";
 import { dubError } from "./format";
 import { useDubRun } from "./useDubRun";
+import { useCloudLabels } from "../cloud/useCloudLabels";
 
 interface Props {
   handle: string;
@@ -30,6 +31,7 @@ export function DubScreen({ handle, readOnly }: Props) {
     }
   };
 
+  const cloudLabels = useCloudLabels(view.status?.dub.options.fallbacks?.engines);
   const status = view.status;
   if (!status) return null;
   const state = view.state;
@@ -73,6 +75,7 @@ export function DubScreen({ handle, readOnly }: Props) {
         <RunProgress
           handle={handle}
           view={view}
+          cloudLabels={cloudLabels}
           onCancel={() => view.runId && guard(() => dubCancel(view.runId as string))}
           onResume={() =>
             guard(async () => {

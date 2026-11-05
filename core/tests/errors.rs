@@ -42,6 +42,16 @@ const CONTRACT_CODES: &[&str] = &[
     NOTHING_TO_RESUME,
     FILE_EXISTS,
     RUN_NOT_COMPLETE,
+    // feature 003
+    CLOUD_CONSENT_REQUIRED,
+    CLOUD_NO_KEY,
+    CLOUD_KEYS_EXHAUSTED,
+    CLOUD_AUTH_FAILED,
+    CLOUD_OFFLINE,
+    CLOUD_BAD_REPLY,
+    KEY_INVALID,
+    KEY_DUPLICATE,
+    KEY_STORE_UNAVAILABLE,
 ];
 
 #[test]
@@ -71,9 +81,19 @@ fn every_listed_error_has_real_keys_and_no_code_is_listed_twice() {
 
 #[test]
 fn every_message_with_a_placeholder_names_one_the_run_can_fill() {
-    // The UI fills {{stage}}, {{needed}}, {{free}} and {{missing}}; nothing else is promised.
+    // The UI fills {{stage}}, {{needed}}, {{free}}, {{missing}} and, for cloud steps, {{service}}, {{labels}} and {{detail}}; nothing else is promised.
     let tree = en();
-    let known = ["stage", "needed", "free", "missing", "shortfall"];
+    let known = [
+        "stage",
+        "needed",
+        "free",
+        "missing",
+        "shortfall",
+        "service",
+        "labels",
+        "detail",
+        "seconds",
+    ];
     for (code, message, _) in DUB_ERRORS {
         let text = message
             .split('.')

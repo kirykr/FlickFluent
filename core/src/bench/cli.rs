@@ -271,6 +271,7 @@ pub async fn run_with(
         |l| l.cpu_cores.saturating_sub(1).max(1),
     );
     let cfg = RunConfig {
+        cloud: None,
         project_path: work.join("bench.flick"),
         project_id: "bench".into(),
         models_dir: models.clone(),

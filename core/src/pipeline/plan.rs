@@ -272,6 +272,18 @@ pub fn plan_models_full(
     } else if plan.voices.is_empty() {
         plan.unsupported.push((Step::Speak, target.to_string()));
     }
+    // A step the user sent to a cloud service needs no local model and cannot be unsupported
+    // locally. Whether the service covers the pair is checked with the service's language lists.
+    use crate::cloud::services::Step as CloudStep;
+    if choices.engines.cloud(CloudStep::Translate).is_some() {
+        plan.translate = None;
+        plan.pivot = None;
+        plan.unsupported.retain(|(s, _)| *s != Step::Translate);
+    }
+    if choices.engines.cloud(CloudStep::Speak).is_some() {
+        plan.voices.clear();
+        plan.unsupported.retain(|(s, _)| *s != Step::Speak);
+    }
     plan
 }
 

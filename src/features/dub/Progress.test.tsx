@@ -51,6 +51,7 @@ const view = (over: Partial<RunView> = {}): RunView => ({
   error: null,
   state: "running",
   detected: null,
+  cloud: null,
   ...over,
 });
 
@@ -158,6 +159,59 @@ describe("run progress", () => {
     render(<RunProgress view={view({ state: "failed", runId: null, error })} {...handlers()} />);
     expect(await screen.findByRole("button", { name: "Download 500.0 MB" })).toBeTruthy();
     expect(screen.getByText("Whisper small")).toBeTruthy();
+  });
+
+  it("labels a stage that runs on a cloud service, and no other", () => {
+    render(
+      <RunProgress
+        view={view()}
+        {...handlers()}
+        cloudLabels={{ translate: "Cloud: Google Gemini API" }}
+      />,
+    );
+    const label = screen.getByTestId("cloud-label");
+    expect(label.textContent).toBe("Cloud: Google Gemini API");
+    expect(document.querySelector('[data-stage="translate"]')?.contains(label)).toBe(true);
+    expect(screen.getAllByTestId("cloud-label")).toHaveLength(1);
+  });
+
+  it.each([
+    [{ kind: "switched", keyLabel: "second" }, "Moved on to the key \u201csecond\u201d."],
+    [
+      { kind: "setAside", keyLabel: "first", reason: "rejected" },
+      "The key \u201cfirst\u201d is out for this run: the service refused it.",
+    ],
+    [{ kind: "setAside", keyLabel: "first", reason: "noCredit" }, "no credit or quota left"],
+    [{ kind: "waiting", waitSeconds: 90 }, "Every key is limited. Waiting 90 seconds."],
+    [{ kind: "resumed" }, "The wait is over. Carrying on."],
+  ])("shows one plain line for a cloud event %j", (note, text) => {
+    const cloud = {
+      step: "translate",
+      serviceId: "google-gemini",
+      keyLabel: null,
+      reason: null,
+      waitSeconds: null,
+      ...note,
+    } as RunView["cloud"];
+    render(<RunProgress view={view({ cloud })} {...handlers()} />);
+    expect(screen.getByTestId("cloud-note").textContent).toContain(text);
+  });
+
+  it("says how long to wait when every key is limited, with a resume button", () => {
+    const error = failure({
+      code: "CLOUD_KEYS_EXHAUSTED",
+      stage: "translate",
+      messageKey: "dub.error.cloudKeysExhausted",
+      nextStepKey: "dub.next.waitAndResume",
+      details: { service: "Google Gemini API", retryAfterSeconds: 700 },
+    });
+    const h = handlers();
+    render(<RunProgress view={view({ state: "failed", error })} {...h} />);
+    const box = screen.getByTestId("dub-run-error");
+    expect(box.textContent).toContain("Google Gemini API asked you to wait about 700 seconds");
+    expect(box.textContent).toContain("everything finished is kept");
+    expect(box.textContent).toContain("Wait for the time shown, then resume.");
+    expect(screen.getByRole("button", { name: /Try again|Resume/ })).toBeTruthy();
   });
 
   it("keeps cancelled runs gentle and resumable", () => {

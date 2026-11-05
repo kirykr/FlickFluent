@@ -13,6 +13,10 @@ declare global {
       revealed: string[];
       slow: boolean;
       subtitlesOnly: boolean;
+      /** Send the translation step to this cloud service (needs the user's agreement first). */
+      cloud: string | null;
+      /** `dub:cloud` events sent when the translate stage starts. */
+      cloudNotes: { kind: string; keyLabel?: string; reason?: string; waitSeconds?: number }[];
       /** Fail the run when it reaches this step (0 extract .. 5 mix) with this error. */
       failAtStep: number | null;
       failure: {
@@ -32,6 +36,8 @@ export function installFakeCore() {
     revealed: [] as string[],
     slow: false,
     subtitlesOnly: false,
+    cloud: null as string | null,
+    cloudNotes: [] as Window["__fakeDub"]["cloudNotes"],
     failAtStep: null as number | null,
     failure: null as Window["__fakeDub"]["failure"],
   };
@@ -123,6 +129,19 @@ export function installFakeCore() {
     }
     if (d.step > 0) emit("dub:stage", { runId: "r1", stage: stages[d.step - 1], status: "done" });
     emit("dub:stage", { runId: "r1", stage, status: "running" });
+    if (stage === "translate") {
+      for (const n of fake.cloudNotes) {
+        emit("dub:cloud", {
+          runId: "r1",
+          step: "translate",
+          serviceId: fake.cloud ?? "google-gemini",
+          keyLabel: n.keyLabel ?? null,
+          reason: n.reason ?? null,
+          waitSeconds: n.waitSeconds ?? null,
+          kind: n.kind,
+        });
+      }
+    }
     emit("dub:progress", {
       runId: "r1",
       stage,
@@ -155,6 +174,12 @@ export function installFakeCore() {
     timer = window.setTimeout(tick, 100);
   };
 
+  // The service a step goes to: set directly by a test, or chosen in Settings.
+  const engines = (): { translate: string; speak: string } =>
+    JSON.parse(localStorage.getItem("fakeEngines") ?? '{"translate":"local","speak":"local"}');
+  const cloudService = (): string | null =>
+    fake.cloud ?? (engines().translate !== "local" ? engines().translate : null);
+
   const dub = () => ({
     source: !load().configured ? null : { path: "/videos/holiday.mp4", durationMs: 20000 },
     sourceLanguage: "fr",
@@ -165,7 +190,34 @@ export function installFakeCore() {
       exportKind: "video",
       exportName: "holiday",
       quality: "standard",
+      ...(cloudService()
+        ? {
+            fallbacks: {
+              subtitlesOnly: false,
+              genericVoice: false,
+              pivotViaEnglish: false,
+              optIn: [],
+              engines: { translate: cloudService(), speak: "local" },
+            },
+          }
+        : {}),
     },
+    cloudUsage:
+      cloudService() && load().run === "completed"
+        ? [
+            {
+              step: "translate",
+              serviceId: cloudService(),
+              serviceName: "Google Gemini API",
+              chars: 300,
+              requests: 1,
+              keysUsed: ["mine"],
+              switches: 0,
+              waitedSeconds: 0,
+              runId: "r1",
+            },
+          ]
+        : [],
     lines:
       load().run === "completed"
         ? LINES.map((l) => ({
@@ -250,7 +302,75 @@ export function installFakeCore() {
       machineClass: "minimum",
       warnings: [],
       blockers: [],
+      cloud: cloudService()
+        ? [
+            {
+              step: "translate",
+              serviceId: cloudService(),
+              serviceName: "Google Gemini API",
+              estimatedChars: 300,
+              needsConsent: localStorage.getItem("fakeConsent") !== "1",
+              reason: "first",
+              hasKey: true,
+            },
+          ]
+        : [],
     }),
+    cloud_services: () => [
+      {
+        id: "google-gemini",
+        name: "Google Gemini API",
+        steps: ["translate", "speak"],
+        needsRegion: false,
+        termsUrl: "https://ai.google.dev/gemini-api/terms",
+        languages: { translate: [], speak: [] },
+      },
+    ],
+    cloud_notice: () => ({
+      serviceName: "Google Gemini API",
+      step: "translate",
+      sends: ["cloud.notice.translate"],
+      doesNotSend: ["cloud.notice.doesNotSend", "cloud.notice.bill"],
+      termsUrl: "https://ai.google.dev/gemini-api/terms",
+      estimatedChars: 300,
+      noticeVersion: 1,
+    }),
+    cloud_keys_list: () => [
+      {
+        id: "k1",
+        serviceId: "google-gemini",
+        label: "mine",
+        region: null,
+        last4: "1234",
+        order: 0,
+        state: "verified",
+        verifiedAt: "2026-11-05T00:00:00Z",
+        storage: "os",
+      },
+    ],
+    cloud_engines_get: () => engines(),
+    cloud_engines_set: (a) => {
+      const next = { ...engines(), [String(a.step)]: String(a.engine) };
+      localStorage.setItem("fakeEngines", JSON.stringify(next));
+      return next;
+    },
+    cloud_consent_list: () =>
+      localStorage.getItem("fakeConsent") === "1"
+        ? [
+            {
+              serviceId: "google-gemini",
+              step: "translate",
+              agreedAt: "2026-11-05T00:00:00Z",
+              agreedChars: 300,
+              noticeVersion: 1,
+            },
+          ]
+        : [],
+    cloud_consent_withdraw: () => localStorage.removeItem("fakeConsent"),
+    cloud_consent_grant: () => {
+      localStorage.setItem("fakeConsent", "1");
+      return {};
+    },
     model_download_start: () => {
       window.setTimeout(() => {
         store({ ...load(), whisper: true });
@@ -267,6 +387,9 @@ export function installFakeCore() {
       }, 200);
     },
     dub_start: () => {
+      if (cloudService() && localStorage.getItem("fakeConsent") !== "1") {
+        throw { code: "CLOUD_CONSENT_REQUIRED", messageKey: "dub.error.cloudConsentRequired" };
+      }
       store({ ...load(), run: "running", step: 0 });
       begin();
       return "r1";

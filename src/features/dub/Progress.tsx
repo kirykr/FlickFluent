@@ -1,5 +1,6 @@
 import { Check, Circle, X } from "lucide-react";
 import { t } from "../../i18n";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress as Bar } from "@/components/ui/progress";
@@ -20,12 +21,22 @@ interface Props {
   onRestart: () => void;
   /** The detected language equals the target and the user agrees to go on. */
   onConfirmSame: () => void;
+  /** "Cloud: <service>" for each stage that runs on a cloud service. */
+  cloudLabels?: Partial<Record<Stage, string>>;
 }
 
 /** Lines shown while the run goes on; the full list is in the result. */
 const LIVE_LINES = 6;
 
-export function RunProgress({ handle, view, onCancel, onResume, onRestart, onConfirmSame }: Props) {
+export function RunProgress({
+  handle,
+  view,
+  onCancel,
+  onResume,
+  onRestart,
+  onConfirmSame,
+  cloudLabels = {},
+}: Props) {
   // A run recorded as running with nothing running was cut short (the app closed or crashed).
   const interrupted = !!view.status?.interrupted && view.runId === null;
   const running =
@@ -90,6 +101,11 @@ export function RunProgress({ handle, view, onCancel, onResume, onRestart, onCon
                 <span className={status === "pending" || !status ? "text-muted-foreground" : ""}>
                   {t(STAGE_KEYS[stage])}
                 </span>
+                {cloudLabels[stage] && (
+                  <Badge variant="outline" data-testid="cloud-label">
+                    {cloudLabels[stage]}
+                  </Badge>
+                )}
                 {running && status === "running" && view.progress?.stage === stage && (
                   <span
                     className="ml-auto text-xs text-muted-foreground"
@@ -102,6 +118,16 @@ export function RunProgress({ handle, view, onCancel, onResume, onRestart, onCon
             );
           })}
         </ul>
+
+        {running && view.cloud && (
+          <p className="text-sm text-muted-foreground" role="status" data-testid="cloud-note">
+            {t(`cloud.note.${view.cloud.kind}`, {
+              key: view.cloud.keyLabel ?? "",
+              seconds: view.cloud.waitSeconds ?? 0,
+              reason: view.cloud.reason ? t(`cloud.note.reason.${view.cloud.reason}`) : "",
+            })}
+          </p>
+        )}
 
         {live.length > 0 && (
           <section aria-label={t("dub.run.linesTitle")} className="flex flex-col gap-1">

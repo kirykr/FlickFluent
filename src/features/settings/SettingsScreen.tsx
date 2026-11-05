@@ -1,4 +1,5 @@
 import { AboutCard } from "./AboutCard";
+import { CloudCard } from "../cloud/CloudCard";
 import { useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -230,6 +231,7 @@ export function SettingsScreen({ settings, onSettings, onRecheck }: Props) {
           </Button>
         </CardContent>
       </Card>
+      <CloudCard />
       <AboutCard />
     </section>
   );

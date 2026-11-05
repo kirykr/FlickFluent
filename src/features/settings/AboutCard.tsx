@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { modelsCatalogue } from "../../app/ipc";
+import { cloudServices, modelsCatalogue } from "../../app/ipc";
+import type { CloudService } from "../cloud/types";
 import type { ModelRecord } from "../models/types";
 
 /**
@@ -11,6 +12,12 @@ import type { ModelRecord } from "../models/types";
  */
 export function AboutCard() {
   const [models, setModels] = useState<ModelRecord[]>([]);
+  const [services, setServices] = useState<CloudService[]>([]);
+  useEffect(() => {
+    cloudServices()
+      .then((s) => setServices(s ?? []))
+      .catch(() => setServices([]));
+  }, []);
   useEffect(() => {
     modelsCatalogue()
       .then(setModels)
@@ -42,6 +49,20 @@ export function AboutCard() {
               </li>
             ))}
           </ul>
+        )}
+        {services.length > 0 && (
+          <div className="mt-4 flex flex-col gap-1 text-sm" data-testid="about-cloud">
+            <p>{t("about.cloud")}</p>
+            <ul className="list-disc ps-5">
+              {services.map((s) => (
+                <li key={s.id}>
+                  <a className="text-primary underline" href={s.termsUrl} target="_blank" rel="noreferrer">
+                    {t("cloud.terms", { service: s.name })}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </CardContent>
     </Card>

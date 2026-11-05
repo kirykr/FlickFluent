@@ -15,6 +15,7 @@ pub fn run() {
         .manage(commands::dub::DubState::default())
         .setup(|app| {
             app.manage(commands::settings::SettingsState::load(app.handle()));
+            app.manage(commands::cloud::CloudState::load(app.handle()));
             // Write recovery files for projects with unsaved changes (SC-005).
             let handle = app.handle().clone();
             std::thread::spawn(move || loop {
@@ -62,6 +63,19 @@ pub fn run() {
             commands::bench::bench_run,
             commands::bench::bench_records,
             commands::dub::dub_installed_models,
+            commands::cloud::cloud_services,
+            commands::cloud::cloud_keys_list,
+            commands::cloud::cloud_key_add,
+            commands::cloud::cloud_key_verify,
+            commands::cloud::cloud_key_remove,
+            commands::cloud::cloud_keys_reorder,
+            commands::cloud::cloud_engines_get,
+            commands::cloud::cloud_engines_set,
+            commands::cloud::cloud_notice,
+            commands::cloud::cloud_consent_list,
+            commands::cloud::cloud_consent_grant,
+            commands::cloud::cloud_consent_withdraw,
+            commands::cloud::cloud_usage,
         ])
         .run(tauri::generate_context!())
         .expect("error while running FlickFluent");

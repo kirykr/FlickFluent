@@ -41,3 +41,15 @@ Details and numbers: `docs/verification/002-benchmarks.md`.
 - **What is simulated:** the minimum spec (a Mac held to its numbers, not a real 8 GB computer).
 - **What remains open:** all Windows runs (the `.ps1` limiter was never executed); a real 8 GB computer; a full-length film; the slow, non-linear Whisper large-v3 time; the eSpeak source offer in About (T085); NLLB inference with the real model; the macOS LGPL FFmpeg build; Windows on ARM has no local engine.
 - **Owner decisions this feature:** eSpeak NG stays in the separate-process pack with the matching source published (2026-11-05); NLLB-200 is an opt-in non-commercial model.
+
+## Feature 003 hand-off (2026-11-06)
+
+**Built (macOS):** optional cloud engines for translation and speech with the user's own keys. Services: Google Gemini API and Azure AI services, both described in `config/cloud-services.json`. Keys live only in the OS secure storage (`keyring-core`); `cloud-keys.json` and `cloud-consent.json` hold no secret. Cloud is off by default; each service and step needs a notice that names the amount (agreed again only above 5 times the agreed amount). Several keys per service rotate on a limit or refusal, wait up to 10 minutes, then pause the run so it can resume. The language pair check offers a cloud engine or a "set up a key" hint, and cloud-only languages appear in the list once a key is verified.
+
+**Verified:** 290 Rust tests, 80 Vitest, 57 Playwright on macOS, against a local fake server (`docs/verification/003.md`). The no-leak test searches every file and message for the key.
+
+**Open:**
+- Windows has not run anything of 003 (OS store test, quickstart, no-leak search). Do not close the feature before that.
+- No real service was called: run `core/tests/cloud_real.rs` with your keys (T071), then the Gemini listening test (T072). Model ids, voice genders and language lists are marked unverified in the data file.
+- The 15 characters per second estimate was checked against one 20 s fixture only (T066), and idle RAM was not measured (T068).
+- If no Gemini Khmer voice is acceptable, Khmer cloud speech stays unsolved and the local-model decision comes back to the owner.

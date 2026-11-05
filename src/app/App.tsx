@@ -42,6 +42,13 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(FALLBACK_SETTINGS);
   const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
 
+  // A screen can ask to open Settings (for example to add a cloud key) without owning the router.
+  useEffect(() => {
+    const open = () => setPage("settings");
+    window.addEventListener("flickfluent:open-settings", open);
+    return () => window.removeEventListener("flickfluent:open-settings", open);
+  }, []);
+
   // The check runs on every launch. It is quick, and it keeps the mode right after an upgrade.
   useEffect(() => {
     runCompatCheck()

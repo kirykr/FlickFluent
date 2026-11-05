@@ -63,12 +63,20 @@ export function dubError(
     shortfallBytes?: number;
     missing?: string[];
     stage?: string;
+    service?: string;
+    labels?: string;
+    detail?: string;
+    retryAfterSeconds?: number;
   };
   const params: Record<string, string> = {};
   if (typeof d.neededBytes === "number") params.needed = formatBytes(d.neededBytes);
   if (typeof d.freeBytes === "number") params.free = formatBytes(d.freeBytes);
   if (typeof d.shortfallBytes === "number") params.shortfall = formatBytes(d.shortfallBytes);
   if (Array.isArray(d.missing)) params.missing = d.missing.join(", ");
+  if (typeof d.service === "string") params.service = d.service;
+  if (typeof d.labels === "string") params.labels = d.labels;
+  if (typeof d.detail === "string") params.detail = d.detail;
+  if (typeof d.retryAfterSeconds === "number") params.seconds = String(d.retryAfterSeconds);
   if (stage ?? d.stage) params.stage = (stage ?? d.stage) as string;
   return { key, params };
 }
@@ -91,10 +99,16 @@ export type NextAction = "resume" | "restart" | "chooseAnother" | "download" | "
 export function nextAction(nextStepKey: string): NextAction {
   switch (nextStepKey) {
     case "dub.next.retry":
+    case "dub.next.waitAndResume":
+    case "dub.next.reconnectAndResume":
+    case "dub.next.tryAgainOrLocal":
+    case "dub.next.addCloudKey":
+    case "dub.next.checkCloudKeys":
     case "dub.next.freeDiskSpace":
     case "dub.next.resume":
     case "dub.next.finishRun":
       return "resume";
+    case "dub.next.agreeToCloud":
     case "dub.next.restartRun":
     case "dub.next.startRun":
     case "dub.next.confirmOrChange":

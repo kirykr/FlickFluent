@@ -2,7 +2,7 @@
 
 use serde::Serialize;
 
-use super::{enabled, primary};
+use super::{enabled, primary, CloudOffer};
 use crate::models::{CatalogueEntry, LicenceClass, Quality, Step};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -34,6 +34,10 @@ pub enum FallbackKind {
     PivotViaEnglish,
     /// Turn on a non-commercial model the user did not enable yet.
     OptInNonCommercial,
+    /// Let a cloud service the user has a verified key for do the step.
+    CloudEngine,
+    /// A cloud service could do the step, but the user has no verified key for it yet.
+    SetupCloudKey,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -45,6 +49,10 @@ pub struct Fallback {
     pub model_ids: Vec<String>,
     /// Licence notices to show before the user accepts, one per model.
     pub notice_keys: Vec<String>,
+    /// Cloud services that would do it (`CloudEngine` and `SetupCloudKey` only).
+    pub service_ids: Vec<String>,
+    /// The step the fallback is for (cloud kinds only).
+    pub step: Option<StepKind>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -96,6 +104,8 @@ fn fallback(kind: FallbackKind, label_key: &'static str) -> Fallback {
         label_key,
         model_ids: Vec::new(),
         notice_keys: Vec::new(),
+        service_ids: Vec::new(),
+        step: None,
     }
 }
 
@@ -256,4 +266,60 @@ pub fn check_pair(
         steps,
         fallbacks,
     }
+}
+
+/// [`check_pair`], plus a way forward through the cloud for each step this computer cannot do:
+/// "use the cloud service" when a verified key covers the pair, or "set up a cloud key" when a
+/// service covers it but no key is verified. A step the local models do can never be turned into
+/// a cloud step here, and a computer that can do everything locally is never nudged.
+pub fn check_pair_with_cloud(
+    catalogue: &[CatalogueEntry],
+    source: &str,
+    target: &str,
+    opt_in: &[String],
+    cloud: &[CloudOffer],
+) -> PairCheck {
+    let mut check = check_pair(catalogue, source, target, opt_in);
+    let auto = source == "auto";
+    let covers_code =
+        |list: &[String], code: &str| list.iter().any(|l| primary(l) == primary(code));
+    for kind in [StepKind::Translate, StepKind::Speak] {
+        let missing = check.steps.iter().any(|s| s.step == kind && !s.supported);
+        if !missing {
+            continue;
+        }
+        let covering: Vec<&CloudOffer> = cloud
+            .iter()
+            .filter(|o| match kind {
+                StepKind::Translate => {
+                    covers_code(&o.translate, target) && (auto || covers_code(&o.translate, source))
+                }
+                _ => covers_code(&o.speak, target),
+            })
+            .collect();
+        let with_key: Vec<String> = covering
+            .iter()
+            .filter(|o| o.has_verified_key)
+            .map(|o| o.service_id.clone())
+            .collect();
+        let names =
+            |ids: &[&CloudOffer]| ids.iter().map(|o| o.service_id.clone()).collect::<Vec<_>>();
+        let mut f = if !with_key.is_empty() {
+            let mut f = fallback(FallbackKind::CloudEngine, "languages.fallback.cloudEngine");
+            f.service_ids = with_key;
+            f
+        } else if !covering.is_empty() {
+            let mut f = fallback(
+                FallbackKind::SetupCloudKey,
+                "languages.fallback.setupCloudKey",
+            );
+            f.service_ids = names(&covering);
+            f
+        } else {
+            continue;
+        };
+        f.step = Some(kind);
+        check.fallbacks.push(f);
+    }
+    check
 }

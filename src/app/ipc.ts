@@ -1,4 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
+import type {
+  AddKeyInput,
+  CloudKey,
+  CloudService,
+  CloudStep,
+  ConsentRecord,
+  Engines,
+  Notice,
+  VerifyResult,
+} from "../features/cloud/types";
 import type { MachineCapabilityReport } from "../features/compat/types";
 import type { SettingsView } from "../features/settings/types";
 import type { ModelRecord } from "../features/models/types";
@@ -82,3 +92,23 @@ export const languagesList = (optIn: string[] = []) =>
   invoke<Language[]>("languages_list", { optIn });
 export const languagesCheckPair = (source: string, target: string, optIn: string[] = []) =>
   invoke<PairCheck>("languages_check_pair", { source, target, optIn });
+
+export const cloudServices = () => invoke<CloudService[]>("cloud_services");
+export const cloudKeysList = () => invoke<CloudKey[]>("cloud_keys_list");
+export const cloudKeyAdd = (input: AddKeyInput) =>
+  invoke<CloudKey>("cloud_key_add", { ...input });
+export const cloudKeyVerify = (keyId: string) =>
+  invoke<VerifyResult>("cloud_key_verify", { keyId });
+export const cloudKeyRemove = (keyId: string) => invoke<void>("cloud_key_remove", { keyId });
+export const cloudKeysReorder = (serviceId: string, keyIds: string[]) =>
+  invoke<CloudKey[]>("cloud_keys_reorder", { serviceId, keyIds });
+export const cloudEnginesGet = () => invoke<Engines>("cloud_engines_get");
+export const cloudEnginesSet = (step: CloudStep, engine: string) =>
+  invoke<Engines>("cloud_engines_set", { step, engine });
+export const cloudNotice = (serviceId: string, step: CloudStep, estimatedChars: number) =>
+  invoke<Notice>("cloud_notice", { serviceId, step, estimatedChars });
+export const cloudConsentList = () => invoke<ConsentRecord[]>("cloud_consent_list");
+export const cloudConsentGrant = (serviceId: string, step: CloudStep, estimatedChars: number) =>
+  invoke<ConsentRecord>("cloud_consent_grant", { serviceId, step, estimatedChars });
+export const cloudConsentWithdraw = (serviceId: string, step: CloudStep) =>
+  invoke<void>("cloud_consent_withdraw", { serviceId, step });

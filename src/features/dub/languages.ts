@@ -66,8 +66,20 @@ export function pairResolved(check: PairCheck | null, choices: FallbackChoices):
   const missing = (step: PairCheck["steps"][number]["step"]) =>
     check.steps.some((s) => s.step === step && !s.supported);
   const optedIn = choices.optIn.length > 0;
+  // A step sent to a cloud service is covered (the user agrees to the notice when starting).
+  const cloud = (step: "translate" | "speak") => !!choices.engines && choices.engines[step] !== "local";
   if (missing("transcribe")) return false; // nothing here can fix speech recognition
-  if (missing("translate") && !choices.pivotViaEnglish && !optedIn) return false;
-  if (missing("speak") && !choices.subtitlesOnly && !choices.genericVoice && !optedIn) return false;
+  if (missing("translate") && !choices.pivotViaEnglish && !optedIn && !cloud("translate")) {
+    return false;
+  }
+  if (
+    missing("speak") &&
+    !choices.subtitlesOnly &&
+    !choices.genericVoice &&
+    !optedIn &&
+    !cloud("speak")
+  ) {
+    return false;
+  }
   return true;
 }

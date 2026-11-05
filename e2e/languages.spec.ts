@@ -11,6 +11,8 @@ declare global {
       extra: boolean;
       started: number;
       lastOptions: unknown;
+      /** A cloud service has a verified key (otherwise only a set-up hint is offered). */
+      cloudKey: boolean;
     };
   }
 }
@@ -21,6 +23,7 @@ function installFakeCore() {
     extra: false,
     started: 0,
     lastOptions: null as unknown,
+    cloudKey: false,
   };
   (window as unknown as { __fakeLang: typeof fake }).__fakeLang = fake;
 
@@ -111,6 +114,30 @@ function installFakeCore() {
         });
       }
     }
+    if (target === "km") {
+      for (const step of ["translate", "speak"]) {
+        if (step === "translate" && translateOk) continue;
+        fallbacks.push(
+          fake.cloudKey
+            ? {
+                kind: "cloudEngine",
+                labelKey: "languages.fallback.cloudEngine",
+                modelIds: [],
+                noticeKeys: [],
+                serviceIds: ["google-gemini"],
+                step,
+              }
+            : {
+                kind: "setupCloudKey",
+                labelKey: "languages.fallback.setupCloudKey",
+                modelIds: [],
+                noticeKeys: [],
+                serviceIds: ["google-gemini"],
+                step,
+              },
+        );
+      }
+    }
     return { ok: steps.every((s) => (s as { supported: boolean }).supported), steps, fallbacks };
   };
 
@@ -156,7 +183,42 @@ function installFakeCore() {
       machineClass: "minimum",
       warnings: [],
       blockers: [],
+      cloud: (["translate", "speak"] as const)
+        .filter((step) => {
+          const e = (fake.lastOptions as { fallbacks?: { engines?: Record<string, string> } })
+            ?.fallbacks?.engines;
+          return e && e[step] && e[step] !== "local";
+        })
+        .map((step) => ({
+          step,
+          serviceId: "google-gemini",
+          serviceName: "Google Gemini API",
+          estimatedChars: 300,
+          needsConsent: true,
+          reason: "first",
+          hasKey: true,
+        })),
     }),
+    cloud_services: () => [
+      {
+        id: "google-gemini",
+        name: "Google Gemini API",
+        steps: ["translate", "speak"],
+        needsRegion: false,
+        termsUrl: "https://ai.google.dev/gemini-api/terms",
+        languages: { translate: [], speak: [] },
+      },
+    ],
+    cloud_notice: (a) => ({
+      serviceName: "Google Gemini API",
+      step: a.step,
+      sends: ["cloud.notice.translate"],
+      doesNotSend: ["cloud.notice.doesNotSend", "cloud.notice.bill"],
+      termsUrl: "https://ai.google.dev/gemini-api/terms",
+      estimatedChars: 300,
+      noticeVersion: 1,
+    }),
+    cloud_consent_grant: () => ({}),
     dub_start: () => {
       fake.started += 1;
       state = "running";
@@ -320,4 +382,40 @@ test("the same language needs a confirmation", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Start dubbing" })).toBeDisabled();
   await page.getByRole("button", { name: "Use the same language" }).click();
   await expect(page.getByRole("button", { name: "Start dubbing" })).toBeEnabled();
+});
+
+test("a pair only a cloud service covers offers it, and choosing it leads to the consent dialog", async ({
+  page,
+}) => {
+  await start(page);
+  await page.evaluate(() => (window.__fakeLang.cloudKey = true));
+  await chooseVideo(page);
+  await targetPicker(page).click();
+  await page.getByRole("option", { name: "Khmer" }).click();
+
+  const panel = page.getByTestId("pair-check");
+  const startButton = page.getByRole("button", { name: "Start dubbing" });
+  await expect(startButton).toBeDisabled();
+  const cloud = panel.getByRole("checkbox", { name: /Let a cloud service do this step/ });
+  await expect(cloud).toHaveCount(2); // translation and speech
+  await cloud.nth(0).click();
+  await cloud.nth(1).click();
+  await expect(startButton).toBeEnabled();
+
+  await startButton.click();
+  await expect(page.getByRole("dialog")).toContainText("Send text to Google Gemini API?");
+  expect(await page.evaluate(() => window.__fakeLang.started)).toBe(0);
+});
+
+test("without a verified key the pair check says to set one up and opens Settings", async ({
+  page,
+}) => {
+  await start(page);
+  await chooseVideo(page);
+  await targetPicker(page).click();
+  await page.getByRole("option", { name: "Khmer" }).click();
+  const panel = page.getByTestId("pair-check");
+  await expect(panel).toContainText("Add a key for it in Settings first");
+  await panel.getByRole("button", { name: "Open Settings" }).first().click();
+  await expect(page.getByText("Cloud engines", { exact: true })).toBeVisible();
 });

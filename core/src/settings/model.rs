@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use super::hotkeys;
+use crate::cloud::choice::Engines;
 use crate::error::{AppError, HOTKEY_CONFLICT, INVALID_SETTING};
 use crate::hardware::Mode;
 
@@ -46,6 +47,8 @@ pub struct Settings {
     pub analytics_enabled: bool,
     pub models_folder: Option<String>,
     pub last_compat_mode: Option<Mode>,
+    /// Local or a cloud service for each heavy step. Local by default.
+    pub engines: Engines,
 }
 
 impl Default for Settings {
@@ -61,6 +64,7 @@ impl Default for Settings {
             analytics_enabled: false,
             models_folder: None,
             last_compat_mode: None,
+            engines: Engines::default(),
         }
     }
 }
@@ -70,7 +74,7 @@ fn invalid(what: &str) -> AppError {
         .with_details(serde_json::json!({ "what": what }))
 }
 
-const PATCHABLE: [&str; 7] = [
+const PATCHABLE: [&str; 8] = [
     "settingsVersion",
     "theme",
     "general",
@@ -78,6 +82,7 @@ const PATCHABLE: [&str; 7] = [
     "analyticsEnabled",
     "modelsFolder",
     "lastCompatMode",
+    "engines",
 ];
 
 impl Settings {

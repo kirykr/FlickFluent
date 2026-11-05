@@ -88,6 +88,43 @@ pub const DUB_ERRORS: &[(&str, &str, &str)] = &[
         "error.invalidProject",
         "dub.next.chooseAnotherFile",
     ),
+    (
+        CLOUD_CONSENT_REQUIRED,
+        "dub.error.cloudConsentRequired",
+        "dub.next.agreeToCloud",
+    ),
+    (CLOUD_NO_KEY, "dub.error.cloudNoKey", "dub.next.addCloudKey"),
+    (
+        CLOUD_KEYS_EXHAUSTED,
+        "dub.error.cloudKeysExhausted",
+        "dub.next.waitAndResume",
+    ),
+    (
+        CLOUD_AUTH_FAILED,
+        "dub.error.cloudAuthFailed",
+        "dub.next.checkCloudKeys",
+    ),
+    (
+        CLOUD_OFFLINE,
+        "dub.error.cloudOffline",
+        "dub.next.reconnectAndResume",
+    ),
+    (
+        CLOUD_BAD_REPLY,
+        "dub.error.cloudBadReply",
+        "dub.next.tryAgainOrLocal",
+    ),
+    (KEY_INVALID, "dub.error.keyInvalid", "dub.next.checkKeyText"),
+    (
+        KEY_DUPLICATE,
+        "dub.error.keyDuplicate",
+        "dub.next.useTheSavedKey",
+    ),
+    (
+        KEY_STORE_UNAVAILABLE,
+        "dub.error.keyStoreUnavailable",
+        "dub.next.useKeyThisSession",
+    ),
 ];
 
 pub fn next_step_key(code: &str) -> &'static str {

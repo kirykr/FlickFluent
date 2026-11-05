@@ -215,7 +215,16 @@
       "pathNotAllowed": "The engine was asked to use a file outside the project folders.",
       "runtimeMissing": "The speech and translation engine is not installed.",
       "generic": "The dub could not continue.",
-      "noDubAudio": "This run made subtitles only, so there is no dubbed sound to put in a video. Save the subtitles instead."
+      "noDubAudio": "This run made subtitles only, so there is no dubbed sound to put in a video. Save the subtitles instead.",
+      "cloudConsentRequired": "You have not yet agreed to send data to {{service}}. Nothing was sent.",
+      "cloudNoKey": "There is no working key for {{service}}.",
+      "cloudKeysExhausted": "{{service}} asked you to wait about {{seconds}} seconds. The run is paused and everything finished is kept.",
+      "cloudAuthFailed": "{{service}} refused every key: {{labels}}.",
+      "cloudOffline": "{{service}} could not be reached. The run is paused and everything finished is kept.",
+      "cloudBadReply": "{{service}} sent an answer the app did not expect: {{detail}}",
+      "keyInvalid": "This key cannot be saved. It is empty, too long, or missing a part (for example a region).",
+      "keyDuplicate": "This key is already saved.",
+      "keyStoreUnavailable": "The computer's secure storage is not available, so the key was not saved."
     },
     "warn": {
       "fastNoMusic": "Fast mode skips separating the music, so the original music cannot be kept without the original voices."
@@ -235,7 +244,16 @@
       "chooseAnotherName": "Choose another file name.",
       "finishRun": "Wait for the dub to finish.",
       "resume": "Resume the dub.",
-      "saveSubtitles": "Save the subtitles."
+      "saveSubtitles": "Save the subtitles.",
+      "agreeToCloud": "Read the notice and agree, or choose a local engine.",
+      "addCloudKey": "Add and verify a key in Settings, or choose a local engine.",
+      "waitAndResume": "Wait for the time shown, then resume.",
+      "checkCloudKeys": "Check your keys in Settings, then resume.",
+      "reconnectAndResume": "Check your internet connection, then resume or choose a local engine.",
+      "tryAgainOrLocal": "Try again, or choose a local engine.",
+      "checkKeyText": "Check the key and try again.",
+      "useTheSavedKey": "Use the key you already saved.",
+      "useKeyThisSession": "Use the key for this session only, or fix the secure storage."
     },
     "open": "Dub a movie",
     "backToEditor": "Back to editor",
@@ -279,7 +297,8 @@
       "download": "Download {{size}}",
       "downloading": "Downloading",
       "disk": "This needs about {{needed}} of working space. {{free}} is free.",
-      "start": "Start dubbing"
+      "start": "Start dubbing",
+      "cloudNoKey": "This run uses {{service}} for {{step}}, but there is no verified key for it. Add one in Settings."
     },
     "run": {
       "working": "Dubbing",
@@ -396,7 +415,10 @@
       "subtitles": "Make subtitles only, without speech",
       "genericVoice": "Read it with a voice of another language",
       "pivot": "Translate through English (two steps, lower quality)",
-      "optIn": "Use a model that is free only for non-commercial use"
+      "optIn": "Use a model that is free only for non-commercial use",
+      "cloudEngine": "Let a cloud service do this step ({{service}}). Your own key is used and text is sent to the service after you agree.",
+      "setupCloudKey": "A cloud service could do this step. Add a key for it in Settings first.",
+      "openSettings": "Open Settings"
     },
     "pair": {
       "title": "This language pair is limited",
@@ -417,6 +439,98 @@
   "about": {
     "title": "About and licences",
     "body": "FlickFluent uses free and open-source parts. These need a notice.",
-    "none": "Nothing to show yet."
+    "none": "Nothing to show yet.",
+    "cloud": "Cloud engines are optional and off by default. They use your own key: your key, your bill, and the service's own terms apply. Only text is sent, and only after you agree."
+  },
+  "cloud": {
+    "notice": {
+      "translate": "The text of the lines to translate.",
+      "speak": "The translated text of each line, so the service can speak it.",
+      "doesNotSend": "Not sent: your video, your original audio, and your other projects.",
+      "bill": "The service's own terms apply, and the service bills your own key.",
+      "title": "Send text to {{service}}?",
+      "sends": "This will send:",
+      "amount": "About {{chars}} characters",
+      "agree": "Agree",
+      "notNow": "Not now",
+      "reason": {
+        "first": "This is the first time you use {{service}} for this step.",
+        "noticeChanged": "This notice changed since you last agreed.",
+        "largerRun": "This run is much larger than the one you agreed to."
+      }
+    },
+    "title": "Cloud engines",
+    "intro": "Cloud engines are off by default. If your computer is too weak for a step, you can add your own key for a service and let it translate or speak for you. Your key stays in your computer's secure storage and is never shown again. You pay the service yourself.",
+    "empty": "No keys yet.",
+    "add": "Add key",
+    "verify": "Verify connection",
+    "verifying": "Checking…",
+    "remove": "Remove",
+    "removeTitle": "Remove this key?",
+    "removeBody": "The key is deleted from this computer. No step can use it after that.",
+    "cancel": "Cancel",
+    "close": "Close",
+    "addTitle": "Add a key",
+    "addIntro": "Paste your own key. One key works for every step the service offers.",
+    "field": {
+      "service": "Service",
+      "label": "Name for this key",
+      "key": "Key",
+      "region": "Region (for example westeurope)"
+    },
+    "save": "Save key",
+    "sessionOnly": "Use for this session only",
+    "sessionNote": "Kept in memory until you close the app",
+    "keyMask": "Key ending in {{last4}}",
+    "state": {
+      "untested": "Not checked",
+      "verified": "Works",
+      "rejected": "Refused"
+    },
+    "verifyResult": {
+      "ok": "The key works with {{service}}.",
+      "rejected": "{{service}} refused this key. Check that you copied all of it.",
+      "noCredit": "{{service}} says this key has no credit or quota left.",
+      "offline": "Could not reach {{service}}. Check your internet connection. Your saved key was kept.",
+      "unreachable": "{{service}} is not answering right now. Your saved key was kept.",
+      "unexpected": "{{service}} sent an answer the app did not expect."
+    },
+    "terms": "Terms of {{service}}",
+    "stepLabel": {
+      "translate": "Translation",
+      "speak": "Speech"
+    },
+    "engine": {
+      "title": "Engine for each step",
+      "local": "Local",
+      "unverified": "Add and verify a key for this service first.",
+      "label": "{{step}} engine"
+    },
+    "label": "Cloud: {{service}}",
+    "amount": "{{step}} will send about {{chars}} characters to {{service}}.",
+    "declined": "Nothing was sent. You can switch this step back to Local in Settings, or start again and agree.",
+    "usage": {
+      "title": "Cloud steps",
+      "line": "{{step}}: {{service}}, about {{chars}} characters in {{requests}} requests"
+    },
+    "note": {
+      "switched": "Moved on to the key “{{key}}”.",
+      "setAside": "The key “{{key}}” is out for this run: {{reason}}.",
+      "waiting": "Every key is limited. Waiting {{seconds}} seconds.",
+      "resumed": "The wait is over. Carrying on.",
+      "reason": {
+        "rejected": "the service refused it",
+        "noCredit": "no credit or quota left"
+      }
+    },
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "order": "Keys for one service are tried from the top.",
+    "consent": {
+      "title": "Agreements",
+      "empty": "You have not agreed to send anything yet.",
+      "line": "{{service}} · {{step}} · agreed for about {{chars}} characters",
+      "withdraw": "Withdraw"
+    }
   }
 }

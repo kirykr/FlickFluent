@@ -56,6 +56,30 @@ impl SettingsState {
         self.lock().settings.models_folder.clone()
     }
 
+    /// The engine choice per step (local by default).
+    pub fn engines(&self) -> flickfluent_core::cloud::choice::Engines {
+        self.lock().settings.engines.clone()
+    }
+
+    /// Save a new engine for one step. The caller has checked that the choice is allowed.
+    pub fn set_engine(
+        &self,
+        step: flickfluent_core::cloud::services::Step,
+        engine: &str,
+    ) -> Result<flickfluent_core::cloud::choice::Engines, AppError> {
+        let mut inner = self.lock();
+        let mut next = inner.settings.clone();
+        let mut engines = next.engines.clone();
+        engines.set(step, engine);
+        next.apply_patch(&serde_json::json!({ "engines": engines }))?;
+        let previous = std::mem::replace(&mut inner.settings, next);
+        if let Err(e) = persist(&inner) {
+            inner.settings = previous;
+            return Err(e);
+        }
+        Ok(inner.settings.engines.clone())
+    }
+
     /// Remember the last hardware check result. Failing to save is not worth an error here.
     pub fn record_mode(&self, mode: Mode) {
         let mut inner = self.lock();
