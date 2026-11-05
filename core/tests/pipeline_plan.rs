@@ -1,7 +1,9 @@
 //! Model planning: which models a dub needs on this machine, what the disk must hold.
 
 use flickfluent_core::hardware::{Accelerator, MachineInput};
-use flickfluent_core::models::{CatalogueEntry, Gender, MachineClass, Platforms, Step};
+use flickfluent_core::models::{
+    CatalogueEntry, Gender, MachineClass, Platforms, Quality, Step, VoiceSpec,
+};
 use flickfluent_core::pipeline::plan::{disk_needed_bytes, machine_class, plan_models};
 
 fn e(id: &str, step: Step, class: MachineClass, languages: &[&str]) -> CatalogueEntry {
@@ -200,11 +202,11 @@ fn voices_follow_target_language_and_gender_with_a_generic_fallback() {
         false,
     );
     assert_eq!(
-        fr.voices.get(&Gender::Female).map(String::as_str),
+        fr.voices.get(&Gender::Female).map(|v| v.model.as_str()),
         Some("voice-fr-f")
     );
     assert_eq!(
-        fr.voices.get(&Gender::Male).map(String::as_str),
+        fr.voices.get(&Gender::Male).map(|v| v.model.as_str()),
         Some("voice-fr-f"),
         "one voice serves both"
     );
@@ -218,7 +220,7 @@ fn voices_follow_target_language_and_gender_with_a_generic_fallback() {
         false,
     );
     assert_eq!(
-        en.voices.get(&Gender::Male).map(String::as_str),
+        en.voices.get(&Gender::Male).map(|v| v.model.as_str()),
         Some("voice-en-m")
     );
     let none = plan_models(
@@ -330,4 +332,109 @@ fn auto_detect_needs_only_the_target_language_for_translation() {
         false,
     );
     assert!(none.unsupported.iter().any(|(s, _)| *s == Step::Translate));
+}
+
+fn kokoro() -> CatalogueEntry {
+    let voice = |id: &str, sid: u32, gender: Gender, lang: &str, lexicon: Option<&str>| VoiceSpec {
+        id: id.into(),
+        name: id.into(),
+        speaker_id: sid,
+        gender,
+        languages: vec![lang.split('-').next().unwrap().into()],
+        lang: lang.into(),
+        lexicon: lexicon.map(String::from),
+        quality: Quality::Good,
+    };
+    CatalogueEntry {
+        id: "kokoro".into(),
+        step: Step::Speak,
+        machine_class: MachineClass::Minimum,
+        default_enabled: true,
+        voices: vec![
+            voice("ff_siwis", 30, Gender::Female, "fr", None),
+            voice(
+                "af_heart",
+                3,
+                Gender::Female,
+                "en-us",
+                Some("lexicon-us-en.txt"),
+            ),
+            voice(
+                "am_michael",
+                16,
+                Gender::Male,
+                "en-us",
+                Some("lexicon-us-en.txt"),
+            ),
+        ],
+        requires: vec!["espeak-ng-data".into()],
+        ..Default::default()
+    }
+}
+
+#[test]
+fn a_better_voice_wins_and_carries_its_speaker_id_and_language() {
+    let mut cat = catalogue(); // has Piper voices for fr (female) and en (male)
+    cat.push(kokoro());
+    let fr = plan_models(
+        &cat,
+        MachineClass::Minimum,
+        "macos",
+        "arm64",
+        "en",
+        "fr",
+        false,
+    );
+    let v = &fr.voices[&Gender::Female];
+    assert_eq!(
+        (v.model.as_str(), v.speaker_id, v.lang.as_str()),
+        ("kokoro", 30, "fr"),
+        "Kokoro beats Piper"
+    );
+    assert_eq!(
+        fr.voices[&Gender::Male].model,
+        "kokoro",
+        "no male French voice: the female one serves both"
+    );
+
+    let en = plan_models(
+        &cat,
+        MachineClass::Minimum,
+        "macos",
+        "arm64",
+        "fr",
+        "en",
+        false,
+    );
+    assert_eq!(en.voices[&Gender::Male].speaker_id, 16);
+    assert_eq!(en.voices[&Gender::Female].speaker_id, 3);
+    assert_eq!(
+        en.voices[&Gender::Female].lexicon.as_deref(),
+        Some("lexicon-us-en.txt")
+    );
+    assert!(en.required_ids(&cat).contains(&"kokoro".to_string()));
+}
+
+#[test]
+fn piper_still_covers_languages_kokoro_does_not() {
+    let mut cat = catalogue();
+    let mut piper_de = e("piper-de", Step::Speak, MachineClass::Minimum, &["de"]);
+    piper_de.gender = Some(Gender::Male);
+    cat.push(piper_de);
+    cat.push(kokoro());
+    let de = plan_models(
+        &cat,
+        MachineClass::Minimum,
+        "macos",
+        "arm64",
+        "en",
+        "de",
+        false,
+    );
+    assert_eq!(de.voices[&Gender::Male].model, "piper-de");
+    assert_eq!(
+        de.voices[&Gender::Female].model,
+        "piper-de",
+        "the male voice also serves female speakers"
+    );
 }

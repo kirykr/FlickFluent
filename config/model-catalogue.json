@@ -107,6 +107,44 @@
     }
   },
   {
+    "id": "ffmpeg-macos-arm64",
+    "name": "FFmpeg (arm64 Mac)",
+    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
+    "licence": "LGPL-2.1-or-later",
+    "licenceClass": "copyleftFile",
+    "licenceNoticeKey": "licence.ffmpeg",
+    "sizeBytes": 20658567,
+    "url": "https://github.com/kirykr/FlickFluent/releases/download/ffmpeg-n8.1.3/ffmpeg-n8.1.3-macos-arm64-lgpl.tar.gz",
+    "sha256": "bfb874119831d7f5efb2c5dfaec36aa43e7628bd4ea0efb808848b87225040dd",
+    "fileName": "ffmpeg-n8.1.3-macos-arm64-lgpl.tar.gz",
+    "step": "ffmpeg",
+    "machineClass": "minimum",
+    "platforms": {
+      "macos": [
+        "arm64"
+      ]
+    }
+  },
+  {
+    "id": "ffmpeg-macos-x64",
+    "name": "FFmpeg (x64 Mac)",
+    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
+    "licence": "LGPL-2.1-or-later",
+    "licenceClass": "copyleftFile",
+    "licenceNoticeKey": "licence.ffmpeg",
+    "sizeBytes": 22086368,
+    "url": "https://github.com/kirykr/FlickFluent/releases/download/ffmpeg-n8.1.3/ffmpeg-n8.1.3-macos-x64-lgpl.tar.gz",
+    "sha256": "5ab63f1f0e0f886fc4e8590b619f82e9049cd0c4c994938c50011e27c4a4c31e",
+    "fileName": "ffmpeg-n8.1.3-macos-x64-lgpl.tar.gz",
+    "step": "ffmpeg",
+    "machineClass": "minimum",
+    "platforms": {
+      "macos": [
+        "x64"
+      ]
+    }
+  },
+  {
     "id": "whisper-small",
     "name": "Speech recognition (small)",
     "purpose": "Turns speech into text, with times for each line. Larger models are more accurate and slower.",
@@ -3210,41 +3248,305 @@
     "licenceNoticeKey": "licence.piperVoice"
   },
   {
-    "id": "ffmpeg-macos-arm64",
-    "name": "FFmpeg (arm64 Mac)",
-    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
-    "licence": "LGPL-2.1-or-later",
-    "licenceClass": "copyleftFile",
-    "licenceNoticeKey": "licence.ffmpeg",
-    "sizeBytes": 20658567,
-    "url": "https://github.com/kirykr/FlickFluent/releases/download/ffmpeg-n8.1.3/ffmpeg-n8.1.3-macos-arm64-lgpl.tar.gz",
-    "sha256": "bfb874119831d7f5efb2c5dfaec36aa43e7628bd4ea0efb808848b87225040dd",
-    "fileName": "ffmpeg-n8.1.3-macos-arm64-lgpl.tar.gz",
-    "step": "ffmpeg",
+    "id": "kokoro-multi-lang-v1_0",
+    "name": "Natural voices (Kokoro)",
+    "purpose": "More expressive voices than the basic ones, for English, French, Spanish, Italian, Portuguese, Hindi, Japanese and Chinese.",
+    "licence": "Apache-2.0",
+    "licenceClass": "permissive",
+    "sizeBytes": 376879053,
+    "files": [
+      {
+        "name": "LICENSE",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/LICENSE",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "sizeBytes": 11358
+      },
+      {
+        "name": "date-zh.fst",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/date-zh.fst",
+        "sha256": "eb8aa079ae3cb81d8f4404992f39d61a0cb990947512b5b8d1e54d1f6980e718",
+        "sizeBytes": 59154
+      },
+      {
+        "name": "lexicon-us-en.txt",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/lexicon-us-en.txt",
+        "sha256": "7daaab53a181be9885b853a8582bf1838186317e5dadacbcef9c426d6fa0da14",
+        "sizeBytes": 5956885
+      },
+      {
+        "name": "lexicon-zh.txt",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/lexicon-zh.txt",
+        "sha256": "902bc2d20ac7c449c5ecbbbb23c89d12119c03ed5b8ed27f114f0260c9e35229",
+        "sizeBytes": 2365182
+      },
+      {
+        "name": "model.onnx",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/model.onnx",
+        "sha256": "b40f62b166ac8164b0627ef48a0b358eda0985e272fb03ef5252e7206305da11",
+        "sizeBytes": 325560556
+      },
+      {
+        "name": "number-zh.fst",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/number-zh.fst",
+        "sha256": "743f402181fcfebf76cc2f0546b71fa26476e626fbe4e460fb7b4c3a7a8bd5bd",
+        "sizeBytes": 64482
+      },
+      {
+        "name": "phone-zh.fst",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/phone-zh.fst",
+        "sha256": "1ac2b6fa56b1442320c4de7db08353bab8963a2b57f365eebcdd3a2d3562f8d7",
+        "sizeBytes": 88630
+      },
+      {
+        "name": "tokens.txt",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/tokens.txt",
+        "sha256": "6ebb6bb288f20f3ae8d004d3c2ca27697da27c037d75e81a60e2a6a663f95425",
+        "sizeBytes": 687
+      },
+      {
+        "name": "voices.bin",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/voices.bin",
+        "sha256": "1c5a5b983d3d50d8586d437a51f3faa2da7919ce76a013c081e65671a3447c29",
+        "sizeBytes": 28200960
+      },
+      {
+        "name": "dict/hmm_model.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/hmm_model.utf8",
+        "sha256": "f17790586ac86dd048c8adffed052c4bd2b28ed0682972c1275e59040c0589a7",
+        "sizeBytes": 519739
+      },
+      {
+        "name": "dict/idf.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/idf.utf8",
+        "sha256": "dbd1e03d72b2263cc8d84a4304ed77677eed9e7deaf43a1a5133bbba9733b535",
+        "sizeBytes": 5998717
+      },
+      {
+        "name": "dict/jieba.dict.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/jieba.dict.utf8",
+        "sha256": "3043b77068e09c9904f27cad82f12b6ebe9dbdb5aeff3b25e45ab7f9c1122b55",
+        "sizeBytes": 5071204
+      },
+      {
+        "name": "dict/pos_dict/char_state_tab.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/pos_dict/char_state_tab.utf8",
+        "sha256": "28b7be1dd7369766a51445af4d42e9a2ba4bf374c13be5bc1ca7721e27271dbb",
+        "sizeBytes": 327139
+      },
+      {
+        "name": "dict/pos_dict/prob_emit.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/pos_dict/prob_emit.utf8",
+        "sha256": "c33c4cb7edf3b3a5947df7209b6e9f267eae1f21335d9e2bd2521ea07105457a",
+        "sizeBytes": 1687686
+      },
+      {
+        "name": "dict/pos_dict/prob_start.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/pos_dict/prob_start.utf8",
+        "sha256": "13623ea0e9300bdb597cb2da28770b7b385d6c0098d66e516083fb01b6bd5d96",
+        "sizeBytes": 4347
+      },
+      {
+        "name": "dict/pos_dict/prob_trans.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/pos_dict/prob_trans.utf8",
+        "sha256": "f22363e2307408293d180c6f9f6b5cb75879d52f722f7764fa2d3d0ae2400236",
+        "sizeBytes": 124159
+      },
+      {
+        "name": "dict/stop_words.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/stop_words.utf8",
+        "sha256": "b788b8a939d2e2fe079abd579ea98f12f9fb84370bfd0dddd81bb9381f7ab42c",
+        "sizeBytes": 8974
+      },
+      {
+        "name": "dict/user.dict.utf8",
+        "url": "https://huggingface.co/csukuangfj/kokoro-multi-lang-v1_0/resolve/f7b96bb6bef5c5da4d3aa4f4e0498fbbf62dc78b/dict/user.dict.utf8",
+        "sha256": "5faabcd0c52adf512de77fd7eee3d556da8c98b50f493b47c66a981b3a24959c",
+        "sizeBytes": 829194
+      }
+    ],
+    "step": "speak",
     "machineClass": "minimum",
-    "platforms": {
-      "macos": [
-        "arm64"
-      ]
-    }
-  },
-  {
-    "id": "ffmpeg-macos-x64",
-    "name": "FFmpeg (x64 Mac)",
-    "purpose": "Reads video and audio files, cuts them, and builds the finished dubbed file. LGPL build, no GPL parts.",
-    "licence": "LGPL-2.1-or-later",
-    "licenceClass": "copyleftFile",
-    "licenceNoticeKey": "licence.ffmpeg",
-    "sizeBytes": 22086368,
-    "url": "https://github.com/kirykr/FlickFluent/releases/download/ffmpeg-n8.1.3/ffmpeg-n8.1.3-macos-x64-lgpl.tar.gz",
-    "sha256": "5ab63f1f0e0f886fc4e8590b619f82e9049cd0c4c994938c50011e27c4a4c31e",
-    "fileName": "ffmpeg-n8.1.3-macos-x64-lgpl.tar.gz",
-    "step": "ffmpeg",
-    "machineClass": "minimum",
-    "platforms": {
-      "macos": [
-        "x64"
-      ]
-    }
+    "languages": [
+      "en",
+      "fr",
+      "es",
+      "it",
+      "pt",
+      "hi",
+      "ja",
+      "zh"
+    ],
+    "requires": [
+      "espeak-ng-data"
+    ],
+    "voices": [
+      {
+        "id": "kokoro-af_heart",
+        "name": "Heart",
+        "speakerId": 3,
+        "gender": "female",
+        "languages": [
+          "en"
+        ],
+        "lang": "en-us",
+        "quality": "good",
+        "lexicon": "lexicon-us-en.txt"
+      },
+      {
+        "id": "kokoro-am_michael",
+        "name": "Michael",
+        "speakerId": 16,
+        "gender": "male",
+        "languages": [
+          "en"
+        ],
+        "lang": "en-us",
+        "quality": "good",
+        "lexicon": "lexicon-us-en.txt"
+      },
+      {
+        "id": "kokoro-ff_siwis",
+        "name": "Siwis",
+        "speakerId": 30,
+        "gender": "female",
+        "languages": [
+          "fr"
+        ],
+        "lang": "fr",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-ef_dora",
+        "name": "Dora",
+        "speakerId": 28,
+        "gender": "female",
+        "languages": [
+          "es"
+        ],
+        "lang": "es",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-em_alex",
+        "name": "Alex",
+        "speakerId": 29,
+        "gender": "male",
+        "languages": [
+          "es"
+        ],
+        "lang": "es",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-if_sara",
+        "name": "Sara",
+        "speakerId": 35,
+        "gender": "female",
+        "languages": [
+          "it"
+        ],
+        "lang": "it",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-im_nicola",
+        "name": "Nicola",
+        "speakerId": 36,
+        "gender": "male",
+        "languages": [
+          "it"
+        ],
+        "lang": "it",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-pf_dora",
+        "name": "Dora",
+        "speakerId": 42,
+        "gender": "female",
+        "languages": [
+          "pt"
+        ],
+        "lang": "pt-br",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-pm_alex",
+        "name": "Alex",
+        "speakerId": 43,
+        "gender": "male",
+        "languages": [
+          "pt"
+        ],
+        "lang": "pt-br",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-hf_alpha",
+        "name": "Alpha",
+        "speakerId": 31,
+        "gender": "female",
+        "languages": [
+          "hi"
+        ],
+        "lang": "hi",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-hm_omega",
+        "name": "Omega",
+        "speakerId": 33,
+        "gender": "male",
+        "languages": [
+          "hi"
+        ],
+        "lang": "hi",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-jf_alpha",
+        "name": "Alpha",
+        "speakerId": 37,
+        "gender": "female",
+        "languages": [
+          "ja"
+        ],
+        "lang": "ja",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-jm_kumo",
+        "name": "Kumo",
+        "speakerId": 41,
+        "gender": "male",
+        "languages": [
+          "ja"
+        ],
+        "lang": "ja",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-zf_xiaoxiao",
+        "name": "Xiaoxiao",
+        "speakerId": 47,
+        "gender": "female",
+        "languages": [
+          "zh"
+        ],
+        "lang": "zh",
+        "quality": "good"
+      },
+      {
+        "id": "kokoro-zm_yunxi",
+        "name": "Yunxi",
+        "speakerId": 50,
+        "gender": "male",
+        "languages": [
+          "zh"
+        ],
+        "lang": "zh",
+        "quality": "good"
+      }
+    ]
   }
 ]

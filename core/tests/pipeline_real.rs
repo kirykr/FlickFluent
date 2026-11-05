@@ -6,7 +6,7 @@
 //!
 //! `FLICK_TEST_MODELS` holds the catalogue's model folders by their catalogue ids (symlinks to
 //! smaller models are fine): `whisper-small`, `m2m100-418m`, `htdemucs`, `speaker-diarization`,
-//! `piper-en-us-ljspeech-medium`, `espeak-ng-data`. `FLICK_TEST_CLIP` picks another fixture.
+//! `kokoro-multi-lang-v1_0`, `espeak-ng-data`. `FLICK_TEST_CLIP` picks another fixture.
 #![cfg(unix)]
 
 mod support;

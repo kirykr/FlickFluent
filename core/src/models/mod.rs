@@ -9,7 +9,7 @@ mod verify;
 
 pub use catalogue::{
     bundled as bundled_catalogue, CatalogueEntry, FileSpec, Gender, LicenceClass, MachineClass,
-    Platforms, Quality, Step,
+    Platforms, Quality, Step, VoiceSpec,
 };
 pub use downloader::{download, Control, Outcome, Phase, Progress};
 pub use install::{install_entry, unpack_zip, Target};

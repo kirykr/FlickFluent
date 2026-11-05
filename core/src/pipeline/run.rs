@@ -15,7 +15,7 @@ use time::OffsetDateTime;
 use super::errors::next_step_key;
 use super::ffmpeg::Ffmpeg;
 use super::mix::{mix, MixLine, MixSection};
-use super::plan::{plan_models_with, ModelPlan};
+use super::plan::{plan_models_with, ModelPlan, VoicePick};
 use super::sections::plan as plan_sections;
 use super::stages::{extract, fingerprint};
 use super::state::{input_hash, WorkFolder};
@@ -862,7 +862,7 @@ impl Runner<'_> {
         Ok(lines)
     }
 
-    fn voice_for(&self, speaker_id: &str) -> Option<String> {
+    fn voice_for(&self, speaker_id: &str) -> Option<VoicePick> {
         let gender = self
             .dub
             .speakers
@@ -885,13 +885,21 @@ impl Runner<'_> {
             self.record_hash(index, Stage::Synthesize, "empty");
             return Ok(lines);
         }
-        let voices: Vec<String> = self.plan.voices.values().cloned().collect();
+        let picks: Vec<&VoicePick> = self.plan.voices.values().collect();
+        // The models to load, and a description of each pick for the input hash.
+        let mut voices: Vec<String> = picks.iter().map(|v| v.model.clone()).collect();
+        voices.sort();
+        voices.dedup();
         let mut parts: Vec<String> = vec![
             "synthesize".into(),
             self.dub.target_language.clone(),
             file_hash(&dir.join("translated.json")),
         ];
-        parts.extend(voices.clone());
+        parts.extend(
+            picks
+                .iter()
+                .map(|v| format!("{}#{}#{}", v.model, v.speaker_id, v.lang)),
+        );
         // Speakers and their genders are in this section's transcript file.
         parts.push(file_hash(&dir.join("sec.json")));
         let refs: Vec<&str> = parts.iter().map(String::as_str).collect();
@@ -930,7 +938,10 @@ impl Runner<'_> {
             request_lines.push(json!({
                 "id": l.id,
                 "text": l.translated.clone().unwrap_or_else(|| l.text.clone()),
-                "voiceId": voice,
+                "voiceId": voice.model,
+                "speakerId": voice.speaker_id,
+                "lang": voice.lang,
+                "lexicon": voice.lexicon,
                 "targetMs": l.end_ms - l.start_ms,
             }));
         }

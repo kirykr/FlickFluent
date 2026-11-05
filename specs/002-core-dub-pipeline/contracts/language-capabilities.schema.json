@@ -40,6 +40,24 @@
         "description": "Required for transcribe, translate and speak."
       },
       "gender": { "enum": ["male", "female", null] },
+      "voices": {
+        "type": "array",
+        "description": "Voices of a model that holds many. Each is a candidate for its languages and gender.",
+        "items": {
+          "type": "object",
+          "required": ["id", "name", "speakerId", "gender", "languages", "lang", "quality"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "speakerId": { "type": "integer", "minimum": 0 },
+            "gender": { "enum": ["male", "female"] },
+            "languages": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)?$" } },
+            "lang": { "type": "string" },
+            "lexicon": { "type": "string" },
+            "quality": { "enum": ["good", "fair", "weak"] }
+          }
+        }
+      },
       "machineClass": { "enum": ["minimum", "mid", "fullLocal"] },
       "qualityByLanguage": {
         "type": "object",

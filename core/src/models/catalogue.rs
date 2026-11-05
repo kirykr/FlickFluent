@@ -53,6 +53,37 @@ pub enum Quality {
     Weak,
 }
 
+impl Quality {
+    /// Higher is better, for choosing between voices.
+    pub fn rank(self) -> u8 {
+        match self {
+            Quality::Good => 2,
+            Quality::Fair => 1,
+            Quality::Weak => 0,
+        }
+    }
+}
+
+/// One voice inside a model that holds many (Kokoro). Piper models are one voice each and do
+/// not use this.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VoiceSpec {
+    /// Stable key, such as `kokoro-ff_siwis`.
+    pub id: String,
+    pub name: String,
+    /// Which voice of the model to use (the `sid` of the engine).
+    pub speaker_id: u32,
+    pub gender: Gender,
+    pub languages: Vec<String>,
+    /// Engine language tag the voice needs, such as `fr` or `en-us`.
+    pub lang: String,
+    /// Pronunciation list inside the model folder, when the language needs one.
+    #[serde(default)]
+    pub lexicon: Option<String>,
+    pub quality: Quality,
+}
+
 /// One file of a multi-file model.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -120,6 +151,9 @@ pub struct CatalogueEntry {
     pub step: Step,
     #[serde(default)]
     pub languages: Vec<String>,
+    /// Voices of a multi-voice model. Empty for single-voice models.
+    #[serde(default)]
+    pub voices: Vec<VoiceSpec>,
     #[serde(default)]
     pub gender: Option<Gender>,
     #[serde(default)]

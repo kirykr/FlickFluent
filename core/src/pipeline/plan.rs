@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 
 use crate::hardware::{Accelerator, MachineInput};
-use crate::models::{CatalogueEntry, Gender, MachineClass, Step};
+use crate::models::{CatalogueEntry, Gender, MachineClass, Quality, Step};
 
 /// `fullLocal` needs the full-local spec (8 cores, 16 GB, a GPU or Apple Silicon), `mid` needs
 /// 6 cores and 12 GB, anything else is `minimum`. Unknown values count as not meeting a tier.
@@ -63,6 +63,19 @@ fn best<'a>(
         .max_by_key(|e| (e.machine_class, installed.contains(&e.id)))
 }
 
+/// A voice chosen for one speaker gender: which model holds it and how to ask for it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VoicePick {
+    /// Catalogue id of the model that holds the voice.
+    pub model: String,
+    /// Voice of that model (`0` for a model that has one voice).
+    pub speaker_id: u32,
+    /// Engine language tag, empty when the model needs none.
+    pub lang: String,
+    /// Pronunciation list inside the model folder, when the voice needs one.
+    pub lexicon: Option<String>,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ModelPlan {
     pub runtime: Option<String>,
@@ -73,7 +86,7 @@ pub struct ModelPlan {
     pub speaker: Option<String>,
     /// Voice entry per speaker gender (`male`, `female`). A language with one voice has it under
     /// both keys.
-    pub voices: BTreeMap<Gender, String>,
+    pub voices: BTreeMap<Gender, VoicePick>,
     /// Steps nobody can do for this language pair, as `(step, language)`.
     pub unsupported: Vec<(Step, String)>,
 }
@@ -92,7 +105,7 @@ impl ModelPlan {
         .into_iter()
         .flatten()
         .cloned()
-        .chain(self.voices.values().cloned())
+        .chain(self.voices.values().map(|v| v.model.clone()))
         .collect();
         let mut i = 0;
         while i < ids.len() {
@@ -181,21 +194,92 @@ pub fn plan_models_with(
         plan.unsupported
             .push((Step::Translate, format!("{source}>{target}")));
     }
-    let voice = |gender: Gender| {
-        pick(Step::Speak, &|e| {
-            covers(e, target) && e.gender == Some(gender)
-        })
+    let candidates = voice_candidates(catalogue, class, os, arch, installed, target);
+    let best_voice = |gender: Option<Gender>| {
+        candidates
+            .iter()
+            .filter(|c| gender.is_none() || c.gender == gender)
+            // Better quality first, then one already installed, then the earlier catalogue entry.
+            .max_by_key(|c| (c.quality.rank(), c.installed, std::cmp::Reverse(c.order)))
+            .map(|c| c.pick.clone())
     };
-    let any = pick(Step::Speak, &|e| covers(e, target));
     for gender in [Gender::Female, Gender::Male] {
-        if let Some(id) = voice(gender).or_else(|| any.clone()) {
-            plan.voices.insert(gender, id);
+        if let Some(v) = best_voice(Some(gender)).or_else(|| best_voice(None)) {
+            plan.voices.insert(gender, v);
         }
     }
     if plan.voices.is_empty() {
         plan.unsupported.push((Step::Speak, target.to_string()));
     }
     plan
+}
+
+struct VoiceCandidate {
+    gender: Option<Gender>,
+    quality: Quality,
+    installed: bool,
+    order: usize,
+    pick: VoicePick,
+}
+
+/// Every voice that can speak `target` on this machine: each voice of a multi-voice model, and
+/// each single-voice model.
+fn voice_candidates(
+    catalogue: &[CatalogueEntry],
+    class: MachineClass,
+    os: &str,
+    arch: &str,
+    installed: &[String],
+    target: &str,
+) -> Vec<VoiceCandidate> {
+    let want = primary(target).to_lowercase();
+    let mut out = Vec::new();
+    for (order, e) in catalogue.iter().enumerate() {
+        if e.step != Step::Speak || e.machine_class > class || !usable(e, os, arch) {
+            continue;
+        }
+        let is_installed = installed.contains(&e.id);
+        if e.voices.is_empty() {
+            if covers(e, target) {
+                out.push(VoiceCandidate {
+                    gender: e.gender,
+                    quality: e
+                        .quality_by_language
+                        .get(&want)
+                        .copied()
+                        .unwrap_or(Quality::Fair),
+                    installed: is_installed,
+                    order,
+                    pick: VoicePick {
+                        model: e.id.clone(),
+                        speaker_id: 0,
+                        lang: String::new(),
+                        lexicon: None,
+                    },
+                });
+            }
+            continue;
+        }
+        for v in e.voices.iter().filter(|v| {
+            v.languages
+                .iter()
+                .any(|l| primary(l).eq_ignore_ascii_case(&want))
+        }) {
+            out.push(VoiceCandidate {
+                gender: Some(v.gender),
+                quality: v.quality,
+                installed: is_installed,
+                order,
+                pick: VoicePick {
+                    model: e.id.clone(),
+                    speaker_id: v.speaker_id,
+                    lang: v.lang.clone(),
+                    lexicon: v.lexicon.clone(),
+                },
+            });
+        }
+    }
+    out
 }
 
 /// Bytes the work folder will need: about three times the stereo 44.1 kHz source audio (full
