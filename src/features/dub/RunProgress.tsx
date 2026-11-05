@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { dubError, etaMinutes, percent, STAGE_KEYS } from "./format";
+import { languageName } from "./languages";
 import type { RunView } from "./useDubRun";
 import type { Stage } from "./types";
 
@@ -16,9 +17,11 @@ interface Props {
   onCancel: () => void;
   onResume: () => void;
   onRestart: () => void;
+  /** The detected language equals the target and the user agrees to go on. */
+  onConfirmSame: () => void;
 }
 
-export function RunProgress({ view, onCancel, onResume, onRestart }: Props) {
+export function RunProgress({ view, onCancel, onResume, onRestart, onConfirmSame }: Props) {
   // A run recorded as running with nothing running was cut short (the app closed or crashed).
   const interrupted = !!view.status?.interrupted && view.runId === null;
   const running =
@@ -62,6 +65,11 @@ export function RunProgress({ view, onCancel, onResume, onRestart }: Props) {
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {view.detected && (
+          <p className="text-sm" data-testid="detected-language">
+            {t("languages.detected", { language: languageName(view.detected) || view.detected })}
+          </p>
+        )}
         <Progress value={percent(overall)} aria-label={t("dub.run.overall")} />
         <ul className="flex flex-col gap-1 text-sm">
           {ORDER.map((stage) => {
@@ -99,6 +107,19 @@ export function RunProgress({ view, onCancel, onResume, onRestart }: Props) {
             <AlertDescription>
               {t(err.key, err.params)}
               {detail && <span className="mt-1 block text-xs opacity-70">{detail}</span>}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {view.error?.code === "SAME_LANGUAGE" && (
+          <Alert data-testid="same-detected">
+            <AlertDescription className="flex items-center gap-3">
+              {t("languages.sameDetected", {
+                language: languageName(view.detected ?? "") || view.detected || "",
+              })}
+              <Button size="sm" variant="outline" onClick={onConfirmSame}>
+                {t("dub.new.sameConfirm")}
+              </Button>
             </AlertDescription>
           </Alert>
         )}

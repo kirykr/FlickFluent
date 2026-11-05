@@ -22,6 +22,7 @@ Principle V (reuse open source) and Principle VI (licence discipline). Every reu
 | ESLint, Prettier, TypeScript, @types/node | Lint, format, types | MIT / MIT / Apache-2.0 / MIT | Standard |
 | tauri-plugin-dialog, @tauri-apps/plugin-dialog | Open and save file pickers | MIT OR Apache-2.0 | Official Tauri plugin |
 | tempfile (test only) | Temporary folders in tests | MIT OR Apache-2.0 | Test-only |
+| jsdom, @testing-library/react, @testing-library/user-event (test only) | Render tests for the language picker | MIT | Test-only |
 | FFmpeg (LGPL build, BtbN FFmpeg-Builds on Windows) | Read, cut, mix and mux media | LGPL-2.1-or-later | Only practical tool for any common format. Run as a separate program, downloaded on demand, replaceable. Notice in About. No macOS LGPL build is pinned yet (see below). |
 | faster-whisper | Speech to text | MIT | Fast CPU inference through CTranslate2 |
 | CTranslate2 | Inference engine for Whisper and M2M100 | MIT | int8 CPU speed, low memory |

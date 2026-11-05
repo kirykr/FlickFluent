@@ -422,3 +422,125 @@ async fn extracted_audio_is_not_reused_for_a_different_video() {
     .unwrap();
     assert_eq!(info["durationMs"].as_u64().unwrap() / 1000, 120);
 }
+
+fn fallbacks(subtitles_only: bool, pivot: bool) -> flickfluent_core::project::dub::FallbackChoices {
+    flickfluent_core::project::dub::FallbackChoices {
+        subtitles_only,
+        pivot_via_english: pivot,
+        ..Default::default()
+    }
+}
+
+#[tokio::test]
+async fn a_subtitles_only_run_translates_but_does_not_speak_or_mix() {
+    let root = tempfile::tempdir().unwrap();
+    let cfg = config(root.path(), "subs.flick", json!({}));
+    let mut dub = dub_for(&clip("clip-20s-fr.mp4"), "km").await; // no voice, no translator needed by the fake
+    dub.options.fallbacks = fallbacks(true, false);
+    // The fake catalogue has no Khmer translator, so pick a language it does cover.
+    dub.target_language = "en".into();
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let sink = events.clone();
+    let out = run_dub(
+        &cfg,
+        dub,
+        Mode::Fresh,
+        CancelToken::default(),
+        &mut move |e| sink.lock().unwrap().push(e),
+    )
+    .await
+    .unwrap();
+    assert_eq!(out.run.as_ref().unwrap().state, RunState::Completed);
+    assert!(!out.lines.is_empty());
+    assert!(out.lines.iter().all(
+        |l| l.translated.as_deref().is_some_and(|t| t.starts_with("T:")) && l.audio.is_none()
+    ));
+    let work = WorkFolder::folder_for(&cfg.project_path);
+    assert!(!work.join("dub-mix.wav").exists(), "nothing was mixed");
+    assert!(
+        !work.join("sections/0000/clips").exists(),
+        "nothing was spoken"
+    );
+    let events = events.lock().unwrap();
+    assert!(!events.iter().any(|e| matches!(
+        e,
+        RunEvent::Stage {
+            stage: Stage::Synthesize,
+            status: StageStatus::Running
+        }
+    )));
+}
+
+#[tokio::test]
+async fn a_pivot_translates_twice_through_english() {
+    use flickfluent_core::models::{CatalogueEntry, MachineClass, Step};
+    let root = tempfile::tempdir().unwrap();
+    let mut cfg = config(root.path(), "pivot.flick", json!({}));
+    // fr<->en and en<->de models; no model covers fr to de directly.
+    cfg.catalogue.retain(|e| e.step != Step::Translate);
+    for (id, langs) in [("t-fr-en", ["fr", "en"]), ("t-en-de", ["en", "de"])] {
+        std::fs::create_dir_all(cfg.models_dir.join(id)).unwrap();
+        cfg.catalogue.push(CatalogueEntry {
+            id: id.into(),
+            step: Step::Translate,
+            machine_class: MachineClass::Minimum,
+            languages: langs.iter().map(|s| s.to_string()).collect(),
+            default_enabled: true,
+            ..Default::default()
+        });
+    }
+    let mut dub = dub_for(&clip("clip-20s-fr.mp4"), "de").await;
+    dub.options.fallbacks = fallbacks(true, true);
+    let out = run_dub(&cfg, dub, Mode::Fresh, CancelToken::default(), &mut |_| {})
+        .await
+        .unwrap();
+    assert!(
+        out.lines.iter().all(|l| l
+            .translated
+            .as_deref()
+            .is_some_and(|t| t.starts_with("T:T:"))),
+        "{:?}",
+        out.lines[0].translated
+    );
+
+    // Without the choice the pair is unsupported: the run refuses before translating.
+    let mut plain = dub_for(&clip("clip-20s-fr.mp4"), "de").await;
+    plain.options.fallbacks = fallbacks(true, false);
+    let err = run_dub(
+        &cfg,
+        plain,
+        Mode::Fresh,
+        CancelToken::default(),
+        &mut |_| {},
+    )
+    .await
+    .unwrap_err();
+    assert_eq!(err.code, flickfluent_core::error::MODELS_MISSING);
+}
+
+#[tokio::test]
+async fn a_detected_language_equal_to_the_target_asks_before_going_on() {
+    let root = tempfile::tempdir().unwrap();
+    let cfg = config(root.path(), "same2.flick", json!({}));
+    let mut dub = dub_for(&clip("clip-20s-fr.mp4"), "fr").await;
+    dub.source_language = "auto".into(); // the fake sidecar detects French
+    dub.options.fallbacks = fallbacks(true, false);
+    let err = run_dub(
+        &cfg,
+        dub.clone(),
+        Mode::Fresh,
+        CancelToken::default(),
+        &mut |_| {},
+    )
+    .await
+    .unwrap_err();
+    assert_eq!(err.code, flickfluent_core::error::SAME_LANGUAGE);
+    assert_eq!(err.details.unwrap()["detected"], "fr");
+
+    dub.options.confirm_same = true;
+    let out = run_dub(&cfg, dub, Mode::Fresh, CancelToken::default(), &mut |_| {})
+        .await
+        .unwrap();
+    assert_eq!(out.run.unwrap().state, RunState::Completed);
+    assert_eq!(out.detected_language.as_deref(), Some("fr"));
+}

@@ -100,6 +100,11 @@ export function ModelsScreen() {
               {t("models.size")}: {formatBytes(confirming.sizeBytes)} · {t("models.licence")}:{" "}
               {confirming.licence}
             </p>
+            {confirming.licenceNoticeKey && (
+              <p className="mt-1 text-sm" data-testid="licence-notice">
+                {t(confirming.licenceNoticeKey)}
+              </p>
+            )}
             <div className="mt-2 flex gap-2">
               <Button onClick={() => start(confirming)}>{t("models.confirmStart")}</Button>
               <Button variant="outline" onClick={() => setConfirming(null)}>
@@ -126,6 +131,11 @@ export function ModelsScreen() {
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">{m.purpose}</p>
+                    {m.licenceNoticeKey && (
+                      <p className="text-xs text-muted-foreground" data-testid={`notice-${m.id}`}>
+                        {t(m.licenceNoticeKey)}
+                      </p>
+                    )}
                     <p>
                       <Badge
                         variant={m.state === "installed" ? "default" : "secondary"}

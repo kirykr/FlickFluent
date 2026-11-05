@@ -118,19 +118,19 @@ description: "Task list for feature 002: Core Dub Pipeline (Local)"
 
 ### Tests first
 
-- [ ] T052 [P] [US2] Write `core/tests/languages.rs`: the list is the union of catalogue entries per step; adding a test entry adds the language with no other change (SC-005); non-commercial entries count only when enabled; `languages_check_pair` returns the limiting step, quality, and fallbacks `subtitlesOnly`, `genericVoice`, `pivotViaEnglish`, `optInNonCommercialVoice`, `installModel` as the data supports (SC-006)
-- [ ] T053 [P] [US2] Write Vitest `src/features/dub/LanguagePicker.test.tsx`: typing part of a name filters the list, `auto-detect` appears for source only, names come from locale data and the code stays the key
+- [X] T052 [P] [US2] Write `core/tests/languages.rs`: the list is the union of catalogue entries per step; adding a test entry adds the language with no other change (SC-005); non-commercial entries count only when enabled; `languages_check_pair` returns the limiting step, quality, and fallbacks `subtitlesOnly`, `genericVoice`, `pivotViaEnglish`, `optInNonCommercialVoice`, `installModel` as the data supports (SC-006)
+- [X] T053 [P] [US2] Write Vitest `src/features/dub/LanguagePicker.test.tsx`: typing part of a name filters the list, `auto-detect` appears for source only, names come from locale data and the code stays the key
 
 ### Implementation
 
-- [ ] T054 [US2] Implement `core/src/languages/mod.rs`: build `Language[]` from the catalogue (transcribe, translateFrom, translateTo, speak with voice counts, quality per step), using `config/language-codes.json`
-- [ ] T055 [US2] Implement `languages_check_pair` in `core/src/languages/pair.rs`: per-step support, reasons, fallbacks, weak-pair pivot rule from `qualityByLanguage`
-- [ ] T056 [US2] Implement `languages_list` and `languages_check_pair` commands in `src-tauri/src/commands/languages.rs`
-- [ ] T057 [US2] Build `src/features/dub/LanguagePicker.tsx`: searchable dropdown with locale display names (via `Intl.DisplayNames`), auto-detect option for source, quality hints
-- [ ] T058 [US2] Build the pair warning panel in `src/features/dub/PairCheck.tsx`: names the limited step, lists fallbacks, shows the licence notice before an opt-in non-commercial voice or model can be chosen, blocks start until a fallback is chosen (`NO_FALLBACK_CHOSEN`); wire into `NewDub.tsx`
-- [ ] T059 [US2] Show the detected language after auto-detect and ask confirmation when source equals target (`SAME_LANGUAGE`) in `src/features/dub/NewDub.tsx`
-- [ ] T060 [P] [US2] Add Playwright spec `e2e/languages.spec.ts`: search, select, auto-detect result shown, unsupported pair warning appears before start
-- [ ] T061 [US2] Add the non-commercial licence notice text keys to `src/i18n/en.json` and show the notice in About and in the model list (`src/features/models/`)
+- [X] T054 [US2] Implement `core/src/languages/mod.rs`: build `Language[]` from the catalogue (transcribe, translateFrom, translateTo, speak with voice counts, quality per step), using `config/language-codes.json`
+- [X] T055 [US2] Implement `languages_check_pair` in `core/src/languages/pair.rs`: per-step support, reasons, fallbacks, weak-pair pivot rule from `qualityByLanguage`
+- [X] T056 [US2] Implement `languages_list` and `languages_check_pair` commands in `src-tauri/src/commands/languages.rs`
+- [X] T057 [US2] Build `src/features/dub/LanguagePicker.tsx`: searchable dropdown with locale display names (via `Intl.DisplayNames`), auto-detect option for source, quality hints
+- [X] T058 [US2] Build the pair warning panel in `src/features/dub/PairCheck.tsx`: names the limited step, lists fallbacks, shows the licence notice before an opt-in non-commercial voice or model can be chosen, blocks start until a fallback is chosen (`NO_FALLBACK_CHOSEN`); wire into `NewDub.tsx` (fallbacks implemented end to end: subtitles only with an .srt export, generic voice, pivot through English, opt-in; no non-commercial entries exist in the catalogue yet, so opt-in is only exercised by tests)
+- [X] T059 [US2] Show the detected language after auto-detect and ask confirmation when source equals target (`SAME_LANGUAGE`) in `src/features/dub/NewDub.tsx`
+- [X] T060 [P] [US2] Add Playwright spec `e2e/languages.spec.ts`: search, select, auto-detect result shown, unsupported pair warning appears before start
+- [X] T061 [US2] Add the non-commercial licence notice text keys to `src/i18n/en.json` and show the notice in About and in the model list (`src/features/models/`) (there was no About screen, so a licence card was added to Settings)
 
 **Checkpoint**: language list is data-driven and warnings appear before any processing.
 

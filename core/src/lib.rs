@@ -4,6 +4,7 @@ pub mod cli;
 pub mod error;
 pub mod fsutil;
 pub mod hardware;
+pub mod languages;
 pub mod memory;
 pub mod models;
 pub mod pipeline;

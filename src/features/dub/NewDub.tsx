@@ -8,27 +8,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   dubConfigure,
   dubPreflight,
   dubProbeSource,
   dubStart,
+  languagesCheckPair,
+  languagesList,
   modelDownloadStart,
 } from "../../app/ipc";
 import { asAppError } from "../projects/errors";
 import { formatBytes } from "../models/format";
 import type { ModelRecord } from "../models/types";
 import type { AppErrorShape } from "../projects/types";
-import { BASIC_LANGUAGES, baseName, dubError, formatClock, languageName, percent } from "./format";
-import type { DubData, DubOptions, Preflight, Quality, SourceInfo } from "./types";
+import { baseName, dubError, formatClock, percent } from "./format";
+import { LanguagePicker } from "./LanguagePicker";
+import { pairResolved } from "./languages";
+import { PairCheck } from "./PairCheck";
+import {
+  NO_FALLBACKS,
+  type DubData,
+  type DubOptions,
+  type FallbackChoices,
+  type Language,
+  type PairCheck as PairCheckResult,
+  type Preflight,
+  type Quality,
+  type SourceInfo,
+} from "./types";
 
 interface Props {
   handle: string;
@@ -52,6 +60,11 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
   const [busy, setBusy] = useState(false);
   const [sameOk, setSameOk] = useState(false);
   const [downloads, setDownloads] = useState<Record<string, ModelRecord>>({});
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [pair, setPair] = useState<PairCheckResult | null>(null);
+  const [fallbacks, setFallbacks] = useState<FallbackChoices>(
+    saved?.options.fallbacks ?? NO_FALLBACKS,
+  );
 
   const options = useCallback(
     (): DubOptions => ({
@@ -59,8 +72,9 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
       exportKind: saved?.options.exportKind ?? "video",
       exportName: saved?.options.exportName || baseName(path),
       quality,
+      fallbacks,
     }),
-    [mute, quality, saved, path],
+    [mute, quality, saved, path, fallbacks],
   );
 
   const attempt = useCallback(async <T,>(fn: () => Promise<T>): Promise<T | undefined> => {
@@ -88,11 +102,39 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
   const checkRef = useRef(check);
   checkRef.current = check;
 
+  // The language list comes from the catalogue; non-commercial models count once opted in.
+  const optInKey = fallbacks.optIn.join(",");
+  useEffect(() => {
+    languagesList(fallbacks.optIn)
+      .then(setLanguages)
+      .catch(() => setLanguages([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [optInKey]);
+
+  // What the chosen pair needs, shown before anything is processed.
+  useEffect(() => {
+    languagesCheckPair(source, target, fallbacks.optIn)
+      .then(setPair)
+      .catch(() => setPair(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source, target, optInKey]);
+
+  // A different pair needs different fixes: start from none (but keep what the project saved
+  // when the screen first opens).
+  const firstPair = useRef(true);
+  useEffect(() => {
+    if (firstPair.current) {
+      firstPair.current = false;
+      return;
+    }
+    setFallbacks({ ...NO_FALLBACKS });
+  }, [source, target]);
+
   // Re-check when any choice changes and a file is chosen.
   useEffect(() => {
     if (path && !readOnly) void check();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, source, target, mute, quality, sameOk]);
+  }, [path, source, target, mute, quality, sameOk, fallbacks]);
 
   useEffect(() => {
     let off: (() => void) | undefined;
@@ -132,20 +174,20 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
     if (runId) onStarted(runId);
   };
 
-  const languages = (withAuto: boolean) =>
-    BASIC_LANGUAGES.filter((c) => withAuto || c !== "auto").map((c) => ({
-      value: c,
-      label: c === "auto" ? t("dub.new.autoDetect") : languageName(c),
-    }));
-
-  const sameLanguage = source !== "auto" && source === target;
+  const sameLanguage = source !== "auto" && source === target && !sameOk;
   const downloading = (pre?.missingModels ?? []).some((m) => {
     const d = downloads[m.id];
     return d && (d.state === "downloading" || d.state === "verifying");
   });
-  const blocked = (pre?.blockers.length ?? 0) > 0;
+  // Language limits are shown by the pair panel; only machine limits are listed separately.
+  const machineBlockers = (pre?.blockers ?? []).filter((b) => b.reason === "machine");
   const ready =
-    !!pre && !blocked && pre.missingModels.length === 0 && !sameLanguage && !downloading;
+    !!pre &&
+    machineBlockers.length === 0 &&
+    pairResolved(pair, fallbacks) &&
+    pre.missingModels.length === 0 &&
+    !sameLanguage &&
+    !downloading;
   const err = error
     ? dubError(error as AppErrorShape & { details?: Record<string, unknown> })
     : null;
@@ -190,41 +232,26 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <Label htmlFor="dub-source-language">{t("dub.new.sourceLanguage")}</Label>
-              <Select
-                items={languages(true)}
+              <LanguagePicker
+                id="dub-source-language"
+                languages={languages}
                 value={source}
-                onValueChange={(v) => v && setSource(v)}
-              >
-                <SelectTrigger id="dub-source-language" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {languages(true).map((l) => (
-                    <SelectItem key={l.value} value={l.value}>
-                      {l.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={setSource}
+                role="source"
+                allowAuto
+                disabled={readOnly}
+              />
             </div>
             <div className="flex flex-col gap-1">
               <Label htmlFor="dub-target-language">{t("dub.new.targetLanguage")}</Label>
-              <Select
-                items={languages(false)}
+              <LanguagePicker
+                id="dub-target-language"
+                languages={languages}
                 value={target}
-                onValueChange={(v) => v && setTarget(v)}
-              >
-                <SelectTrigger id="dub-target-language" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {languages(false).map((l) => (
-                    <SelectItem key={l.value} value={l.value}>
-                      {l.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={setTarget}
+                role="target"
+                disabled={readOnly}
+              />
             </div>
           </div>
 
@@ -250,6 +277,8 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
         </CardContent>
       </Card>
 
+      <PairCheck check={pair} choices={fallbacks} onChoices={setFallbacks} readOnly={readOnly} />
+
       {sameLanguage && (
         <Alert role="alert">
           <AlertTitle>{t("dub.error.sameLanguage")}</AlertTitle>
@@ -273,7 +302,7 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
         </Alert>
       ))}
 
-      {pre?.blockers.map((b) => (
+      {machineBlockers.map((b) => (
         <Alert key={`${b.step}-${b.reason}`} variant="destructive" role="alert">
           <AlertDescription>
             {t(b.reason === "machine" ? "dub.blocker.machine" : "dub.blocker.language", {

@@ -15,13 +15,13 @@ use time::OffsetDateTime;
 use super::errors::next_step_key;
 use super::ffmpeg::Ffmpeg;
 use super::mix::{mix, MixLine, MixSection};
-use super::plan::{plan_models_with, ModelPlan, VoicePick};
+use super::plan::{plan_models_full, ModelPlan, VoicePick};
 use super::sections::plan as plan_sections;
 use super::stages::{extract, fingerprint};
 use super::state::{input_hash, WorkFolder};
 use crate::error::{
-    AppError, CANCELLED, MODELS_MISSING, NOTHING_TO_RESUME, NO_SPEECH_FOUND, SOURCE_CHANGED,
-    STAGE_FAILED,
+    AppError, CANCELLED, MODELS_MISSING, NOTHING_TO_RESUME, NO_SPEECH_FOUND, SAME_LANGUAGE,
+    SOURCE_CHANGED, STAGE_FAILED,
 };
 use crate::models::{CatalogueEntry, Gender, MachineClass};
 use crate::project::dub::{
@@ -90,6 +90,8 @@ pub enum RunEvent {
     },
     Line(TranscriptLine),
     Error(RunError),
+    /// The spoken language found by auto-detect, as soon as it is known.
+    Detected(String),
     Done(RunState),
 }
 
@@ -230,7 +232,7 @@ pub async fn run_dub(
         .into_iter()
         .map(|m| m.id)
         .collect();
-    let plan = plan_models_with(
+    let plan = plan_models_full(
         &cfg.catalogue,
         cfg.class,
         &cfg.os,
@@ -239,6 +241,7 @@ pub async fn run_dub(
         &dub.target_language,
         dub.options.quality == Quality::Fast,
         &have,
+        &dub.options.fallbacks,
     );
     dub.lines.clear();
 
@@ -466,6 +469,7 @@ impl Runner<'_> {
 
         // 4. per-section stages
         let fast = self.dub.options.quality == Quality::Fast;
+        let subtitles_only = self.dub.options.fallbacks.subtitles_only;
         let count = self.run.sections.len();
         for stage in Stage::PER_SECTION {
             if !(fast && stage == Stage::Separate) {
@@ -476,7 +480,9 @@ impl Runner<'_> {
             let started = Instant::now();
             let mut lines = Vec::new();
             for (stage_index, stage) in Stage::PER_SECTION.into_iter().enumerate() {
-                if fast && stage == Stage::Separate {
+                if (fast && stage == Stage::Separate)
+                    || (subtitles_only && stage == Stage::Synthesize)
+                {
                     continue;
                 }
                 self.check_cancel()?;
@@ -519,7 +525,10 @@ impl Runner<'_> {
         // 5. mix
         self.check_cancel()?;
         self.set_stage(Stage::Mix, StageStatus::Running);
-        self.mix_all().await?;
+        // A run that does not speak has nothing to mix: its result is the translated lines.
+        if !subtitles_only {
+            self.mix_all().await?;
+        }
         self.set_stage(Stage::Mix, StageStatus::Done);
         let count = self.run.sections.len() as u32;
         self.emit(RunEvent::Progress {
@@ -601,11 +610,12 @@ impl Runner<'_> {
             .to_string();
         self.dub.detected_language = Some(language.clone());
         self.source_lang = language.clone();
+        self.emit(RunEvent::Detected(language.clone()));
         let have: Vec<String> = crate::models::installed(&self.cfg.models_dir)
             .into_iter()
             .map(|m| m.id)
             .collect();
-        self.plan = plan_models_with(
+        self.plan = plan_models_full(
             &self.cfg.catalogue,
             self.cfg.class,
             &self.cfg.os,
@@ -614,7 +624,16 @@ impl Runner<'_> {
             &self.dub.target_language,
             self.dub.options.quality == Quality::Fast,
             &have,
+            &self.dub.options.fallbacks,
         );
+        // Detection can show that nothing needs translating. That is worth a question, not a
+        // silent run: the user confirms and resumes.
+        let same =
+            language.split(['-', '_']).next() == self.dub.target_language.split(['-', '_']).next();
+        if same && !self.dub.options.confirm_same {
+            return Err(AppError::new(SAME_LANGUAGE, "dub.error.sameLanguage")
+                .with_details(json!({ "detected": language })));
+        }
         Ok(())
     }
 
@@ -782,6 +801,44 @@ impl Runner<'_> {
         Ok(lines)
     }
 
+    /// Translate `texts` with one model. The count must not change.
+    async fn translate_texts(
+        &mut self,
+        texts: &[String],
+        source: &str,
+        target: &str,
+        model: &Option<String>,
+        dir: &Path,
+        index: usize,
+    ) -> Result<Vec<String>, AppError> {
+        let main = self.model_dir(model)?;
+        let req = self.request(
+            "translate",
+            json!({
+                "source": source,
+                "target": target,
+                "lines": texts.iter().map(|t| json!({ "text": t })).collect::<Vec<_>>(),
+            }),
+            dir,
+            "sec",
+            json!({ "main": main }),
+        );
+        let done = self.call(req, index, Stage::Translate).await?;
+        let out: Vec<String> = done.result["translated"]
+            .as_array()
+            .map(|a| {
+                a.iter()
+                    .map(|v| v.as_str().unwrap_or("").to_string())
+                    .collect()
+            })
+            .unwrap_or_default();
+        if out.len() != texts.len() {
+            return Err(AppError::new(STAGE_FAILED, "dub.error.stageFailed")
+                .with_details(json!({ "stage": "translate", "reason": "line count changed" })));
+        }
+        Ok(out)
+    }
+
     async fn translate(&mut self, index: usize) -> Result<Vec<TranscriptLine>, AppError> {
         let sec = self.section(index);
         let dir = self.work.section_dir(sec.index);
@@ -795,6 +852,7 @@ impl Runner<'_> {
         let hash = input_hash(&[
             "translate",
             &model,
+            self.plan.pivot.as_deref().unwrap_or(""),
             &self.source_lang,
             &self.dub.target_language,
             &file_hash(&dir.join("sec.json")),
@@ -818,36 +876,39 @@ impl Runner<'_> {
         }
         let translated: Vec<String> = if same {
             lines.iter().map(|l| l.text.clone()).collect()
-        } else {
-            let main = self.model_dir(&self.plan.translate.clone())?;
-            let req = self.request(
-                "translate",
-                json!({
-                    "source": self.source_lang,
-                    "target": self.dub.target_language,
-                    "lines": lines.iter().map(|l| json!({ "text": l.text })).collect::<Vec<_>>(),
-                }),
+        } else if let Some(second) = self.plan.pivot.clone() {
+            // Through English: source to English, then English to the target.
+            let texts: Vec<String> = lines.iter().map(|l| l.text.clone()).collect();
+            let first = self
+                .translate_texts(
+                    &texts,
+                    &self.source_lang.clone(),
+                    "en",
+                    &self.plan.translate.clone(),
+                    &dir,
+                    index,
+                )
+                .await?;
+            self.translate_texts(
+                &first,
+                "en",
+                &self.dub.target_language.clone(),
+                &Some(second),
                 &dir,
-                "sec",
-                json!({ "main": main }),
-            );
-            let done = self.call(req, index, Stage::Translate).await?;
-            let out: Vec<String> = done.result["translated"]
-                .as_array()
-                .map(|a| {
-                    a.iter()
-                        .map(|v| v.as_str().unwrap_or("").to_string())
-                        .collect()
-                })
-                .unwrap_or_default();
-            if out.len() != lines.len() {
-                return Err(
-                    AppError::new(STAGE_FAILED, "dub.error.stageFailed").with_details(
-                        json!({ "stage": "translate", "reason": "line count changed" }),
-                    ),
-                );
-            }
-            out
+                index,
+            )
+            .await?
+        } else {
+            let texts: Vec<String> = lines.iter().map(|l| l.text.clone()).collect();
+            self.translate_texts(
+                &texts,
+                &self.source_lang.clone(),
+                &self.dub.target_language.clone(),
+                &self.plan.translate.clone(),
+                &dir,
+                index,
+            )
+            .await?
         };
         crate::fsutil::write_atomic(
             &done_path,

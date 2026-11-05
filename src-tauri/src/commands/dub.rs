@@ -14,7 +14,7 @@ use flickfluent_core::error::{
 use flickfluent_core::hardware;
 use flickfluent_core::models::{bundled_catalogue, installed};
 use flickfluent_core::pipeline::ffmpeg::{Ffmpeg, SourceInfo};
-use flickfluent_core::pipeline::plan::{machine_class, plan_models_with};
+use flickfluent_core::pipeline::plan::{machine_class, plan_models_full};
 use flickfluent_core::pipeline::preflight::{check_start, preflight, Preflight};
 use flickfluent_core::pipeline::run::{run_dub, CancelToken, Mode, RunConfig, RunEvent};
 use flickfluent_core::pipeline::stages::{
@@ -40,6 +40,7 @@ pub mod event {
     pub const LINE: &str = "dub:line";
     pub const ERROR: &str = "dub:error";
     pub const DONE: &str = "dub:done";
+    pub const DETECTED: &str = "dub:detected";
     /// Sent by the benchmark story (US5).
     #[allow(dead_code)]
     pub const BENCH_PROGRESS: &str = "bench:progress";
@@ -150,18 +151,7 @@ fn store(state: &ProjectState, handle: &str, dub: &DubData) -> Result<(), AppErr
     })
 }
 
-// --- languages (US2) and benchmark (US5): stubs --------------------------------------------
-
-#[tauri::command]
-pub fn languages_list() -> Result<Value, AppError> {
-    not_implemented()
-}
-
-#[tauri::command]
-pub fn languages_check_pair(source: String, target: String) -> Result<Value, AppError> {
-    let _ = (source, target);
-    not_implemented()
-}
+// --- benchmark (US5): stub --------------------------------------------
 
 #[tauri::command]
 pub fn bench_run(fixture_id: String, simulated: Option<bool>) -> Result<String, AppError> {
@@ -197,6 +187,8 @@ pub struct OptionsInput {
     export_name: String,
     #[serde(default)]
     quality: Quality,
+    #[serde(default)]
+    fallbacks: flickfluent_core::project::dub::FallbackChoices,
 }
 
 #[tauri::command]
@@ -245,6 +237,8 @@ pub async fn dub_configure(
         export_kind: options.export_kind,
         export_name: options.export_name,
         quality: options.quality,
+        fallbacks: options.fallbacks,
+        confirm_same: confirm_same == Some(true),
     };
     if changed {
         dub.detected_language = None;
@@ -271,7 +265,7 @@ fn plan_for(
         dub.source_language.clone()
     };
     let have: Vec<String> = installed(models).into_iter().map(|m| m.id).collect();
-    let plan = plan_models_with(
+    let plan = plan_models_full(
         &bundled_catalogue(),
         class,
         os_name(),
@@ -280,6 +274,7 @@ fn plan_for(
         &dub.target_language,
         dub.options.quality == Quality::Fast,
         &have,
+        &dub.options.fallbacks,
     );
     (plan, class, source)
 }
@@ -349,6 +344,10 @@ fn payload(run_id: &str, event: &RunEvent) -> Option<(&'static str, Value)> {
         ),
         // `dub:done` is sent by the command after the project is saved, so the screen that
         // reloads on it sees the finished lines and a run that is no longer active.
+        RunEvent::Detected(language) => (
+            event::DETECTED,
+            json!({ "runId": run_id, "language": language }),
+        ),
         RunEvent::Done(_) => return None,
         RunEvent::Line(_) => return None, // sent by the line queue
     })
@@ -552,8 +551,24 @@ pub async fn dub_export(
     let finished = work
         .load_run()?
         .is_some_and(|r| r.state == RunState::Completed);
+    if !finished {
+        return Err(AppError::new(RUN_NOT_COMPLETE, "dub.error.runNotComplete"));
+    }
+    if kind == ExportKind::Subtitles {
+        // Subtitles come from the saved lines, so they also work for a run that did not speak.
+        let lines = match dub.lines.is_empty() {
+            false => dub.lines,
+            true => work.load_lines(&work.load_run()?.unwrap_or_default()),
+        };
+        return flickfluent_core::pipeline::stages::export_subtitles(
+            &lines,
+            Path::new(&folder),
+            &file_name,
+            overwrite.unwrap_or(false),
+        );
+    }
     let mix = work.path().join("dub-mix.wav");
-    if !finished || !mix.exists() {
+    if !mix.exists() {
         return Err(AppError::new(RUN_NOT_COMPLETE, "dub.error.runNotComplete"));
     }
     let ffmpeg = ffmpeg_for(&models)?;

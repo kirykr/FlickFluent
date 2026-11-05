@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 
 use crate::hardware::{Accelerator, MachineInput};
 use crate::models::{CatalogueEntry, Gender, MachineClass, Quality, Step};
+use crate::project::dub::FallbackChoices;
 
 /// `fullLocal` needs the full-local spec (8 cores, 16 GB, a GPU or Apple Silicon), `mid` needs
 /// 6 cores and 12 GB, anything else is `minimum`. Unknown values count as not meeting a tier.
@@ -36,8 +37,9 @@ fn covers(entry: &CatalogueEntry, language: &str) -> bool {
         .any(|l| primary(l).eq_ignore_ascii_case(want))
 }
 
-fn usable(entry: &CatalogueEntry, os: &str, arch: &str) -> bool {
-    entry.default_enabled
+/// On by default or opted in, and built for this platform.
+fn usable(entry: &CatalogueEntry, os: &str, arch: &str, opt_in: &[String]) -> bool {
+    (entry.default_enabled || opt_in.contains(&entry.id))
         && entry
             .platforms
             .as_ref()
@@ -47,6 +49,7 @@ fn usable(entry: &CatalogueEntry, os: &str, arch: &str) -> bool {
 /// The best entry of `step` for the machine: the highest class not above the machine's. Among
 /// equals, one that is already installed wins (the user should not download a second voice when
 /// one works), then the first in the catalogue.
+#[allow(clippy::too_many_arguments)]
 fn best<'a>(
     catalogue: &'a [CatalogueEntry],
     step: Step,
@@ -54,11 +57,14 @@ fn best<'a>(
     os: &str,
     arch: &str,
     installed: &[String],
+    opt_in: &[String],
     keep: impl Fn(&CatalogueEntry) -> bool,
 ) -> Option<&'a CatalogueEntry> {
     catalogue
         .iter()
-        .filter(|e| e.step == step && e.machine_class <= class && usable(e, os, arch) && keep(e))
+        .filter(|e| {
+            e.step == step && e.machine_class <= class && usable(e, os, arch, opt_in) && keep(e)
+        })
         .rev()
         .max_by_key(|e| (e.machine_class, installed.contains(&e.id)))
 }
@@ -83,6 +89,8 @@ pub struct ModelPlan {
     pub separate: Option<String>,
     pub transcribe: Option<String>,
     pub translate: Option<String>,
+    /// The model for the second hop of a translation through English, when that was chosen.
+    pub pivot: Option<String>,
     pub speaker: Option<String>,
     /// Voice entry per speaker gender (`male`, `female`). A language with one voice has it under
     /// both keys.
@@ -100,6 +108,7 @@ impl ModelPlan {
             &self.separate,
             &self.transcribe,
             &self.translate,
+            &self.pivot,
             &self.speaker,
         ]
         .into_iter()
@@ -163,8 +172,35 @@ pub fn plan_models_with(
     quality_fast: bool,
     installed: &[String],
 ) -> ModelPlan {
+    plan_models_full(
+        catalogue,
+        class,
+        os,
+        arch,
+        source,
+        target,
+        quality_fast,
+        installed,
+        &FallbackChoices::default(),
+    )
+}
+
+/// Like `plan_models_with`, also applying what the user chose for an unsupported pair.
+#[allow(clippy::too_many_arguments)]
+pub fn plan_models_full(
+    catalogue: &[CatalogueEntry],
+    class: MachineClass,
+    os: &str,
+    arch: &str,
+    source: &str,
+    target: &str,
+    quality_fast: bool,
+    installed: &[String],
+    choices: &FallbackChoices,
+) -> ModelPlan {
+    let opt_in = &choices.opt_in;
     let pick = |step: Step, keep: &dyn Fn(&CatalogueEntry) -> bool| {
-        best(catalogue, step, class, os, arch, installed, keep).map(|e| e.id.clone())
+        best(catalogue, step, class, os, arch, installed, opt_in, keep).map(|e| e.id.clone())
     };
     let mut plan = ModelPlan {
         runtime: pick(Step::Runtime, &|_| true),
@@ -191,10 +227,25 @@ pub fn plan_models_with(
             .push((Step::Transcribe, source.to_string()));
     }
     if primary(source) != primary(target) && plan.translate.is_none() {
-        plan.unsupported
-            .push((Step::Translate, format!("{source}>{target}")));
+        // Through English: one model into English, one out of it (often the same model).
+        let hop =
+            |from: &str, to: &str| pick(Step::Translate, &|e| covers(e, from) && covers(e, to));
+        if choices.pivot_via_english && source != "auto" {
+            if let (Some(first), Some(second)) = (hop(source, "en"), hop("en", target)) {
+                plan.translate = Some(first);
+                plan.pivot = Some(second);
+            }
+        }
+        if plan.translate.is_none() {
+            plan.unsupported
+                .push((Step::Translate, format!("{source}>{target}")));
+        }
     }
-    let candidates = voice_candidates(catalogue, class, os, arch, installed, target);
+    let mut candidates = voice_candidates(catalogue, class, os, arch, installed, opt_in, target);
+    if candidates.is_empty() && choices.generic_voice {
+        // A voice of another language reads the translation: the best one there is.
+        candidates = voice_candidates(catalogue, class, os, arch, installed, opt_in, "");
+    }
     let best_voice = |gender: Option<Gender>| {
         candidates
             .iter()
@@ -208,7 +259,10 @@ pub fn plan_models_with(
             plan.voices.insert(gender, v);
         }
     }
-    if plan.voices.is_empty() {
+    if choices.subtitles_only {
+        // No speech at all: the voices are not needed and not missing.
+        plan.voices.clear();
+    } else if plan.voices.is_empty() {
         plan.unsupported.push((Step::Speak, target.to_string()));
     }
     plan
@@ -230,17 +284,20 @@ fn voice_candidates(
     os: &str,
     arch: &str,
     installed: &[String],
+    opt_in: &[String],
     target: &str,
 ) -> Vec<VoiceCandidate> {
     let want = primary(target).to_lowercase();
     let mut out = Vec::new();
     for (order, e) in catalogue.iter().enumerate() {
-        if e.step != Step::Speak || e.machine_class > class || !usable(e, os, arch) {
+        if e.step != Step::Speak || e.machine_class > class || !usable(e, os, arch, opt_in) {
             continue;
         }
         let is_installed = installed.contains(&e.id);
+        // An empty `target` means any language (the generic-voice fallback).
+        let any = target.is_empty();
         if e.voices.is_empty() {
-            if covers(e, target) {
+            if any || covers(e, target) {
                 out.push(VoiceCandidate {
                     gender: e.gender,
                     quality: e
@@ -261,7 +318,8 @@ fn voice_candidates(
             continue;
         }
         for v in e.voices.iter().filter(|v| {
-            v.languages
+            any || v
+                .languages
                 .iter()
                 .any(|l| primary(l).eq_ignore_ascii_case(&want))
         }) {

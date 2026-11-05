@@ -4,7 +4,7 @@ export type StageStatus = "pending" | "running" | "done" | "failed";
 export type RunState = "queued" | "running" | "cancelling" | "cancelled" | "failed" | "completed";
 export type LineFlag = "overlap" | "tooLong" | "tooShort" | "mixedLanguage" | "lowConfidence";
 export type Quality = "fast" | "standard";
-export type ExportKind = "video" | "audio";
+export type ExportKind = "video" | "audio" | "subtitles";
 
 export interface SourceInfo {
   durationMs: number;
@@ -36,11 +36,67 @@ export interface Preflight {
   blockers: Blocker[];
 }
 
+export interface FallbackChoices {
+  subtitlesOnly: boolean;
+  genericVoice: boolean;
+  pivotViaEnglish: boolean;
+  /** Non-commercial models the user turned on after reading their notice. */
+  optIn: string[];
+}
+
+export const NO_FALLBACKS: FallbackChoices = {
+  subtitlesOnly: false,
+  genericVoice: false,
+  pivotViaEnglish: false,
+  optIn: [],
+};
+
 export interface DubOptions {
   muteOriginal: boolean;
   exportKind: ExportKind;
   exportName: string;
   quality: Quality;
+  fallbacks: FallbackChoices;
+}
+
+export type QualityLevel = "good" | "fair" | "weak";
+
+/** One language and what can be done with it, from the model catalogue. */
+export interface Language {
+  code: string;
+  transcribe: boolean;
+  translateFrom: boolean;
+  translateTo: boolean;
+  speak: { voices: number; permissiveVoices: number };
+  quality: {
+    transcribe: QualityLevel | null;
+    translate: QualityLevel | null;
+    speak: QualityLevel | null;
+  };
+}
+
+export type StepKind = "transcribe" | "translate" | "speak";
+export type FallbackKind =
+  "subtitlesOnly" | "genericVoice" | "pivotViaEnglish" | "optInNonCommercial";
+
+export interface PairStep {
+  step: StepKind;
+  supported: boolean;
+  quality: QualityLevel | null;
+  reason: string | null;
+}
+
+export interface PairFallback {
+  kind: FallbackKind;
+  labelKey: string;
+  modelIds: string[];
+  noticeKeys: string[];
+}
+
+export interface PairCheck {
+  ok: boolean;
+  steps: PairStep[];
+  fallbacks: PairFallback[];
 }
 
 export interface TranscriptLine {

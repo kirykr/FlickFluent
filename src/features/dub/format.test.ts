@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { baseName, dubError, etaMinutes, formatClock, languageName, percent } from "./format";
+import { baseName, dubError, etaMinutes, formatClock, percent } from "./format";
+import { languageName } from "./languages";
 
 describe("dub format helpers", () => {
   it("formats clock times", () => {

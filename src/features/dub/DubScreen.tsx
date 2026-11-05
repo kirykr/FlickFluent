@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { t } from "../../i18n";
-import { dubCancel, dubDiscardRun, dubResume } from "../../app/ipc";
+import { dubCancel, dubConfigure, dubDiscardRun, dubResume } from "../../app/ipc";
 import { asAppError } from "../projects/errors";
 import type { AppErrorShape } from "../projects/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -59,6 +59,7 @@ export function DubScreen({ handle, readOnly }: Props) {
               : status.dub.lines
           }
           noSpeech={status.run?.error?.code === "NO_SPEECH_FOUND"}
+          detected={view.detected ?? status.dub.detectedLanguage}
         />
       </div>
     );
@@ -73,6 +74,21 @@ export function DubScreen({ handle, readOnly }: Props) {
           onCancel={() => view.runId && guard(() => dubCancel(view.runId as string))}
           onResume={() =>
             guard(async () => {
+              follow(await dubResume(handle));
+            })
+          }
+          onConfirmSame={() =>
+            guard(async () => {
+              const d = status.dub;
+              if (!d.source) return;
+              await dubConfigure(
+                handle,
+                d.source.path,
+                d.sourceLanguage,
+                d.targetLanguage,
+                d.options,
+                true,
+              );
               follow(await dubResume(handle));
             })
           }

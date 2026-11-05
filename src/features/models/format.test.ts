@@ -7,6 +7,8 @@ const model = (state: ModelRecord["state"], sizeBytes: number): ModelRecord => (
   name: state,
   purpose: "",
   licence: "MIT",
+  licenceClass: "permissive",
+  licenceNoticeKey: null,
   sizeBytes,
   state,
   bytesDone: 0,

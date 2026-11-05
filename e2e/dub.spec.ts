@@ -171,6 +171,24 @@ function installFakeCore() {
       return a.handler;
     },
     "plugin:event|unlisten": () => undefined,
+    languages_list: () =>
+      ["en", "fr", "de"].map((code) => ({
+        code,
+        transcribe: true,
+        translateFrom: true,
+        translateTo: true,
+        speak: { voices: 1, permissiveVoices: 1 },
+        quality: { transcribe: null, translate: null, speak: null },
+      })),
+    languages_check_pair: () => ({
+      ok: true,
+      steps: [
+        { step: "transcribe", supported: true, quality: null, reason: null },
+        { step: "translate", supported: true, quality: null, reason: null },
+        { step: "speak", supported: true, quality: null, reason: null },
+      ],
+      fallbacks: [],
+    }),
     dub_probe_source: () => ({
       durationMs: 20000,
       hasAudio: true,

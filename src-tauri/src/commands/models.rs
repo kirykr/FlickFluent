@@ -45,6 +45,10 @@ pub struct ModelRecord {
     name: String,
     purpose: String,
     licence: String,
+    /// `permissive`, `copyleftFile` or `nonCommercial`.
+    licence_class: flickfluent_core::models::LicenceClass,
+    /// i18n key of the notice to show before download, when the licence needs one.
+    licence_notice_key: Option<String>,
     size_bytes: u64,
     /// `notInstalled`, `downloading`, `paused`, `verifying`, `installed` or `failed`.
     state: &'static str,
@@ -94,6 +98,8 @@ fn record(
         name: entry.name.clone(),
         purpose: entry.purpose.clone(),
         licence: entry.licence.clone(),
+        licence_class: entry.licence_class,
+        licence_notice_key: entry.licence_notice_key.clone(),
         size_bytes: entry.total_download_bytes(),
         state,
         bytes_done,

@@ -27,6 +27,7 @@ import { dubExport } from "../../app/ipc";
 import { asAppError } from "../projects/errors";
 import { formatBytes } from "../models/format";
 import { baseName, dubError, FLAG_KEYS, fileName, formatClock } from "./format";
+import { languageName } from "./languages";
 import type { DubData, ExportKind, ExportResult, TranscriptLine } from "./types";
 
 interface Props {
@@ -34,10 +35,14 @@ interface Props {
   dub: DubData;
   lines: TranscriptLine[];
   noSpeech: boolean;
+  detected: string | null;
 }
 
-export function Result({ handle, dub, lines, noSpeech }: Props) {
-  const [kind, setKind] = useState<ExportKind>(dub.options.exportKind || "video");
+export function Result({ handle, dub, lines, noSpeech, detected }: Props) {
+  const subtitlesOnly = dub.options.fallbacks?.subtitlesOnly === true;
+  const [kind, setKind] = useState<ExportKind>(
+    subtitlesOnly ? "subtitles" : dub.options.exportKind || "video",
+  );
   const [name, setName] = useState(dub.options.exportName || baseName(dub.source?.path ?? "dub"));
   const [folder, setFolder] = useState<string | null>(null);
   const [overwrite, setOverwrite] = useState(false);
@@ -48,6 +53,15 @@ export function Result({ handle, dub, lines, noSpeech }: Props) {
     messageKey?: string;
   } | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // A run that did not speak has nothing to play: its result is the subtitles.
+  const kinds: { value: ExportKind; label: string }[] = subtitlesOnly
+    ? [{ value: "subtitles", label: t("dub.result.kindSubtitles") }]
+    : [
+        { value: "video", label: t("dub.result.kindVideo") },
+        { value: "audio", label: t("dub.result.kindAudio") },
+        { value: "subtitles", label: t("dub.result.kindSubtitles") },
+      ];
 
   const pickFolder = async () => {
     const picked = await open({ directory: true, multiple: false });
@@ -79,25 +93,28 @@ export function Result({ handle, dub, lines, noSpeech }: Props) {
       <Card size="sm">
         <CardHeader>
           <CardTitle>{t("dub.result.exportTitle")}</CardTitle>
-          <CardDescription>{t("dub.result.exportBody")}</CardDescription>
+          <CardDescription>
+            {t("dub.result.exportBody")}
+            {detected && (
+              <span className="ml-2" data-testid="result-language">
+                {t("languages.detected", { language: languageName(detected) || detected })}
+              </span>
+            )}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
             <Label htmlFor="export-kind">{t("dub.result.kind")}</Label>
-            <Select
-              items={[
-                { value: "video", label: t("dub.result.kindVideo") },
-                { value: "audio", label: t("dub.result.kindAudio") },
-              ]}
-              value={kind}
-              onValueChange={(v) => v && setKind(v as ExportKind)}
-            >
+            <Select items={kinds} value={kind} onValueChange={(v) => v && setKind(v as ExportKind)}>
               <SelectTrigger id="export-kind" className="w-44">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="video">{t("dub.result.kindVideo")}</SelectItem>
-                <SelectItem value="audio">{t("dub.result.kindAudio")}</SelectItem>
+                {kinds.map((k) => (
+                  <SelectItem key={k.value} value={k.value}>
+                    {k.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

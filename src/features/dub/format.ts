@@ -71,18 +71,6 @@ export function dubError(
   return { key, params };
 }
 
-/** Languages offered until the data-driven list arrives with the language story. */
-export const BASIC_LANGUAGES = ["auto", "en", "fr", "de", "es"] as const;
-
-export function languageName(code: string, locale = "en"): string {
-  if (code === "auto") return "";
-  try {
-    return new Intl.DisplayNames([locale], { type: "language" }).of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
-
 /** The file name without folders or extension, as a default export name. */
 export function baseName(path: string): string {
   const file = path.split(/[\\/]/).pop() ?? path;

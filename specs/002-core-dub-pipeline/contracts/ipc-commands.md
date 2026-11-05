@@ -5,9 +5,9 @@ Adds to the commands in feature 001. Same rules: every command returns `Result<T
 ## Languages
 | Command | Input | Output |
 |---------|-------|--------|
-| `languages_list` | none | `Language[]` (see data-model), built from the model catalogue |
-| `languages_check_pair` | `source` (code or `auto`), `target` | `PairCheck`: `{ ok, steps: [{ step, supported, quality, reason }], fallbacks: [{ kind, labelKey }] }` |
-`fallbacks.kind` is one of `subtitlesOnly`, `genericVoice`, `pivotViaEnglish`, `optInNonCommercialVoice`, `installModel`. The UI must call `languages_check_pair` and show its result before `dub_start`.
+| `languages_list` | `optIn?` (non-commercial model ids the user turned on) | `Language[]` (see data-model), built from the model catalogue |
+| `languages_check_pair` | `source` (code or `auto`), `target`, `optIn?` | `PairCheck`: `{ ok, steps: [{ step, supported, quality, reason }], fallbacks: [{ kind, labelKey }] }` |
+`fallbacks.kind` is one of `subtitlesOnly`, `genericVoice`, `pivotViaEnglish`, `optInNonCommercial`. Each fallback lists `modelIds` and `noticeKeys` for opt-in kinds. The user's choices are saved in `options.fallbacks` (`subtitlesOnly`, `genericVoice`, `pivotViaEnglish`, `optIn`) by `dub_configure`. Exports gain kind `subtitles` (`.srt`). The UI must call `languages_check_pair` and show its result before `dub_start`.
 
 ## Dub run
 | Command | Input | Output |
@@ -15,7 +15,7 @@ Adds to the commands in feature 001. Same rules: every command returns `Result<T
 | `dub_probe_source` | `path` | `SourceInfo` `{ durationMs, hasAudio, hasVideo, container, sizeBytes }`; errors `UNREADABLE_FILE`, `NO_AUDIO_TRACK` |
 | `dub_configure` | `handle`, `source`, `sourceLanguage`, `targetLanguage`, `options` | `ProjectHandle`; error `SAME_LANGUAGE` (needs `confirmSame: true`), `NO_FALLBACK_CHOSEN` |
 | `dub_preflight` | `handle` | `Preflight` `{ missingModels: [{id, sizeBytes}], diskNeededBytes, diskFreeBytes, machineClass, warnings[] }`; nothing is downloaded |
-| `dub_start` | `handle`, `fallbackChoices` | `RunId`; errors `MODELS_MISSING` (call `model_download_start` first), `NO_SPACE` `{neededBytes, freeBytes}`, `MACHINE_TOO_WEAK` `{missing[]}` |
+| `dub_start` | `handle` (fallback choices are saved by `dub_configure` in `options.fallbacks`) | `RunId`; errors `MODELS_MISSING` (call `model_download_start` first), `NO_SPACE` `{neededBytes, freeBytes}`, `MACHINE_TOO_WEAK` `{missing[]}` |
 | `dub_cancel` | `runId` | void; run goes `cancelling` then `cancelled`; finished work kept |
 | `dub_resume` | `handle` | `RunId`; error `NOTHING_TO_RESUME`, `SOURCE_CHANGED` (fingerprint differs) |
 | `dub_status` | `handle` | `PipelineRun` |
@@ -37,6 +37,7 @@ CLI: `flickfluent --bench [--json]` runs the same code and exits 0 on success. I
 | `dub:stage` | `{ runId, stage, status }` | on change |
 | `dub:line` | `{ runId, line }` | when a transcript line first appears or its status changes (batched, at most 5 per second) |
 | `dub:error` | `{ runId, code, stage, sectionIndex, message, nextStep }` | on failure |
+| `dub:detected` | `{ runId, language }` | once, when auto-detect finds the spoken language |
 | `dub:done` | `{ runId, state }` | once |
 | `bench:progress` | `{ runId, stage, progress }` | at most once a second |
 

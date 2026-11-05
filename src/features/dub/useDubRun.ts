@@ -21,6 +21,8 @@ export interface RunView {
   lines: TranscriptLine[];
   error: RunError | null;
   state: RunState | null;
+  /** Spoken language found by auto-detect, once known. */
+  detected: string | null;
 }
 
 const EMPTY: RunView = {
@@ -32,6 +34,7 @@ const EMPTY: RunView = {
   lines: [],
   error: null,
   state: null,
+  detected: null,
 };
 
 /** Follows one project's dub: loads its saved state, then applies the events the core sends. */
@@ -47,6 +50,7 @@ export function useDubRun(handle: string) {
       // Lines that arrived as events stay if the saved project has none yet.
       lines: status.running || status.dub.lines.length === 0 ? v.lines : status.dub.lines,
       state: status.run?.state ?? null,
+      detected: status.dub.detectedLanguage ?? v.detected,
       error: status.run?.error ?? null,
     }));
   }, [handle]);
@@ -111,6 +115,10 @@ export function useDubRun(handle: string) {
           nextStepKey: p.nextStep ?? "dub.next.retry",
         },
       }));
+    });
+    void add<{ runId: string; language: string }>("dub:detected", (p) => {
+      if (!mine(p)) return;
+      setView((v) => ({ ...v, detected: p.language }));
     });
     void add<{ runId: string; state: RunState }>("dub:done", (p) => {
       if (!mine(p)) return;

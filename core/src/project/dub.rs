@@ -26,6 +26,23 @@ pub enum ExportKind {
     #[default]
     Video,
     Audio,
+    /// The translated lines as an `.srt` file. The only export of a subtitles-only run.
+    Subtitles,
+}
+
+/// What the user chose when a language pair is not fully supported (`languages_check_pair`
+/// offers the choices). Kept in the project so a resume uses the same ones.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct FallbackChoices {
+    /// Transcribe and translate, but do not speak.
+    pub subtitles_only: bool,
+    /// Read the translation with a voice of another language.
+    pub generic_voice: bool,
+    /// Translate through English.
+    pub pivot_via_english: bool,
+    /// Non-commercial models the user turned on after reading their notice.
+    pub opt_in: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -44,6 +61,11 @@ pub struct Options {
     pub export_kind: ExportKind,
     pub export_name: String,
     pub quality: Quality,
+    #[serde(default)]
+    pub fallbacks: FallbackChoices,
+    /// The user confirmed that source and target are the same language.
+    #[serde(default)]
+    pub confirm_same: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]

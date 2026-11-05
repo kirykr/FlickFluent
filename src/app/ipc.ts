@@ -8,6 +8,8 @@ import type {
   DubStatus,
   ExportKind,
   ExportResult,
+  Language,
+  PairCheck,
   Preflight,
   SourceInfo,
 } from "../features/dub/types";
@@ -75,3 +77,8 @@ export const dubExport = (
   overwrite = false,
 ) => invoke<ExportResult>("dub_export", { handle, kind, fileName, folder, overwrite });
 export const dubDiscardRun = (handle: string) => invoke<void>("dub_discard_run", { handle });
+
+export const languagesList = (optIn: string[] = []) =>
+  invoke<Language[]>("languages_list", { optIn });
+export const languagesCheckPair = (source: string, target: string, optIn: string[] = []) =>
+  invoke<PairCheck>("languages_check_pair", { source, target, optIn });

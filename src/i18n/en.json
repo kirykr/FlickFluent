@@ -117,7 +117,8 @@
   "licence": {
     "ffmpeg": "FFmpeg is free software under the LGPL 2.1 or later. This build has no GPL parts. It runs as a separate program and you can replace it.",
     "espeak": "eSpeak NG pronunciation data is free software under the GPL 3 or later. It is a separate download used only to read text aloud, and the app does not change it.",
-    "piperVoice": "This voice was trained on a public speech recording. Its licence allows use in a product; some voices ask you to credit the speaker."
+    "piperVoice": "This voice was trained on a public speech recording. Its licence allows use in a product; some voices ask you to credit the speaker.",
+    "nonCommercial": "This model is free only for non-commercial use. Do not use what it makes in a product you sell or for paid work."
   },
   "models": {
     "title": "Models",
@@ -282,7 +283,8 @@
       "original": "Original",
       "translated": "Translated",
       "flags": "Notes",
-      "empty": "No lines yet."
+      "empty": "No lines yet.",
+      "kindSubtitles": "Subtitles (.srt)"
     }
   },
   "editor": {
@@ -341,5 +343,46 @@
     "trackText": "T1",
     "trackAudio": "A1",
     "notes": "Notes"
+  },
+  "languages": {
+    "search": "Search languages…",
+    "none": "No language found.",
+    "hint": {
+      "noRecogniser": "Speech not recognised",
+      "noTranslator": "Cannot translate into it",
+      "noVoice": "No voice",
+      "weak": "Lower quality"
+    },
+    "reason": {
+      "noRecogniser": "No model can write down speech in this language.",
+      "noTranslator": "No model can translate between these languages.",
+      "noVoice": "No voice speaks the target language."
+    },
+    "fallback": {
+      "subtitles": "Make subtitles only, without speech",
+      "genericVoice": "Read it with a voice of another language",
+      "pivot": "Translate through English (two steps, lower quality)",
+      "optIn": "Use a model that is free only for non-commercial use"
+    },
+    "pair": {
+      "title": "This language pair is limited",
+      "body": "Choose how to go on before dubbing starts.",
+      "steps": {
+        "transcribe": "Writing down speech",
+        "translate": "Translating",
+        "speak": "Speaking"
+      },
+      "low": "Lower quality",
+      "notice": "Read this before you turn it on",
+      "accept": "I have read it and will use it only for non-commercial work",
+      "required": "Choose one of these to go on."
+    },
+    "detected": "Detected language: {{language}}",
+    "sameDetected": "The video is already in {{language}}. Dub into the same language anyway?"
+  },
+  "about": {
+    "title": "About and licences",
+    "body": "FlickFluent uses free and open-source parts. These need a notice.",
+    "none": "Nothing to show yet."
   }
 }

@@ -10,7 +10,7 @@ use super::ffmpeg::{Ffmpeg, SourceInfo};
 use crate::error::{AppError, FILE_EXISTS, INVALID_PROJECT};
 use crate::fsutil::write_atomic;
 use crate::models::preflight_space;
-use crate::project::dub::ExportKind;
+use crate::project::dub::{ExportKind, TranscriptLine};
 
 const FINGERPRINT_EDGE: u64 = 1024 * 1024;
 
@@ -140,6 +140,11 @@ pub async fn export(
     let (ext, format) = match req.kind {
         ExportKind::Video => ("mp4", "mp4"),
         ExportKind::Audio => ("m4a", "ipod"),
+        // Subtitles are text, not an ffmpeg job: see `export_subtitles`.
+        ExportKind::Subtitles => {
+            return Err(AppError::new(INVALID_PROJECT, "error.invalidProject")
+                .with_details(serde_json::json!({ "detail": "subtitles use export_subtitles" })))
+        }
     };
     let target = req.folder.join(format!("{}.{ext}", req.file_name.trim()));
     if target.exists() && !req.overwrite {
@@ -147,7 +152,9 @@ pub async fn export(
     }
     let needed = match req.kind {
         ExportKind::Video => std::fs::metadata(req.source).map_err(AppError::io)?.len(),
-        ExportKind::Audio => std::fs::metadata(req.mix).map_err(AppError::io)?.len(),
+        ExportKind::Audio | ExportKind::Subtitles => {
+            std::fs::metadata(req.mix).map_err(AppError::io)?.len()
+        }
     };
     preflight_space(needed, req.folder)?;
 
@@ -168,7 +175,9 @@ pub async fn export(
             "-movflags".into(),
             "+faststart".into(),
         ]),
-        ExportKind::Audio => args.extend(["-i".into(), req.mix.into(), "-vn".into()]),
+        ExportKind::Audio | ExportKind::Subtitles => {
+            args.extend(["-i".into(), req.mix.into(), "-vn".into()])
+        }
     }
     args.extend([
         "-c:a".into(),
@@ -185,6 +194,57 @@ pub async fn export(
         return Err(e);
     }
     std::fs::rename(&part, &target).map_err(AppError::io)?;
+    let size_bytes = std::fs::metadata(&target).map_err(AppError::io)?.len();
+    Ok(ExportResult {
+        path: target,
+        size_bytes,
+    })
+}
+
+/// `00:01:02,500` from milliseconds.
+fn srt_time(ms: u64) -> String {
+    format!(
+        "{:02}:{:02}:{:02},{:03}",
+        ms / 3_600_000,
+        ms / 60_000 % 60,
+        ms / 1000 % 60,
+        ms % 1000
+    )
+}
+
+/// The lines as SubRip text: the translation when there is one, otherwise the original.
+pub fn subtitles_text(lines: &[TranscriptLine]) -> String {
+    let mut out = String::new();
+    for (i, l) in lines.iter().enumerate() {
+        let text = l
+            .translated
+            .as_deref()
+            .filter(|t| !t.trim().is_empty())
+            .unwrap_or(&l.text);
+        out.push_str(&format!(
+            "{}\n{} --> {}\n{}\n\n",
+            i + 1,
+            srt_time(l.start_ms),
+            srt_time(l.end_ms),
+            text.trim()
+        ));
+    }
+    out
+}
+
+/// Write `<file_name>.srt` in `folder`. Same name and overwrite rules as `export`.
+pub fn export_subtitles(
+    lines: &[TranscriptLine],
+    folder: &Path,
+    file_name: &str,
+    overwrite: bool,
+) -> Result<ExportResult, AppError> {
+    check_file_name(file_name)?;
+    let target = folder.join(format!("{}.srt", file_name.trim()));
+    if target.exists() && !overwrite {
+        return Err(AppError::new(FILE_EXISTS, "dub.error.fileExists"));
+    }
+    write_atomic(&target, subtitles_text(lines).as_bytes())?;
     let size_bytes = std::fs::metadata(&target).map_err(AppError::io)?.len();
     Ok(ExportResult {
         path: target,
