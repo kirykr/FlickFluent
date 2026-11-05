@@ -144,6 +144,8 @@ export interface DubStatus {
   interrupted: boolean;
   running: boolean;
   dub: DubData;
+  /** The run made dubbed sound. False for a run that only made subtitles. */
+  hasDubAudio: boolean;
 }
 
 export interface ProgressEvent {

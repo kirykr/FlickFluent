@@ -60,6 +60,7 @@ export function DubScreen({ handle, readOnly }: Props) {
           }
           noSpeech={status.run?.error?.code === "NO_SPEECH_FOUND"}
           detected={view.detected ?? status.dub.detectedLanguage}
+          hasDubAudio={status.hasDubAudio}
         />
       </div>
     );

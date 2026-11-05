@@ -36,10 +36,13 @@ interface Props {
   lines: TranscriptLine[];
   noSpeech: boolean;
   detected: string | null;
+  /** The run made dubbed sound; without it only subtitles can be saved. */
+  hasDubAudio: boolean;
 }
 
-export function Result({ handle, dub, lines, noSpeech, detected }: Props) {
-  const subtitlesOnly = dub.options.fallbacks?.subtitlesOnly === true;
+export function Result({ handle, dub, lines, noSpeech, detected, hasDubAudio }: Props) {
+  // What the work folder holds decides, not a setting that may have been saved later or lost.
+  const subtitlesOnly = !hasDubAudio;
   const [kind, setKind] = useState<ExportKind>(
     subtitlesOnly ? "subtitles" : dub.options.exportKind || "video",
   );
@@ -63,6 +66,9 @@ export function Result({ handle, dub, lines, noSpeech, detected }: Props) {
         { value: "subtitles", label: t("dub.result.kindSubtitles") },
       ];
 
+  // The chosen kind may not be on offer (the list follows what the run made): use the first.
+  const activeKind = kinds.some((k) => k.value === kind) ? kind : kinds[0].value;
+
   const pickFolder = async () => {
     const picked = await open({ directory: true, multiple: false });
     if (typeof picked === "string") setFolder(picked);
@@ -74,7 +80,7 @@ export function Result({ handle, dub, lines, noSpeech, detected }: Props) {
     setError(null);
     setDone(null);
     try {
-      setDone(await dubExport(handle, kind, name.trim(), folder, force || overwrite));
+      setDone(await dubExport(handle, activeKind, name.trim(), folder, force || overwrite));
       setOverwrite(false);
     } catch (e) {
       const err = asAppError(e);
@@ -105,7 +111,11 @@ export function Result({ handle, dub, lines, noSpeech, detected }: Props) {
         <CardContent className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
             <Label htmlFor="export-kind">{t("dub.result.kind")}</Label>
-            <Select items={kinds} value={kind} onValueChange={(v) => v && setKind(v as ExportKind)}>
+            <Select
+              items={kinds}
+              value={activeKind}
+              onValueChange={(v) => v && setKind(v as ExportKind)}
+            >
               <SelectTrigger id="export-kind" className="w-44">
                 <SelectValue />
               </SelectTrigger>
@@ -170,15 +180,15 @@ export function Result({ handle, dub, lines, noSpeech, detected }: Props) {
         className="min-h-0 flex-1 overflow-auto rounded-md border"
         data-testid="transcript-table"
       >
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20">{t("dub.result.start")}</TableHead>
-              <TableHead className="w-20">{t("dub.result.end")}</TableHead>
+              <TableHead className="w-16">{t("dub.result.start")}</TableHead>
+              <TableHead className="w-16">{t("dub.result.end")}</TableHead>
               <TableHead className="w-24">{t("dub.result.speaker")}</TableHead>
-              <TableHead>{t("dub.result.original")}</TableHead>
-              <TableHead>{t("dub.result.translated")}</TableHead>
-              <TableHead className="w-40">{t("dub.result.flags")}</TableHead>
+              <TableHead className="w-[34%]">{t("dub.result.original")}</TableHead>
+              <TableHead className="w-[34%]">{t("dub.result.translated")}</TableHead>
+              <TableHead>{t("dub.result.flags")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -194,8 +204,10 @@ export function Result({ handle, dub, lines, noSpeech, detected }: Props) {
                 <TableCell className="tabular-nums">{formatClock(l.startMs)}</TableCell>
                 <TableCell className="tabular-nums">{formatClock(l.endMs)}</TableCell>
                 <TableCell>{speakerLabel(l.speakerId)}</TableCell>
-                <TableCell className="whitespace-normal">{l.text}</TableCell>
-                <TableCell className="whitespace-normal">{l.translated ?? ""}</TableCell>
+                <TableCell className="whitespace-normal break-words align-top">{l.text}</TableCell>
+                <TableCell className="whitespace-normal break-words align-top">
+                  {l.translated ?? ""}
+                </TableCell>
                 <TableCell className="whitespace-normal">
                   <span className="flex flex-wrap gap-1">
                     {l.flags.map((f) => (

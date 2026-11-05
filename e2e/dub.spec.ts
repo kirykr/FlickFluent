@@ -8,12 +8,22 @@ import { expect, test, type Page } from "@playwright/test";
 
 declare global {
   interface Window {
-    __fakeDub: { nextOpen: string | null; revealed: string[]; slow: boolean };
+    __fakeDub: {
+      nextOpen: string | null;
+      revealed: string[];
+      slow: boolean;
+      subtitlesOnly: boolean;
+    };
   }
 }
 
 function installFakeCore() {
-  const fake = { nextOpen: null as string | null, revealed: [] as string[], slow: false };
+  const fake = {
+    nextOpen: null as string | null,
+    revealed: [] as string[],
+    slow: false,
+    subtitlesOnly: false,
+  };
   (window as unknown as { __fakeDub: typeof fake }).__fakeDub = fake;
   type Line = {
     id: string;
@@ -255,10 +265,12 @@ function installFakeCore() {
         interrupted,
         running,
         dub: dub(),
+        hasDubAudio: !fake.subtitlesOnly,
       };
     },
     dub_export: (a) => {
-      const name = `${a.folder}/${a.fileName}.${a.kind === "video" ? "mp4" : "m4a"}`;
+      const ext = a.kind === "video" ? "mp4" : a.kind === "subtitles" ? "srt" : "m4a";
+      const name = `${a.folder}/${a.fileName}.${ext}`;
       const d = load();
       if (d.exported.includes(name) && !a.overwrite)
         throw { code: "FILE_EXISTS", messageKey: "dub.error.fileExists" };
@@ -400,4 +412,22 @@ test("stopping a dub keeps it resumable", async ({ page }) => {
   await expect(page.getByTestId("dub-progress")).toContainText("Stopped");
   await expect(page.getByRole("button", { name: "Resume" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start over" })).toBeVisible();
+});
+
+test("a run that only made subtitles offers only subtitles and explains a video export", async ({
+  page,
+}) => {
+  await start(page);
+  await page.evaluate(() => (window.__fakeDub.subtitlesOnly = true));
+  await chooseVideo(page);
+  await page.getByRole("button", { name: /^Download/ }).click();
+  await page.getByRole("button", { name: "Start dubbing" }).click();
+  await expect(page.getByTestId("dub-result")).toBeVisible({ timeout: 15_000 });
+
+  // The only kind on offer is subtitles, shown by name.
+  await expect(page.getByRole("combobox", { name: "Save as" })).toContainText("Subtitles (.srt)");
+  await page.evaluate(() => (window.__fakeDub.nextOpen = "/exports"));
+  await page.getByRole("button", { name: "Choose a folder…" }).click();
+  await page.getByTestId("dub-result").getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByTestId("export-done")).toContainText("holiday.srt");
 });

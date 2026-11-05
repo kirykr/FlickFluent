@@ -498,6 +498,8 @@ pub struct Status {
     running: bool,
     /// Languages, options, speakers and lines as saved in the project.
     dub: DubData,
+    /// The run made dubbed sound. A run that only made subtitles has nothing to play.
+    has_dub_audio: bool,
 }
 
 #[tauri::command]
@@ -521,11 +523,15 @@ pub fn dub_status(
         }
     }
     let interrupted = !running && work.as_ref().is_some_and(|w| w.is_interrupted());
+    let has_dub_audio = work
+        .as_ref()
+        .is_some_and(|w| w.path().join("dub-mix.wav").exists());
     Ok(Status {
         run,
         interrupted,
         running,
         dub,
+        has_dub_audio,
     })
 }
 
@@ -569,7 +575,12 @@ pub async fn dub_export(
     }
     let mix = work.path().join("dub-mix.wav");
     if !mix.exists() {
-        return Err(AppError::new(RUN_NOT_COMPLETE, "dub.error.runNotComplete"));
+        // The run finished but made no dubbed sound (subtitles only): say so, do not say
+        // the run is unfinished.
+        return Err(AppError::new(
+            flickfluent_core::error::NO_DUB_AUDIO,
+            "dub.error.noDubAudio",
+        ));
     }
     let ffmpeg = ffmpeg_for(&models)?;
     export(

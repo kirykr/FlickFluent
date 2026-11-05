@@ -186,7 +186,8 @@
       "pathNotAllowed": "The engine was asked to use a file outside the project folders.",
       "runtimeMissing": "The speech and translation engine is not installed.",
       "notImplemented": "This part of dubbing is not available yet.",
-      "generic": "The dub could not continue."
+      "generic": "The dub could not continue.",
+      "noDubAudio": "This run made subtitles only, so there is no dubbed sound to put in a video. Save the subtitles instead."
     },
     "warn": {
       "fastNoMusic": "Fast mode skips separating the music, so the original music cannot be kept without the original voices."
@@ -206,7 +207,8 @@
       "chooseAnotherName": "Choose another file name.",
       "finishRun": "Wait for the dub to finish.",
       "resume": "Resume the dub.",
-      "waitForUpdate": "Wait for a later version of the app."
+      "waitForUpdate": "Wait for a later version of the app.",
+      "saveSubtitles": "Save the subtitles."
     },
     "open": "Dub a movie",
     "backToEditor": "Back to editor",
