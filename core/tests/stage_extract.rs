@@ -54,6 +54,7 @@ async fn extract_writes_both_copies_with_the_right_format_and_length() {
         &source,
         work.path(),
         info.duration_ms,
+        "fp",
         &mut |_| {},
     )
     .await
@@ -75,7 +76,10 @@ async fn extract_writes_both_copies_with_the_right_format_and_length() {
         info.duration_ms
     );
 
-    assert!(work.path().join("source-info.json").exists());
+    let saved: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(work.path().join("source-info.json")).unwrap())
+            .unwrap();
+    assert_eq!(saved["fingerprint"], "fp");
     assert!(
         !work.path().join("audio.wav.part").exists(),
         "no leftover .part file"

@@ -345,3 +345,80 @@ async fn a_speech_free_video_completes_with_the_original_audio_and_a_notice() {
         .join("dub-mix.wav")
         .exists());
 }
+
+#[tokio::test]
+async fn a_new_project_with_the_same_file_name_does_not_inherit_the_old_work() {
+    let root = tempfile::tempdir().unwrap();
+    let mut old = config(root.path(), "same.flick", json!({}));
+    old.project_id = "old-project".into();
+    let dub = dub_for(&clip("clip-20s-fr.mp4"), "en").await;
+    run_dub(&old, dub, Mode::Fresh, CancelToken::default(), &mut |_| {})
+        .await
+        .unwrap();
+    let path = &old.project_path;
+    assert!(WorkFolder::open_for(path, "old-project").is_some());
+
+    // Same file name, a different project: the old folder is not its folder.
+    assert!(WorkFolder::open_for(path, "new-project").is_none());
+    let mut new = config(root.path(), "same.flick", json!({}));
+    new.project_id = "new-project".into();
+    // A different video, so reusing the old extracted audio would be a visible mistake.
+    let other = root.path().join("other.mp4");
+    std::fs::copy(clip("clip-2min-fr.mp4"), &other).unwrap();
+    let dub = dub_for(&other, "en").await;
+    let out = run_dub(&new, dub, Mode::Fresh, CancelToken::default(), &mut |_| {})
+        .await
+        .unwrap();
+    assert!(
+        WorkFolder::open_for(path, "old-project").is_none(),
+        "the old folder was cleared"
+    );
+    let info: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(WorkFolder::folder_for(path).join("source-info.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        info["durationMs"].as_u64().unwrap() / 1000,
+        120,
+        "audio is from the new video"
+    );
+    assert_eq!(out.run.unwrap().state, RunState::Completed);
+
+    // Deleting a project removes its work folder.
+    WorkFolder::remove(path).unwrap();
+    assert!(WorkFolder::open(path).is_none());
+}
+
+#[tokio::test]
+async fn extracted_audio_is_not_reused_for_a_different_video() {
+    let root = tempfile::tempdir().unwrap();
+    let cfg = config(root.path(), "reuse.flick", json!({}));
+    let first = dub_for(&clip("clip-20s-fr.mp4"), "en").await;
+    run_dub(
+        &cfg,
+        first,
+        Mode::Fresh,
+        CancelToken::default(),
+        &mut |_| {},
+    )
+    .await
+    .unwrap();
+    // Same project, new video: a fresh run must extract again.
+    let other = root.path().join("other.mp4");
+    std::fs::copy(clip("clip-2min-fr.mp4"), &other).unwrap();
+    let second = dub_for(&other, "en").await;
+    run_dub(
+        &cfg,
+        second,
+        Mode::Fresh,
+        CancelToken::default(),
+        &mut |_| {},
+    )
+    .await
+    .unwrap();
+    let info: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(WorkFolder::folder_for(&cfg.project_path).join("source-info.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(info["durationMs"].as_u64().unwrap() / 1000, 120);
+}

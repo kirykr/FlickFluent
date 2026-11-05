@@ -265,6 +265,8 @@ pub fn project_delete(
             Err(e) => return Err(AppError::io(e)),
         }
     }
+    // The dub's working files go with the project, so a new project with the same name starts clean.
+    flickfluent_core::pipeline::state::WorkFolder::remove(&p)?;
     if let Some(file) = recent_file(&app) {
         let mut list = recent::load(&file);
         recent::remove(&mut list, &path);

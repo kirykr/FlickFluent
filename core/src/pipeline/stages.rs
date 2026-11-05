@@ -57,6 +57,7 @@ pub async fn extract(
     source: &Path,
     work: &Path,
     duration_ms: u64,
+    fingerprint: &str,
     on_progress: &mut (dyn FnMut(f32) + Send),
 ) -> Result<Extracted, AppError> {
     std::fs::create_dir_all(work).map_err(AppError::io)?;
@@ -88,7 +89,7 @@ pub async fn extract(
         }
         std::fs::rename(&part, target).map_err(AppError::io)?;
     }
-    let info = serde_json::json!({ "durationMs": duration_ms });
+    let info = serde_json::json!({ "durationMs": duration_ms, "fingerprint": fingerprint });
     write_atomic(&work.join("source-info.json"), info.to_string().as_bytes())?;
     Ok(Extracted { asr, full })
 }

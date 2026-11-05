@@ -41,6 +41,11 @@ impl WorkFolder {
     /// Create the folder if needed and write `work-manifest.json`.
     pub fn create(project_path: &Path, project_id: &str) -> Result<Self, AppError> {
         let dir = Self::folder_for(project_path);
+        // A folder left by another project that had the same file name (deleted, then a new one
+        // made with the same name) must not leak its audio or run into this one.
+        if dir.is_dir() && Self::manifest_id(&dir).as_deref() != Some(project_id) {
+            std::fs::remove_dir_all(&dir).map_err(AppError::io)?;
+        }
         std::fs::create_dir_all(&dir).map_err(AppError::io)?;
         let manifest = json!({ "projectId": project_id, "formatVersion": 2 });
         write_atomic(
@@ -50,10 +55,32 @@ impl WorkFolder {
         Ok(Self { dir })
     }
 
+    fn manifest_id(dir: &Path) -> Option<String> {
+        let bytes = std::fs::read(dir.join(WORK_MANIFEST)).ok()?;
+        let v: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        v["projectId"].as_str().map(String::from)
+    }
+
     /// Open an existing folder without creating it.
     pub fn open(project_path: &Path) -> Option<Self> {
         let dir = Self::folder_for(project_path);
         dir.is_dir().then_some(Self { dir })
+    }
+
+    /// Open the folder only if it belongs to the project with this id. A folder from another
+    /// project with the same file name does not count.
+    pub fn open_for(project_path: &Path, project_id: &str) -> Option<Self> {
+        let found = Self::open(project_path)?;
+        (Self::manifest_id(&found.dir).as_deref() == Some(project_id)).then_some(found)
+    }
+
+    /// Delete the folder and everything in it. Missing is fine.
+    pub fn remove(project_path: &Path) -> Result<(), AppError> {
+        match std::fs::remove_dir_all(Self::folder_for(project_path)) {
+            Ok(()) => Ok(()),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            Err(e) => Err(AppError::io(e)),
+        }
     }
 
     pub fn path(&self) -> &Path {

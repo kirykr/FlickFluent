@@ -130,12 +130,13 @@ fn ffmpeg_for(models: &Path) -> Result<Ffmpeg, AppError> {
     })
 }
 
+/// The project data, its file, and its stable id (not the window handle).
 fn dub_of(state: &ProjectState, handle: &str) -> Result<(DubData, PathBuf, String), AppError> {
     state.with(handle, |s| {
         Ok((
             read_from(&s.project.data),
             s.path.clone(),
-            s.project.manifest.name.clone(),
+            s.project.manifest.id.to_string(),
         ))
     })
 }
@@ -398,11 +399,10 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
         ));
     }
     let models = models_dir(&app, &settings)?;
-    let (dub, path, name) = dub_of(&projects, &handle)?;
-    let _ = name;
+    let (dub, path, project_id) = dub_of(&projects, &handle)?;
     if mode == Mode::Fresh {
         check_start(&preflight_for(&projects, &handle, &models)?)?;
-    } else if WorkFolder::open(&path).is_none() {
+    } else if WorkFolder::open_for(&path, &project_id).is_none() {
         return Err(AppError::new(
             NOTHING_TO_RESUME,
             "dub.error.nothingToResume",
@@ -410,7 +410,7 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
     }
     let work = WorkFolder::folder_for(&path);
     std::fs::create_dir_all(&work).map_err(AppError::io)?;
-    let cfg = build_config(&app, &models, &path, &handle, &work);
+    let cfg = build_config(&app, &models, &path, &project_id, &work);
 
     let run_id = uuid::Uuid::new_v4().to_string();
     let cancel = CancelToken::default();
@@ -436,6 +436,7 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
     let task_app = app.clone();
     let task_id = run_id.clone();
     let project_path = path.clone();
+    let owner_id = project_id.clone();
     tauri::async_runtime::spawn(async move {
         let sink_app = task_app.clone();
         let sink_id = task_id.clone();
@@ -456,7 +457,7 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
                 state
             }
             // The runner already sent `dub:error` with the details; the run file has the state.
-            Err(_) => WorkFolder::open(&project_path)
+            Err(_) => WorkFolder::open_for(&project_path, &owner_id)
                 .and_then(|w| w.load_run().ok().flatten())
                 .map_or(RunState::Failed, |r| r.state),
         };
@@ -506,8 +507,8 @@ pub fn dub_status(
     dubs: tauri::State<DubState>,
     handle: String,
 ) -> Result<Status, AppError> {
-    let (dub, path, _) = dub_of(&projects, &handle)?;
-    let work = WorkFolder::open(&path);
+    let (dub, path, project_id) = dub_of(&projects, &handle)?;
+    let work = WorkFolder::open_for(&path, &project_id);
     let running = dubs.running_for(&handle);
     let run = work
         .as_ref()
@@ -542,11 +543,11 @@ pub async fn dub_export(
     overwrite: Option<bool>,
 ) -> Result<ExportResult, AppError> {
     let models = models_dir(&app, &settings)?;
-    let (dub, path, _) = dub_of(&projects, &handle)?;
+    let (dub, path, project_id) = dub_of(&projects, &handle)?;
     let source = dub
         .source
         .ok_or_else(|| AppError::new(RUN_NOT_COMPLETE, "dub.error.runNotComplete"))?;
-    let work = WorkFolder::open(&path)
+    let work = WorkFolder::open_for(&path, &project_id)
         .ok_or_else(|| AppError::new(RUN_NOT_COMPLETE, "dub.error.runNotComplete"))?;
     let finished = work
         .load_run()?
@@ -584,8 +585,8 @@ pub fn dub_discard_run(
             "error.inUse",
         ));
     }
-    let (mut dub, path, _) = dub_of(&projects, &handle)?;
-    if let Some(work) = WorkFolder::open(&path) {
+    let (mut dub, path, project_id) = dub_of(&projects, &handle)?;
+    if let Some(work) = WorkFolder::open_for(&path, &project_id) {
         std::fs::remove_dir_all(work.path()).map_err(AppError::io)?;
     }
     dub.run = None;

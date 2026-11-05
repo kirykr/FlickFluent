@@ -411,7 +411,8 @@ impl Runner<'_> {
         self.set_stage(Stage::Extract, StageStatus::Running);
         let have = work.join("audio.wav").exists()
             && work.join("audio-full.wav").exists()
-            && work.join("source-info.json").exists();
+            && read_json(&work.join("source-info.json"))
+                .is_some_and(|v| v["fingerprint"] == self.fingerprint.as_str());
         if !have {
             let mut last = Instant::now() - EVENT_EVERY;
             let mut pending = Vec::new();
@@ -420,6 +421,7 @@ impl Runner<'_> {
                 Path::new(&source.path),
                 &work,
                 source.duration_ms,
+                &self.fingerprint,
                 &mut |p| {
                     if last.elapsed() >= EVENT_EVERY {
                         last = Instant::now();
