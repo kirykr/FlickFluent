@@ -1,18 +1,19 @@
 import { Check, Circle, X } from "lucide-react";
 import { t } from "../../i18n";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Progress as Bar } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
-import { dubError, etaMinutes, percent, STAGE_KEYS } from "./format";
+import { etaMinutes, formatClock, nextAction, percent, STAGE_KEYS } from "./format";
 import { languageName } from "./languages";
+import { RunError } from "./RunError";
 import type { RunView } from "./useDubRun";
 import type { Stage } from "./types";
 
 const ORDER: Stage[] = ["extract", "separate", "transcribe", "translate", "synthesize", "mix"];
 
 interface Props {
+  handle: string;
   view: RunView;
   onCancel: () => void;
   onResume: () => void;
@@ -21,23 +22,19 @@ interface Props {
   onConfirmSame: () => void;
 }
 
-export function RunProgress({ view, onCancel, onResume, onRestart, onConfirmSame }: Props) {
+/** Lines shown while the run goes on; the full list is in the result. */
+const LIVE_LINES = 6;
+
+export function RunProgress({ handle, view, onCancel, onResume, onRestart, onConfirmSame }: Props) {
   // A run recorded as running with nothing running was cut short (the app closed or crashed).
   const interrupted = !!view.status?.interrupted && view.runId === null;
   const running =
     !interrupted &&
     (view.state === "running" || view.state === "queued" || view.state === "cancelling");
-  view.state === "running" || view.state === "queued" || view.state === "cancelling";
   const overall = view.progress?.overallProgress ?? 0;
   const eta = etaMinutes(view.progress?.etaSeconds ?? null);
-  const stageName = view.error?.stage ? t(STAGE_KEYS[view.error.stage]).toLowerCase() : null;
-  const err = view.error
-    ? dubError(
-        { code: view.error.code, messageKey: view.error.messageKey, details: view.error.details },
-        stageName,
-      )
-    : null;
-  const detail = (view.error?.details as { message?: string } | null | undefined)?.message;
+  const failedHere = view.error ? nextAction(view.error.nextStepKey) : null;
+  const live = [...view.lines].sort((x, y) => x.startMs - y.startMs).slice(-LIVE_LINES);
   const canResume = view.state === "cancelled" || view.state === "failed" || interrupted;
 
   return (
@@ -70,7 +67,7 @@ export function RunProgress({ view, onCancel, onResume, onRestart, onConfirmSame
             {t("languages.detected", { language: languageName(view.detected) || view.detected })}
           </p>
         )}
-        <Progress value={percent(overall)} aria-label={t("dub.run.overall")} />
+        <Bar value={percent(overall)} aria-label={t("dub.run.overall")} />
         <ul className="flex flex-col gap-1 text-sm">
           {ORDER.map((stage) => {
             const status = view.stageStatus[stage];
@@ -93,35 +90,45 @@ export function RunProgress({ view, onCancel, onResume, onRestart, onConfirmSame
                 <span className={status === "pending" || !status ? "text-muted-foreground" : ""}>
                   {t(STAGE_KEYS[stage])}
                 </span>
+                {running && status === "running" && view.progress?.stage === stage && (
+                  <span
+                    className="ml-auto text-xs text-muted-foreground"
+                    data-testid="stage-percent"
+                  >
+                    {percent(view.progress.stageProgress)}%
+                  </span>
+                )}
               </li>
             );
           })}
         </ul>
 
-        {err && (
-          <Alert
-            variant={view.state === "cancelled" ? "default" : "destructive"}
-            role="alert"
-            data-testid="dub-run-error"
-          >
-            <AlertDescription>
-              {t(err.key, err.params)}
-              {detail && <span className="mt-1 block text-xs opacity-70">{detail}</span>}
-            </AlertDescription>
-          </Alert>
+        {live.length > 0 && (
+          <section aria-label={t("dub.run.linesTitle")} className="flex flex-col gap-1">
+            <h3 className="text-xs font-medium text-muted-foreground">{t("dub.run.linesTitle")}</h3>
+            <ul className="flex max-h-40 flex-col gap-1 overflow-y-auto text-sm">
+              {live.map((l) => (
+                <li key={l.id} className="flex gap-2" data-testid="live-line">
+                  <span className="shrink-0 tabular-nums text-muted-foreground">
+                    {formatClock(l.startMs)}
+                  </span>
+                  <span className="min-w-0">{l.translated ?? l.text}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
-        {view.error?.code === "SAME_LANGUAGE" && (
-          <Alert data-testid="same-detected">
-            <AlertDescription className="flex items-center gap-3">
-              {t("languages.sameDetected", {
-                language: languageName(view.detected ?? "") || view.detected || "",
-              })}
-              <Button size="sm" variant="outline" onClick={onConfirmSame}>
-                {t("dub.new.sameConfirm")}
-              </Button>
-            </AlertDescription>
-          </Alert>
+        {view.error && (
+          <RunError
+            handle={handle}
+            error={view.error}
+            state={view.state}
+            detected={view.detected}
+            onResume={onResume}
+            onRestart={onRestart}
+            onConfirmSame={onConfirmSame}
+          />
         )}
 
         <div className="flex justify-end gap-2">
@@ -130,8 +137,10 @@ export function RunProgress({ view, onCancel, onResume, onRestart, onConfirmSame
               {t("dub.run.cancel")}
             </Button>
           )}
-          {!running && canResume && <Button onClick={onResume}>{t("dub.run.resume")}</Button>}
-          {!running && canResume && (
+          {!running && canResume && !view.error && (
+            <Button onClick={onResume}>{t("dub.run.resume")}</Button>
+          )}
+          {!running && canResume && failedHere !== "restart" && failedHere !== "chooseAnother" && (
             <Button variant="outline" onClick={onRestart}>
               {t("dub.run.startOver")}
             </Button>

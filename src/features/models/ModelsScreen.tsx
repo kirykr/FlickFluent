@@ -16,8 +16,53 @@ import {
   modelsCatalogue,
 } from "../../app/ipc";
 import { asAppError } from "../projects/errors";
-import { formatBytes, installedBytes, modelError, percent } from "./format";
+import { languageName } from "../dub/languages";
+import {
+  formatBytes,
+  installedBytes,
+  languageSummary,
+  modelError,
+  percent,
+  unavailableReason,
+} from "./format";
 import type { ModelRecord } from "./types";
+
+function unavailableText(m: ModelRecord): string {
+  if (!m.unavailable) return "";
+  const r = unavailableReason(m.unavailable, (c) => t(`models.class.${c}`));
+  return t(r.key, r.params);
+}
+
+/** What the model does, how big a computer it needs, and the languages it handles. */
+function ModelFacts({ model: m }: { model: ModelRecord }) {
+  const langs = languageSummary(m.languages, (c) => languageName(c) || c);
+  return (
+    <dl
+      className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground"
+      data-testid={`facts-${m.id}`}
+    >
+      <div className="flex gap-1">
+        <dt className="sr-only">{t("models.purposeLabel")}</dt>
+        <dd>{t(`models.step.${m.step}`)}</dd>
+      </div>
+      <div className="flex gap-1">
+        <dt>{t("models.needs")}:</dt>
+        <dd>{t(`models.class.${m.machineClass}`)}</dd>
+      </div>
+      {m.step !== "runtime" && m.step !== "ffmpeg" && m.step !== "data" && m.step !== "test" && (
+        <div className="flex gap-1">
+          <dt>{t("models.languages")}:</dt>
+          <dd data-testid={`languages-${m.id}`}>
+            {langs.names.length === 0
+              ? t("models.forAllLanguages")
+              : langs.names.join(", ") +
+                (langs.more ? ` ${t("models.languagesMore", { count: langs.more })}` : "")}
+          </dd>
+        </div>
+      )}
+    </dl>
+  );
+}
 
 export function ModelsScreen() {
   const [models, setModels] = useState<ModelRecord[]>([]);
@@ -131,6 +176,12 @@ export function ModelsScreen() {
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">{m.purpose}</p>
+                    <ModelFacts model={m} />
+                    {m.unavailable && (
+                      <p className="text-sm text-destructive" data-testid={`unavailable-${m.id}`}>
+                        {unavailableText(m)}
+                      </p>
+                    )}
                     {m.licenceNoticeKey && (
                       <p className="text-xs text-muted-foreground" data-testid={`notice-${m.id}`}>
                         {t(m.licenceNoticeKey)}
@@ -166,7 +217,9 @@ export function ModelsScreen() {
                   </div>
                   <div className="flex gap-2">
                     {m.state === "notInstalled" && (
-                      <Button onClick={() => setConfirming(m)}>{t("models.download")}</Button>
+                      <Button onClick={() => setConfirming(m)} disabled={!!m.unavailable}>
+                        {t("models.download")}
+                      </Button>
                     )}
                     {m.state === "downloading" && (
                       <Button variant="outline" onClick={() => run(() => modelDownloadPause(m.id))}>

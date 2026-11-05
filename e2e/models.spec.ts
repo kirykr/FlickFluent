@@ -33,6 +33,10 @@ function installFakeCore() {
     purpose: "Used to test downloads",
     licence: "MIT",
     sizeBytes: SIZE,
+    step: "translate",
+    languages: ["fr", "km", "de"],
+    machineClass: "minimum",
+    unavailable: null,
     state: r.state,
     bytesDone: r.bytesDone,
     errorCode,
@@ -108,7 +112,23 @@ function installFakeCore() {
       return a.handler;
     },
     "plugin:event|unlisten": () => undefined,
-    models_catalogue: () => [record(load(), localStorage.getItem("fakeModelError"))],
+    models_catalogue: () => [
+      record(load(), localStorage.getItem("fakeModelError")),
+      // Only listed when a test asks for it, so the other tests see a single model.
+      ...(localStorage.getItem("fakeBigModel")
+        ? [
+            {
+              ...record({ state: "notInstalled", bytesDone: 0 }),
+              id: "m2",
+              name: "Big model",
+              machineClass: "mid",
+              languages: [],
+              step: "speak",
+              unavailable: { reason: "machine", needs: "mid" },
+            },
+          ]
+        : []),
+    ],
     model_download_start: start,
     model_download_resume: start,
     model_download_pause: () => {
@@ -246,4 +266,25 @@ test("a stopped download explains why and can be retried", async ({ page }) => {
   await expect(state(page)).toHaveText("Download stopped");
   await expect(page.getByRole("alert")).toContainText("could not reach the internet");
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+});
+
+test("each model shows what it does, what it needs and its languages", async ({ page }) => {
+  await start(page);
+  const facts = page.getByTestId("facts-m1");
+  await expect(facts).toContainText("Translates");
+  await expect(facts).toContainText("any supported computer");
+  await expect(page.getByTestId("languages-m1")).toHaveText("French, German, Khmer");
+});
+
+test("a model this computer cannot run says why and cannot be downloaded", async ({ page }) => {
+  await start(page);
+  await page.evaluate(() => localStorage.setItem("fakeBigModel", "1"));
+  await page.reload();
+  await page.getByRole("button", { name: "Models", exact: true }).click();
+  await expect(page.getByTestId("unavailable-m2")).toContainText("cannot run it");
+  await expect(page.getByTestId("unavailable-m2")).toContainText("mid-range");
+  await expect(
+    page.getByTestId("model-m2").getByRole("button", { name: /Download/ }),
+  ).toBeDisabled();
+  await expect(page.getByTestId("unavailable-m1")).toHaveCount(0);
 });

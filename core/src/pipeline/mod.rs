@@ -6,6 +6,7 @@ pub mod ffmpeg;
 pub mod mix;
 pub mod plan;
 pub mod preflight;
+pub mod progress;
 pub mod run;
 pub mod sections;
 pub mod stages;

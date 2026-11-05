@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flickfluent/voice-rights",
+  "title": "VoiceRightsRecord",
+  "description": "Who allowed a voice to be trained and shipped. One file per project-trained voice in config/voice-rights/. A voice without a complete, granted record is never shipped.",
+  "type": "object",
+  "required": ["voiceId", "status", "licence", "covers", "rightsHolders", "speakers", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "voiceId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "status": { "enum": ["pending", "granted", "refused"] },
+    "licence": {
+      "type": "object",
+      "required": ["name", "class"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "class": { "enum": ["permissive", "copyleftFile", "nonCommercial"] },
+        "spdx": { "type": ["string", "null"] }
+      }
+    },
+    "covers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["train", "ship", "commercial"] }
+    },
+    "rightsHolders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "role", "grantedOn", "evidenceKind", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["station", "narrator", "dataset publisher", "producer", "other"] },
+          "grantedOn": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "evidenceKind": { "enum": ["signed-licence", "written-email", "contract", "open-licence", "assumed-public"] },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "speakers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "displayName", "consent", "consentOn", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "displayName": { "type": "string", "minLength": 1 },
+          "consent": { "enum": ["written", "open-licence", "none"] },
+          "consentOn": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["description", "hours", "origin"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "hours": { "type": "number", "minimum": 0 },
+        "origin": { "enum": ["commissioned", "open dataset", "licensed archive"] }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

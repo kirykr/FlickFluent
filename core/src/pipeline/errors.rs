@@ -84,11 +84,6 @@ pub const DUB_ERRORS: &[(&str, &str, &str)] = &[
         "dub.next.downloadModels",
     ),
     (
-        NOT_IMPLEMENTED,
-        "dub.error.notImplemented",
-        "dub.next.waitForUpdate",
-    ),
-    (
         INVALID_PROJECT,
         "error.invalidProject",
         "dub.next.chooseAnotherFile",

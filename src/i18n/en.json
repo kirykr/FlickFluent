@@ -116,7 +116,9 @@
   },
   "licence": {
     "ffmpeg": "FFmpeg is free software under the LGPL 2.1 or later. This build has no GPL parts. It runs as a separate program and you can replace it.",
-    "espeak": "eSpeak NG pronunciation data is free software under the GPL 3 or later. It is a separate download used only to read text aloud, and the app does not change it.",
+    "espeak": "eSpeak NG pronunciation data is free software under the GPL 3 or later. It is a separate download used only to read text aloud, and the app does not change it. The matching source code is published with each release at https://github.com/kirykr/FlickFluent/releases.",
+    "runtimePack": "The engine pack runs as a separate program and you can replace it. It contains free software under other terms: eSpeak NG (GPL 3 or later, inside sherpa-onnx) and the LAME MP3 encoder wrapper lameenc (LGPL 3), which the music separator loads but this app never uses. The matching source code is published with each release at https://github.com/kirykr/FlickFluent/releases.",
+    "nllb": "NLLB-200 translation is licensed CC BY-NC 4.0 by Meta. It is free only for non-commercial use. Do not use the translations in a product you sell or for paid work. Turn it on only if that suits you; the default translator has no such limit.",
     "piperVoice": "This voice was trained on a public speech recording. Its licence allows use in a product; some voices ask you to credit the speaker.",
     "nonCommercial": "This model is free only for non-commercial use. Do not use what it makes in a product you sell or for paid work."
   },
@@ -126,6 +128,32 @@
     "empty": "No models are available yet.",
     "size": "Size",
     "licence": "Licence",
+    "languages": "Languages",
+    "purposeLabel": "What it does",
+    "languagesMore": "and {{count}} more",
+    "forAllLanguages": "Not tied to a language",
+    "needs": "Needs",
+    "class": {
+      "minimum": "any supported computer",
+      "mid": "a mid-range computer (6 cores, 12 GB RAM)",
+      "fullLocal": "a powerful computer (8 cores, 16 GB RAM, Apple Silicon or a graphics card)"
+    },
+    "step": {
+      "runtime": "Speech engine",
+      "ffmpeg": "Video tools",
+      "separate": "Separates voices from music",
+      "transcribe": "Writes down speech",
+      "translate": "Translates",
+      "speak": "Speaks",
+      "vad": "Finds speech",
+      "speaker": "Tells speakers apart",
+      "data": "Support files",
+      "test": "Download test"
+    },
+    "unavailable": {
+      "machine": "This computer cannot run it. It needs {{needs}}.",
+      "platform": "It is not built for this computer's system or processor."
+    },
     "download": "Download…",
     "confirmTitle": "Download this model?",
     "confirmStart": "Start download",
@@ -147,7 +175,7 @@
     "storage": "Space used by models",
     "progress": "{{done}} of {{total}}",
     "error": {
-      "noSpace": "Not enough free disk space. This needs {{needed}} and only {{free}} is free.",
+      "noSpace": "Not enough free disk space. This needs {{needed}} and only {{free}} is free. Free at least {{shortfall}} to go on.",
       "offline": "The download could not reach the internet. Your progress is kept, so you can resume later.",
       "hashMismatch": "The downloaded file did not match what was expected, so it was deleted. Please try again.",
       "server": "The download server returned an error. Please try again later.",
@@ -172,11 +200,12 @@
       "sameLanguage": "The source and target language are the same.",
       "noFallbackChosen": "Choose how to handle the language that is not fully supported.",
       "modelsMissing": "Some models must be downloaded before this can start.",
-      "noSpace": "Not enough free disk space. This needs {{needed}} and only {{free}} is free.",
+      "noSpace": "Not enough free disk space. This needs {{needed}} and only {{free}} is free. Free at least {{shortfall}} to go on.",
       "machineTooWeak": "This computer cannot run this step. It needs {{missing}}.",
       "sidecarStart": "The speech and translation engine could not start.",
       "sidecarCrashed": "The speech and translation engine stopped unexpectedly.",
-      "stageFailed": "The {{stage}} step failed.",
+      "stageFailed": "The step “{{stage}}” failed.",
+      "sourceMissing": "The video file is gone or cannot be reached, so the step “{{stage}}” could not go on. Finished work was kept.",
       "stageFailedUnknown": "A step of the dub failed.",
       "sourceChanged": "The video file has changed or moved since the dub started.",
       "nothingToResume": "There is no unfinished dub to resume.",
@@ -185,7 +214,6 @@
       "cancelled": "The dub was stopped. Finished work was kept.",
       "pathNotAllowed": "The engine was asked to use a file outside the project folders.",
       "runtimeMissing": "The speech and translation engine is not installed.",
-      "notImplemented": "This part of dubbing is not available yet.",
       "generic": "The dub could not continue.",
       "noDubAudio": "This run made subtitles only, so there is no dubbed sound to put in a video. Save the subtitles instead."
     },
@@ -207,7 +235,6 @@
       "chooseAnotherName": "Choose another file name.",
       "finishRun": "Wait for the dub to finish.",
       "resume": "Resume the dub.",
-      "waitForUpdate": "Wait for a later version of the app.",
       "saveSubtitles": "Save the subtitles."
     },
     "open": "Dub a movie",
@@ -265,7 +292,12 @@
       "overall": "Overall progress",
       "cancel": "Stop",
       "resume": "Resume",
-      "startOver": "Start over"
+      "startOver": "Start over",
+      "tryAgain": "Try again",
+      "chooseAnother": "Choose another file",
+      "linesTitle": "What has been said so far",
+      "stageDone": "done",
+      "stageFailed": "failed"
     },
     "result": {
       "exportTitle": "Save your dub",

@@ -15,11 +15,14 @@ use tokio::process::{Child, ChildStdin, ChildStdout, Command};
 use tokio::time::timeout;
 
 use crate::error::{
-    AppError, CANCELLED, PATH_NOT_ALLOWED, SIDECAR_CRASHED, SIDECAR_START_FAILED, STAGE_FAILED,
+    AppError, CANCELLED, NO_SPACE, PATH_NOT_ALLOWED, SIDECAR_CRASHED, SIDECAR_START_FAILED,
+    STAGE_FAILED,
 };
 
 pub const PROTOCOL: u64 = 1;
 const STDERR_TAIL: usize = 50;
+/// How often a silent request wakes the caller with `Event::Tick`.
+const TICK: Duration = Duration::from_secs(2);
 
 #[derive(Debug, Clone)]
 pub struct SidecarConfig {
@@ -42,7 +45,12 @@ pub struct Request {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Event {
     Progress(f32),
-    Item { kind: String, data: Value },
+    Item {
+        kind: String,
+        data: Value,
+    },
+    /// The worker said nothing for a while but is not hung yet. Lets the caller send a heartbeat.
+    Tick,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -124,6 +132,7 @@ fn worker_error(err: &Value) -> AppError {
     });
     match code {
         "CANCELLED" => AppError::new(CANCELLED, "dub.error.cancelled"),
+        "NO_SPACE" => AppError::new(NO_SPACE, "dub.error.noSpace").with_details(detail),
         "PATH_NOT_ALLOWED" => {
             AppError::new(PATH_NOT_ALLOWED, "dub.error.pathNotAllowed").with_details(detail)
         }
@@ -275,13 +284,23 @@ impl Sidecar {
         on_event: &mut (dyn FnMut(Event) + Send),
     ) -> Result<Done, Failure> {
         self.send(&msg).await.map_err(|_| Failure::Died)?;
+        let slice = TICK.min(self.cfg.hang_timeout);
+        let mut idle = Duration::ZERO;
         loop {
-            let next = timeout(self.cfg.hang_timeout, self.lines.next_line()).await;
+            let next = timeout(slice, self.lines.next_line()).await;
             let line = match next {
-                Err(_) => return Err(Failure::Hung),
+                Err(_) => {
+                    idle += slice;
+                    if idle >= self.cfg.hang_timeout {
+                        return Err(Failure::Hung);
+                    }
+                    on_event(Event::Tick);
+                    continue;
+                }
                 Ok(Err(_)) | Ok(Ok(None)) => return Err(Failure::Died),
                 Ok(Ok(Some(l))) => l,
             };
+            idle = Duration::ZERO;
             let Ok(m) = serde_json::from_str::<Value>(&line) else {
                 continue;
             };

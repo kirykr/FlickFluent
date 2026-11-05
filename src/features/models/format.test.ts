@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { formatBytes, installedBytes, modelError, percent } from "./format";
+import {
+  formatBytes,
+  installedBytes,
+  languageSummary,
+  modelError,
+  percent,
+  unavailableReason,
+} from "./format";
 import type { ModelRecord } from "./types";
 
 const model = (state: ModelRecord["state"], sizeBytes: number): ModelRecord => ({
@@ -10,6 +17,10 @@ const model = (state: ModelRecord["state"], sizeBytes: number): ModelRecord => (
   licenceClass: "permissive",
   licenceNoticeKey: null,
   sizeBytes,
+  step: "translate",
+  languages: [],
+  machineClass: "minimum",
+  unavailable: null,
   state,
   bytesDone: 0,
   errorCode: null,
@@ -42,5 +53,31 @@ describe("model formatting", () => {
 
   it("falls back to a generic message", () => {
     expect(modelError("WHAT").key).toBe("models.error.generic");
+  });
+});
+
+describe("model details", () => {
+  it("lists the first languages by name and counts the rest", () => {
+    const names: Record<string, string> = {
+      fr: "French",
+      de: "German",
+      km: "Khmer",
+      en: "English",
+    };
+    const s = languageSummary(["km", "fr", "en", "de"], (c) => names[c], 3);
+    expect(s.names).toEqual(["English", "French", "German"]);
+    expect(s.more).toBe(1);
+    expect(languageSummary([], (c) => c)).toEqual({ names: [], more: 0 });
+  });
+
+  it("says why a model cannot be used here", () => {
+    const className = (c: string) => (c === "mid" ? "a mid-range computer" : c);
+    expect(unavailableReason({ reason: "machine", needs: "mid" }, className)).toEqual({
+      key: "models.unavailable.machine",
+      params: { needs: "a mid-range computer" },
+    });
+    expect(unavailableReason({ reason: "platform", needs: null }, className).key).toBe(
+      "models.unavailable.platform",
+    );
   });
 });

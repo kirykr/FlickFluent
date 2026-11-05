@@ -8,6 +8,7 @@
   "properties": {
     "version": { "type": "integer", "minimum": 1 },
     "provisional": { "type": "boolean" },
+    "basis": { "enum": ["simulated", "measured"] },
     "minimum": { "$ref": "#/$defs/tier" },
     "fullLocal": { "$ref": "#/$defs/tier" }
   },

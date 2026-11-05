@@ -71,3 +71,42 @@ fn bundled_catalogue_loads_into_rust_types() {
     let list = flickfluent_core::models::bundled_catalogue();
     assert!(!list.is_empty());
 }
+
+#[test]
+fn a_model_is_unavailable_when_the_platform_or_the_machine_cannot_run_it() {
+    use flickfluent_core::models::{bundled_catalogue, MachineClass, Step};
+    let cat = bundled_catalogue();
+    let entry = |id: &str| cat.iter().find(|e| e.id == id).unwrap().clone();
+
+    // A bigger model than the machine's class: unavailable, with the class it needs.
+    let big = cat
+        .iter()
+        .find(|e| e.step == Step::Translate && e.machine_class == MachineClass::Mid)
+        .expect("the catalogue has a mid-class translator");
+    let why = big
+        .unavailable("macos", "arm64", MachineClass::Minimum)
+        .unwrap();
+    assert_eq!(
+        (why.reason, why.needs),
+        ("machine", Some(MachineClass::Mid))
+    );
+    assert!(big
+        .unavailable("macos", "arm64", MachineClass::Mid)
+        .is_none());
+
+    // A model built for other processors says so, whatever the machine class.
+    let runtime = entry("runtime-macos-arm64");
+    assert!(runtime
+        .unavailable("macos", "arm64", MachineClass::Minimum)
+        .is_none());
+    let why = runtime
+        .unavailable("windows", "x64", MachineClass::FullLocal)
+        .unwrap();
+    assert_eq!((why.reason, why.needs), ("platform", None));
+
+    // Opt-in (non-commercial) models are not unavailable: the user chooses them.
+    let nllb = entry("nllb-200-distilled-600m");
+    assert!(nllb
+        .unavailable("macos", "arm64", MachineClass::Minimum)
+        .is_none());
+}

@@ -438,3 +438,51 @@ fn piper_still_covers_languages_kokoro_does_not() {
         "the male voice also serves female speakers"
     );
 }
+
+#[test]
+fn an_opted_in_model_beats_a_default_one_of_the_same_step() {
+    use flickfluent_core::pipeline::plan::plan_models_full;
+    use flickfluent_core::project::dub::FallbackChoices;
+
+    let small = e(
+        "m2m-small",
+        Step::Translate,
+        MachineClass::Minimum,
+        &["fr", "en", "km"],
+    );
+    // A bigger default model would win on class alone.
+    let big = e(
+        "m2m-big",
+        Step::Translate,
+        MachineClass::Mid,
+        &["fr", "en", "km"],
+    );
+    let mut nllb = e(
+        "nllb",
+        Step::Translate,
+        MachineClass::Minimum,
+        &["fr", "en", "km"],
+    );
+    nllb.default_enabled = false;
+    let cat = vec![small, big, nllb];
+    let plan = |opt_in: &[&str]| {
+        let choices = FallbackChoices {
+            opt_in: opt_in.iter().map(|s| s.to_string()).collect(),
+            ..Default::default()
+        };
+        plan_models_full(
+            &cat,
+            MachineClass::FullLocal,
+            "macos",
+            "arm64",
+            "fr",
+            "km",
+            false,
+            &[],
+            &choices,
+        )
+        .translate
+    };
+    assert_eq!(plan(&[]).as_deref(), Some("m2m-big"));
+    assert_eq!(plan(&["nllb"]).as_deref(), Some("nllb"));
+}

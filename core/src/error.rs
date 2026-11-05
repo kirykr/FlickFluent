@@ -58,5 +58,4 @@ pub const SOURCE_CHANGED: &str = "SOURCE_CHANGED";
 pub const NOTHING_TO_RESUME: &str = "NOTHING_TO_RESUME";
 pub const FILE_EXISTS: &str = "FILE_EXISTS";
 pub const RUN_NOT_COMPLETE: &str = "RUN_NOT_COMPLETE";
-pub const NOT_IMPLEMENTED: &str = "NOT_IMPLEMENTED";
 pub const NO_DUB_AUDIO: &str = "NO_DUB_AUDIO";

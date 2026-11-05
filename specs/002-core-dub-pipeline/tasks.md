@@ -144,17 +144,17 @@ description: "Task list for feature 002: Core Dub Pipeline (Local)"
 
 ### Tests first
 
-- [ ] T062 [P] [US3] Write `core/tests/progress.rs`: with the stub sidecar, `dub:progress` arrives at least every 5 s while a stage runs and at most once a second; ETA equals remaining sections times the rolling mean of finished sections; `dub:stage` fires on each change
-- [ ] T063 [P] [US3] Write `core/tests/errors.rs`: each error code in `contracts/ipc-commands.md` maps to a `message` and a `nextStep` key that exist in `src/i18n/en.json`; source removed mid-run gives `STAGE_FAILED` naming the stage; disk full gives a clean stop with the exact shortfall and finished work kept
-- [ ] T064 [P] [US3] Write Vitest `src/features/dub/Progress.test.tsx`: renders stage name, percentage, ETA; shows the error message and next-step action
+- [X] T062 [P] [US3] Write `core/tests/progress.rs`: with the stub sidecar, `dub:progress` arrives at least every 5 s while a stage runs and at most once a second; ETA equals remaining sections times the rolling mean of finished sections; `dub:stage` fires on each change
+- [X] T063 [P] [US3] Write `core/tests/errors.rs`: each error code in `contracts/ipc-commands.md` maps to a `message` and a `nextStep` key that exist in `src/i18n/en.json`; source removed mid-run gives `STAGE_FAILED` naming the stage; disk full gives a clean stop with the exact shortfall and finished work kept
+- [X] T064 [P] [US3] Write Vitest `src/features/dub/Progress.test.tsx`: renders stage name, percentage, ETA; shows the error message and next-step action
 
 ### Implementation
 
-- [ ] T065 [US3] Implement `core/src/pipeline/progress.rs`: aggregate worker progress into stage and overall progress, rolling ETA, throttle events, emit `dub:progress`, `dub:stage`, `dub:line`, `dub:error`, `dub:done`
-- [ ] T066 [US3] Build `src/features/dub/Progress.tsx`: stage list with status, bars, ETA, live transcript lines as they arrive, cancel button
-- [ ] T067 [US3] Build error display in `src/features/dub/RunError.tsx`: plain message, next-step button (retry, free disk, choose another file, download model)
-- [ ] T068 [US3] Show the download size prompt and progress for missing models inside the run flow in `src/features/dub/ModelPrompt.tsx`, reusing the 001 `model_download_*` commands
-- [ ] T069 [P] [US3] Add Playwright spec `e2e/progress.spec.ts`: updates arrive, forced source removal shows a next step, cancel keeps finished work
+- [X] T065 [US3] Implement `core/src/pipeline/progress.rs`: aggregate worker progress into stage and overall progress, rolling ETA, throttle events, emit `dub:progress`, `dub:stage`, `dub:line`, `dub:error`, `dub:done`
+- [X] T066 [US3] Build `src/features/dub/Progress.tsx`: stage list with status, bars, ETA, live transcript lines as they arrive, cancel button
+- [X] T067 [US3] Build error display in `src/features/dub/RunError.tsx`: plain message, next-step button (retry, free disk, choose another file, download model)
+- [X] T068 [US3] Show the download size prompt and progress for missing models inside the run flow in `src/features/dub/ModelPrompt.tsx`, reusing the 001 `model_download_*` commands
+- [X] T069 [P] [US3] Add Playwright spec `e2e/progress.spec.ts`: updates arrive, forced source removal shows a next step, cancel keeps finished work
 
 **Checkpoint**: users can follow, cancel and recover a run.
 
@@ -168,19 +168,19 @@ description: "Task list for feature 002: Core Dub Pipeline (Local)"
 
 ### Tests first
 
-- [ ] T070 [P] [US4] Write `core/tests/bench_record.rs`: a benchmark run on the stub sidecar writes a record that validates (fields from data-model.md), including `simulated`
-- [ ] T071 [P] [US4] Extend `core/tests/spec_definition.rs`: when `provisional` is false, every value in `config/spec-definition.json` has a matching entry in `docs/verification/002-benchmarks.md`
-- [ ] T072 [P] [US4] Extend `core/tests/hardware_evaluate.rs`: with the final values, machines at, just below and just above minimum and full-local give the right mode and the exact blocked message
+- [X] T070 [P] [US4] Write `core/tests/bench_record.rs`: a benchmark run on the stub sidecar writes a record that validates (fields from data-model.md), including `simulated`
+- [X] T071 [P] [US4] Extend `core/tests/spec_definition.rs`: when `provisional` is false, every value in `config/spec-definition.json` has a matching entry in `docs/verification/002-benchmarks.md`
+- [X] T072 [P] [US4] Extend `core/tests/hardware_evaluate.rs`: with the final values, machines at, just below and just above minimum and full-local give the right mode and the exact blocked message
 
 ### Implementation
 
-- [ ] T073 [US4] Implement `core/src/bench/mod.rs` and the `--bench` flag in `core/src/cli.rs`: run every stage on the 2-minute fixture, record wall time, peak memory and real-time factor per stage and model; `--json` output; `bench_run` and `bench_records` commands in `src-tauri/src/commands/bench.rs`
-- [ ] T074 [US4] Implement simulated limits for the minimum-spec machine: script `bench/simulate-limits.sh` (macOS: CPU and memory caps through a VM or `taskpolicy` plus memory limit on the sidecar) and `bench/simulate-limits.ps1` (Windows Job Object); document in `docs/verification/002-benchmarks.md`
-- [ ] T075 [US4] Run benchmarks on a minimum-class (simulated) and a full-local machine on macOS and on Windows; save `bench-<machine>.json` under `docs/verification/benchmarks/`
-- [ ] T076 [US4] Write `docs/verification/002-benchmarks.md`: every record, its machine, whether `simulated`, and the derived minimum and full-local numbers; state whether 8 GB RAM stays or can be lowered (owner rule: lower only if light steps are proven to fit)
-- [ ] T077 [US4] Update `config/spec-definition.json` from the records and remove `"provisional": true` only if records cover both OSes; if only simulated records exist, keep a `"basis": "simulated"` note in the file and in the docs, and update the schema in `specs/001-app-shell-hardware-check/contracts/spec-definition.schema.json` to allow the field
-- [ ] T078 [US4] Show each model's size, licence, supported languages and machine class in `src/features/models/`, and mark models the machine cannot run as unavailable with the reason
-- [ ] T079 [US4] Update the roadmap hand-off: add a "Feature 002 hand-off" section to `docs/roadmap.md` with final spec values, what is simulated, and what remains open
+- [X] T073 [US4] Implement `core/src/bench/mod.rs` and the `--bench` flag in `core/src/cli.rs`: run every stage on the 2-minute fixture, record wall time, peak memory and real-time factor per stage and model; `--json` output; `bench_run` and `bench_records` commands in `src-tauri/src/commands/bench.rs`
+- [X] T074 [US4] Implement simulated limits for the minimum-spec machine: script `bench/simulate-limits.sh` (macOS: CPU and memory caps through a VM or `taskpolicy` plus memory limit on the sidecar) and `bench/simulate-limits.ps1` (Windows Job Object); document in `docs/verification/002-benchmarks.md`
+- [ ] T075 [US4] (macOS done: real full-local and simulated minimum records saved; Windows NOT run, needs a Windows computer) Run benchmarks on a minimum-class (simulated) and a full-local machine on macOS and on Windows; save `bench-<machine>.json` under `docs/verification/benchmarks/`
+- [X] T076 [US4] Write `docs/verification/002-benchmarks.md`: every record, its machine, whether `simulated`, and the derived minimum and full-local numbers; state whether 8 GB RAM stays or can be lowered (owner rule: lower only if light steps are proven to fit)
+- [X] T077 [US4] Update `config/spec-definition.json` from the records and remove `"provisional": true` only if records cover both OSes; if only simulated records exist, keep a `"basis": "simulated"` note in the file and in the docs, and update the schema in `specs/001-app-shell-hardware-check/contracts/spec-definition.schema.json` to allow the field
+- [X] T078 [US4] Show each model's size, licence, supported languages and machine class in `src/features/models/`, and mark models the machine cannot run as unavailable with the reason
+- [X] T079 [US4] Update the roadmap hand-off: add a "Feature 002 hand-off" section to `docs/roadmap.md` with final spec values, what is simulated, and what remains open
 
 **Checkpoint**: the hardware check and alert use measured values; the catalogue is truthful.
 
@@ -188,11 +188,12 @@ description: "Task list for feature 002: Core Dub Pipeline (Local)"
 
 ## Phase 7: Polish and cross-cutting
 
-- [ ] T080 [P] Run the licence jobs (`cargo deny check`, npm check, Python `pip-licenses` against `sidecar/requirements.lock`); fix `docs/dependencies.md` and the About screen for any non-permissive component (FR-016)
-- [ ] T081 [P] Run Constitution Check against the finished code and record it in `docs/verification/002.md` (Principles I to IX)
+- [X] T080 [P] Run the licence jobs (`cargo deny check`, npm check, Python `pip-licenses` against `sidecar/requirements.lock`); fix `docs/dependencies.md` and the About screen for any non-permissive component (FR-016)
+- [X] T081 [P] Run Constitution Check against the finished code and record it in `docs/verification/002.md` (Principles I to IX)
 - [ ] T082 Run the full quickstart (steps 1 to 9) on Windows and macOS and fill `docs/verification/002.md`; any failure becomes a bug task before closing
-- [ ] T083 [P] Confirm idle RAM and installer size budgets from 001 still hold with the new code (runtime pack not in the installer); record in `docs/verification/002.md`
-- [ ] T084 Update `README`/`docs` text and `src/i18n/en.json` leftovers; remove `NOT_IMPLEMENTED` stubs
+- [ ] T083 (binary size 16.9 MB measured; idle RAM not measured, another instance of the app was open) [P] Confirm idle RAM and installer size budgets from 001 still hold with the new code (runtime pack not in the installer); record in `docs/verification/002.md`
+- [ ] T085 (About notice and source-offer link done; publishing the source is a release step in `docs/release-checklist.md`) Publish the matching eSpeak NG and sherpa-onnx source with each runtime pack release and link it from About (owner decision 2026-11-05, see `docs/dependencies.md`)
+- [X] T084 Update `README`/`docs` text and `src/i18n/en.json` leftovers; remove `NOT_IMPLEMENTED` stubs
 
 ---
 

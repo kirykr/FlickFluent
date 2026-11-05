@@ -1,6 +1,4 @@
-//! Dub, language and benchmark commands (feature 002). The dub commands drive
-//! `flickfluent_core::pipeline`; the language and benchmark commands return `NOT_IMPLEMENTED`
-//! until the story that owns them lands, so the UI can be built against the final names.
+//! Dub commands (feature 002). They drive `flickfluent_core::pipeline`.
 
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -8,9 +6,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
 
-use flickfluent_core::error::{
-    AppError, NOTHING_TO_RESUME, NOT_IMPLEMENTED, RUN_NOT_COMPLETE, SAME_LANGUAGE,
-};
+use flickfluent_core::error::{AppError, NOTHING_TO_RESUME, RUN_NOT_COMPLETE, SAME_LANGUAGE};
 use flickfluent_core::hardware;
 use flickfluent_core::models::{bundled_catalogue, installed};
 use flickfluent_core::pipeline::ffmpeg::{Ffmpeg, SourceInfo};
@@ -41,9 +37,6 @@ pub mod event {
     pub const ERROR: &str = "dub:error";
     pub const DONE: &str = "dub:done";
     pub const DETECTED: &str = "dub:detected";
-    /// Sent by the benchmark story (US5).
-    #[allow(dead_code)]
-    pub const BENCH_PROGRESS: &str = "bench:progress";
 }
 
 /// Lines go out at most this often, so a long transcript does not flood the window.
@@ -70,10 +63,6 @@ impl DubState {
     }
 }
 
-fn not_implemented<T>() -> Result<T, AppError> {
-    Err(AppError::new(NOT_IMPLEMENTED, "dub.error.notImplemented"))
-}
-
 fn os_name() -> &'static str {
     if cfg!(windows) {
         "windows"
@@ -91,7 +80,7 @@ fn arch_name() -> &'static str {
 }
 
 /// The sidecar launcher: bundled with the app, or in the source tree during development.
-fn launcher(app: &tauri::AppHandle) -> PathBuf {
+pub fn launcher(app: &tauri::AppHandle) -> PathBuf {
     if let Ok(res) = app.path().resource_dir() {
         let bundled = res.join("sidecar").join("launcher.py");
         if bundled.exists() {
@@ -149,19 +138,6 @@ fn store(state: &ProjectState, handle: &str, dub: &DubData) -> Result<(), AppErr
         s.set_data(data);
         Ok(())
     })
-}
-
-// --- benchmark (US5): stub --------------------------------------------
-
-#[tauri::command]
-pub fn bench_run(fixture_id: String, simulated: Option<bool>) -> Result<String, AppError> {
-    let _ = (fixture_id, simulated);
-    not_implemented()
-}
-
-#[tauri::command]
-pub fn bench_records() -> Result<Value, AppError> {
-    not_implemented()
 }
 
 // --- dub -----------------------------------------------------------------------------------
@@ -348,7 +324,7 @@ fn payload(run_id: &str, event: &RunEvent) -> Option<(&'static str, Value)> {
             event::DETECTED,
             json!({ "runId": run_id, "language": language }),
         ),
-        RunEvent::Done(_) => return None,
+        RunEvent::Done(_) | RunEvent::Stat(_) => return None,
         RunEvent::Line(_) => return None, // sent by the line queue
     })
 }

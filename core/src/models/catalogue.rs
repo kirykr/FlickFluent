@@ -116,6 +116,16 @@ impl Platforms {
     }
 }
 
+/// Why this computer cannot use a model. Shown on the Models screen instead of a download button.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Unavailable {
+    /// `platform` (not built for this OS and processor) or `machine` (needs a stronger computer).
+    pub reason: &'static str,
+    /// For `machine`, the class the model needs.
+    pub needs: Option<MachineClass>,
+}
+
 /// A model the app can download. Everything the user needs to decide is here, and it is shown
 /// before any download starts (FR-016).
 ///
@@ -147,6 +157,10 @@ pub struct CatalogueEntry {
     pub licence_class: LicenceClass,
     #[serde(default)]
     pub licence_notice_key: Option<String>,
+    /// For a voice the project trained itself: the rights record that says who allowed it, as a
+    /// path from the repository root (`config/voice-rights/<id>.json`). See `models::rights`.
+    #[serde(default)]
+    pub rights_record: Option<String>,
     #[serde(default)]
     pub step: Step,
     #[serde(default)]
@@ -174,6 +188,28 @@ fn yes() -> bool {
 }
 
 impl CatalogueEntry {
+    /// `None` when this computer can use the model. Opt-in models are available: the user
+    /// chooses them, so they are not listed here.
+    pub fn unavailable(&self, os: &str, arch: &str, class: MachineClass) -> Option<Unavailable> {
+        if self
+            .platforms
+            .as_ref()
+            .is_some_and(|p| !p.supports(os, arch))
+        {
+            return Some(Unavailable {
+                reason: "platform",
+                needs: None,
+            });
+        }
+        if self.machine_class > class {
+            return Some(Unavailable {
+                reason: "machine",
+                needs: Some(self.machine_class),
+            });
+        }
+        None
+    }
+
     /// Everything the user downloads for this entry: the files and any packages after them.
     pub fn total_download_bytes(&self) -> u64 {
         self.size_bytes + self.extra_download_bytes

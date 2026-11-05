@@ -16,6 +16,10 @@ use serde::{Deserialize, Serialize};
 pub struct SpecDefinition {
     pub version: u32,
     pub provisional: bool,
+    /// Where the numbers come from when they are not fully measured: `simulated` (the minimum
+    /// spec was only simulated, or only one OS was measured) or `measured`.
+    #[serde(default)]
+    pub basis: Option<String>,
     pub minimum: SpecTier,
     pub full_local: SpecTier,
 }

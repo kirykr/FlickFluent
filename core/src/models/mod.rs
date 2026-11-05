@@ -3,13 +3,14 @@
 mod catalogue;
 mod downloader;
 pub mod install;
+pub mod rights;
 pub mod runtime;
 mod storage;
 mod verify;
 
 pub use catalogue::{
     bundled as bundled_catalogue, CatalogueEntry, FileSpec, Gender, LicenceClass, MachineClass,
-    Platforms, Quality, Step, VoiceSpec,
+    Platforms, Quality, Step, Unavailable, VoiceSpec,
 };
 pub use downloader::{download, Control, Outcome, Phase, Progress};
 pub use install::{install_entry, unpack_zip, Target};

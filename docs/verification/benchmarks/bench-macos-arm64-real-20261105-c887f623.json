@@ -1,0 +1,71 @@
+{
+  "id": "c887f623-8632-467f-97a2-bda80932cdf2",
+  "createdAt": "2026-11-05T07:38:14.597384Z",
+  "machine": {
+    "os": "macos",
+    "osVersion": "26.5.2",
+    "arch": "arm64",
+    "cpuModel": "Apple M5",
+    "cores": 10,
+    "ramGb": 16.0,
+    "freeDiskGb": 110.0,
+    "accelerator": "appleSilicon",
+    "simulated": false
+  },
+  "fixture": {
+    "id": "clip-2min-fr",
+    "durationMs": 120116
+  },
+  "results": [
+    {
+      "stage": "extract",
+      "modelId": "ffmpeg",
+      "wallMs": 131,
+      "peakRamMb": null,
+      "realTimeFactor": 0.001
+    },
+    {
+      "stage": "separate",
+      "modelId": "htdemucs",
+      "wallMs": 41231,
+      "peakRamMb": 1789,
+      "realTimeFactor": 0.343
+    },
+    {
+      "stage": "transcribe",
+      "modelId": "whisper-large-v3",
+      "wallMs": 519317,
+      "peakRamMb": 4066,
+      "realTimeFactor": 4.323
+    },
+    {
+      "stage": "translate",
+      "modelId": "m2m100-1.2b",
+      "wallMs": 11073,
+      "peakRamMb": 2761,
+      "realTimeFactor": 0.092
+    },
+    {
+      "stage": "synthesize",
+      "modelId": "kokoro-multi-lang-v1_0",
+      "wallMs": 11847,
+      "peakRamMb": 836,
+      "realTimeFactor": 0.099
+    },
+    {
+      "stage": "mix",
+      "modelId": "ffmpeg",
+      "wallMs": 237,
+      "peakRamMb": null,
+      "realTimeFactor": 0.002
+    }
+  ],
+  "verdict": {
+    "canRunMinimum": true,
+    "canRunFullLocal": true,
+    "notes": [
+      "Heaviest stage used 4066 MB; the minimum spec allows 6144 MB (75% of 8 GB) and the full-local spec 12288 MB.",
+      "Whole dub ran at 4.86x real time (1.00 means one minute of video takes one minute)."
+    ]
+  }
+}

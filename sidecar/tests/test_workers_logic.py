@@ -73,3 +73,35 @@ def test_codes_and_tokens():
     assert lang_token("zh-CN") == "__zh__"
     assert [len(b) for b in batches(list(range(450)), 200)] == [200, 200, 50]
     assert MAX_SPEEDUP > 1
+
+
+# --- NLLB language tokens -------------------------------------------------------------------
+
+
+def test_nllb_tokens_have_the_flores_shape_and_are_unique():
+    import re
+
+    from flickfluent_sidecar.workers.nllb_codes import NLLB_TOKENS
+
+    assert all(re.fullmatch(r"[a-z]{3}_[A-Z][a-z]{3}", t) for t in NLLB_TOKENS.values())
+    assert len(set(NLLB_TOKENS.values())) == len(NLLB_TOKENS)
+    assert NLLB_TOKENS["km"] == "khm_Khmr"
+
+
+def test_nllb_token_drops_the_region_and_refuses_unknown_languages():
+    from flickfluent_sidecar.protocol import WorkerError
+    from flickfluent_sidecar.workers.translate import nllb_token
+
+    assert nllb_token("pt-BR".lower()) == "por_Latn"
+    with pytest.raises(WorkerError) as e:
+        nllb_token("xx")
+    assert e.value.code == "UNSUPPORTED_LANGUAGE"
+
+
+def test_the_model_folder_name_says_which_language_tokens_apply():
+    from pathlib import Path
+
+    from flickfluent_sidecar.workers.translate import is_nllb
+
+    assert is_nllb(Path("/models/nllb-200-distilled-600m"))
+    assert not is_nllb(Path("/models/m2m100-418m"))

@@ -42,6 +42,12 @@ def crash_once(ctx, req):
     return work(ctx, req)
 
 
+def pid(ctx, req):
+    out = Path(req["output"]["dir"]) / (req["output"].get("prefix", "out") + ".json")
+    atomic_write(out, json.dumps({"pid": os.getpid()}).encode())
+    return {"result": {"pid": os.getpid()}, "files": [out.name]}
+
+
 def always_crash(ctx, req):
     os._exit(4)
 
@@ -54,7 +60,7 @@ def fail(ctx, req):
     raise WorkerError("STAGE_FAILED", "nope", retryable=False)
 
 
-workers = {"work": work, "crash_once": crash_once, "always_crash": always_crash, "hang": hang, "fail": fail}
+workers = {"work": work, "pid": pid, "crash_once": crash_once, "always_crash": always_crash, "hang": hang, "fail": fail}
 
 if __name__ == "__main__":
     allow = [a for i, a in enumerate(sys.argv) if i and sys.argv[i - 1] == "--allow"]

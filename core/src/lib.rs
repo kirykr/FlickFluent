@@ -1,5 +1,6 @@
 //! FlickFluent core: all logic, no UI. The Tauri shell only wires this to the window.
 
+pub mod bench;
 pub mod cli;
 pub mod error;
 pub mod fsutil;

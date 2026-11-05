@@ -31,3 +31,13 @@ Built and tested on macOS; see `docs/verification/001.md`. Before starting 002:
 - Windows is entirely unverified, including the installer hook.
 - Idle RAM is about 150 MB against a 150 MB budget.
 - The model catalogue holds only a download self-test file. Feature 002 adds real models.
+
+## Feature 002 hand-off (2026-11-05)
+
+Details and numbers: `docs/verification/002-benchmarks.md`.
+
+- **Spec values (`config/spec-definition.json`):** unchanged and still provisional, `"basis": "simulated"`. Minimum 4 cores, 8 GB RAM, 10 GB free disk, Windows 10 or macOS 12; full local 8 cores, 16 GB RAM, 40 GB free disk and Apple Silicon or a discrete GPU.
+- **What was measured:** the 2-minute French clip, on one Mac (Apple M5, 10 cores, 16 GB), once as itself (full-local models) and once held to the minimum spec (minimum models, 3 worker threads, memory watchdog). Heaviest stage: 4066 MB full-local, 1642 MB minimum. The 8 GB minimum stays, because no real low-memory computer and no Windows computer was tried.
+- **What is simulated:** the minimum spec (a Mac held to its numbers, not a real 8 GB computer).
+- **What remains open:** all Windows runs (the `.ps1` limiter was never executed); a real 8 GB computer; a full-length film; the slow, non-linear Whisper large-v3 time; the eSpeak source offer in About (T085); NLLB inference with the real model; the macOS LGPL FFmpeg build; Windows on ARM has no local engine.
+- **Owner decisions this feature:** eSpeak NG stays in the separate-process pack with the matching source published (2026-11-05); NLLB-200 is an opt-in non-commercial model.

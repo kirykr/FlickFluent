@@ -41,3 +41,15 @@ def test_same_language_is_refused(call):
     with pytest.raises(WorkerError) as e:
         run(call, source="fr", target="fr")
     assert e.value.code == "SAME_LANGUAGE"
+
+
+def test_nllb_translates_khmer_when_its_model_is_present(call, models):
+    """Runs only with the non-commercial NLLB model folder (`nllb-200-distilled-600m`)."""
+    if not (models / "nllb-200-distilled-600m").is_dir():
+        pytest.skip("NLLB model folder not in FLICK_TEST_MODELS")
+    out = call(
+        translate.run,
+        {"source": "en", "target": "km", "lines": [{"text": "Thank you very much."}]},
+        {"main": "nllb-200-distilled-600m"},
+    )["result"]["translated"]
+    assert len(out) == 1 and any("ក" <= ch <= "៿" for ch in out[0]), out

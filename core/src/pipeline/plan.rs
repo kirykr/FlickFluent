@@ -46,8 +46,9 @@ fn usable(entry: &CatalogueEntry, os: &str, arch: &str, opt_in: &[String]) -> bo
             .is_none_or(|p| p.supports(os, arch))
 }
 
-/// The best entry of `step` for the machine: the highest class not above the machine's. Among
-/// equals, one that is already installed wins (the user should not download a second voice when
+/// The best entry of `step` for the machine. An entry the user opted into wins, since they asked
+/// for it by name. Then the highest class not above the machine's. Among equals, one that is
+/// already installed wins (the user should not download a second voice when
 /// one works), then the first in the catalogue.
 #[allow(clippy::too_many_arguments)]
 fn best<'a>(
@@ -66,7 +67,13 @@ fn best<'a>(
             e.step == step && e.machine_class <= class && usable(e, os, arch, opt_in) && keep(e)
         })
         .rev()
-        .max_by_key(|e| (e.machine_class, installed.contains(&e.id)))
+        .max_by_key(|e| {
+            (
+                opt_in.contains(&e.id),
+                e.machine_class,
+                installed.contains(&e.id),
+            )
+        })
 }
 
 /// A voice chosen for one speaker gender: which model holds it and how to ask for it.

@@ -15,13 +15,14 @@ use time::OffsetDateTime;
 use super::errors::next_step_key;
 use super::ffmpeg::Ffmpeg;
 use super::mix::{mix, MixLine, MixSection};
-use super::plan::{plan_models_full, ModelPlan, VoicePick};
+use super::plan::{disk_needed_bytes, plan_models_full, ModelPlan, VoicePick};
+use super::progress::{Eta, Pacer};
 use super::sections::plan as plan_sections;
 use super::stages::{extract, fingerprint};
 use super::state::{input_hash, WorkFolder};
 use crate::error::{
-    AppError, CANCELLED, MODELS_MISSING, NOTHING_TO_RESUME, NO_SPEECH_FOUND, SAME_LANGUAGE,
-    SOURCE_CHANGED, STAGE_FAILED,
+    AppError, CANCELLED, MODELS_MISSING, NOTHING_TO_RESUME, NO_SPACE, NO_SPEECH_FOUND,
+    SAME_LANGUAGE, SOURCE_CHANGED, STAGE_FAILED,
 };
 use crate::models::{CatalogueEntry, Gender, MachineClass};
 use crate::project::dub::{
@@ -35,8 +36,6 @@ pub const TOO_LONG: f64 = 1.25;
 pub const TOO_SHORT: f64 = 0.5;
 /// Below this transcription confidence a line is flagged.
 pub const LOW_CONFIDENCE: f64 = 0.5;
-/// Progress events leave at most this often.
-const EVENT_EVERY: Duration = Duration::from_millis(1000);
 
 #[derive(Clone, Default)]
 pub struct CancelToken(Arc<AtomicBool>);
@@ -74,8 +73,20 @@ pub struct RunConfig {
     pub params: Value,
 }
 
+/// What one worker call cost, for the benchmark.
+#[derive(Debug, Clone)]
+pub struct StageStat {
+    pub stage: Stage,
+    /// Name of the model folder the worker used (the catalogue id), empty when it had none.
+    pub model_id: String,
+    pub wall_ms: u64,
+    pub peak_ram_mb: u64,
+}
+
 #[derive(Debug, Clone)]
 pub enum RunEvent {
+    /// A worker call finished.
+    Stat(StageStat),
     Stage {
         stage: Stage,
         status: StageStatus,
@@ -120,12 +131,25 @@ fn file_hash(path: &Path) -> String {
 }
 
 fn run_error(e: &AppError, stage: Option<Stage>, section: Option<u32>) -> RunError {
+    // A source that vanished is still a failed stage, but the fix is a file, not a retry.
+    let source_missing = e
+        .details
+        .as_ref()
+        .is_some_and(|d| d["reason"] == "sourceMissing");
     RunError {
         code: e.code.to_string(),
         stage,
         section_index: section,
-        message_key: e.message_key.clone(),
-        next_step_key: next_step_key(e.code).to_string(),
+        message_key: if source_missing {
+            "dub.error.sourceMissing".into()
+        } else {
+            e.message_key.clone()
+        },
+        next_step_key: if source_missing {
+            "dub.next.chooseAnotherFile".into()
+        } else {
+            next_step_key(e.code).to_string()
+        },
         details: e.details.clone(),
     }
 }
@@ -163,10 +187,9 @@ struct Runner<'a> {
     sidecar: Option<Sidecar>,
     fingerprint: String,
     source_lang: String,
-    last_event: Instant,
+    pacer: Pacer,
     on_event: &'a mut (dyn FnMut(RunEvent) + Send),
-    /// Finished section stages and the time they took, for the ETA.
-    finished: Vec<Duration>,
+    eta: Eta,
 }
 
 /// Run (or resume) the dub. Returns the project data with `run` and `lines` filled in. A
@@ -255,9 +278,9 @@ pub async fn run_dub(
         sidecar: None,
         fingerprint: fp,
         source_lang,
-        last_event: Instant::now() - EVENT_EVERY,
+        pacer: Pacer::default(),
         on_event,
-        finished: Vec::new(),
+        eta: Eta::default(),
     };
     runner.save()?;
     let outcome = runner.drive().await;
@@ -315,14 +338,47 @@ impl Runner<'_> {
         0.05 + 0.90 * ((section as f32 * per + stage_index as f32 + fraction) / (sections * per))
     }
 
-    fn eta(&self, section: usize) -> Option<u64> {
-        if self.finished.is_empty() {
-            return None;
+    /// Send a progress event unless one left less than a second ago.
+    fn emit_progress(&mut self, event: RunEvent) {
+        if self.pacer.progress_due(Instant::now()) {
+            self.emit(event);
         }
-        let mean =
-            self.finished.iter().sum::<Duration>().as_secs_f64() / self.finished.len() as f64;
-        let left = (self.run.sections.len() - section) as f64;
-        Some((mean * left * Stage::PER_SECTION.len() as f64) as u64)
+    }
+
+    /// The source must still be there for every stage: a file taken away mid-run fails the stage
+    /// about to start, by name.
+    fn check_source(&self, stage: Stage) -> Result<(), AppError> {
+        let Some(source) = self.dub.source.as_ref() else {
+            return Ok(());
+        };
+        if std::fs::metadata(&source.path).is_ok() {
+            return Ok(());
+        }
+        Err(
+            AppError::new(STAGE_FAILED, "dub.error.stageFailed").with_details(
+                json!({ "stage": stage, "reason": "sourceMissing", "path": source.path }),
+            ),
+        )
+    }
+
+    /// A full disk reports what the rest of the run needs, what is free, and the difference.
+    fn with_space_numbers(&self, mut e: AppError, from_section: usize) -> AppError {
+        let left_ms: u64 = self
+            .run
+            .sections
+            .iter()
+            .skip(from_section)
+            .map(|s| s.end_ms.saturating_sub(s.start_ms))
+            .sum();
+        let needed = disk_needed_bytes(left_ms);
+        let free = crate::models::free_space(self.work.path()).unwrap_or(0);
+        let mut details = e.details.take().unwrap_or_else(|| json!({}));
+        if let Value::Object(map) = &mut details {
+            map.insert("neededBytes".into(), json!(needed));
+            map.insert("freeBytes".into(), json!(free));
+            map.insert("shortfallBytes".into(), json!(needed.saturating_sub(free)));
+        }
+        e.with_details(details)
     }
 
     async fn sidecar(&mut self) -> Result<&mut Sidecar, AppError> {
@@ -344,7 +400,8 @@ impl Runner<'_> {
         p
     }
 
-    /// Send one request to the sidecar with crash retry, mapping its progress to run progress.
+    /// Send one request to the sidecar with crash retry, mapping its progress to run progress as
+    /// it arrives. A worker that goes quiet still gets a heartbeat event.
     async fn call(
         &mut self,
         req: Request,
@@ -352,13 +409,36 @@ impl Runner<'_> {
         stage: Stage,
     ) -> Result<crate::sidecar::Done, AppError> {
         self.check_cancel()?;
+        // Workers with one model name it `main`; speech lists voice models by their ids.
+        let model_id = req
+            .models
+            .get("main")
+            .and_then(Value::as_str)
+            .and_then(|m| Path::new(m).file_name())
+            .map(|n| n.to_string_lossy().into_owned())
+            .or_else(|| {
+                req.models.as_object().and_then(|m| {
+                    m.keys()
+                        .find(|k| !matches!(k.as_str(), "espeak" | "speaker"))
+                        .cloned()
+                })
+            })
+            .unwrap_or_default();
         let stage_index = Stage::PER_SECTION
             .iter()
             .position(|s| *s == stage)
             .unwrap_or(0);
+        let count = self.run.sections.len();
+        let eta = self.eta.seconds(count);
+        let (from, to) = (
+            self.overall(section, stage_index, 0.0),
+            self.overall(section, stage_index, 1.0),
+        );
+        self.sidecar().await?;
+        let mut sidecar = self.sidecar.take().expect("just started");
         let watcher = {
             let cancel = self.cancel.clone();
-            let handle = self.sidecar().await?.cancel_handle();
+            let handle = sidecar.cancel_handle();
             tokio::spawn(async move {
                 while !cancel.is_cancelled() {
                     tokio::time::sleep(Duration::from_millis(100)).await;
@@ -366,44 +446,43 @@ impl Runner<'_> {
                 handle.cancel().await;
             })
         };
-        let mut events: Vec<RunEvent> = Vec::new();
-        let (count, eta) = (self.run.sections.len() as u32, self.eta(section));
-        let overall_base = |f: f32, s: &Self| s.overall(section, stage_index, f);
-        let mut last = self.last_event;
-        let mut pending = Vec::new();
-        let result = {
-            let overall: Vec<f32> = (0..=20)
-                .map(|i| overall_base(i as f32 / 20.0, self))
-                .collect();
-            let sc = self.sidecar().await?;
-            sc.run_with_retry(req, &mut |ev| {
-                if let Event::Progress(f) = ev {
-                    if last.elapsed() >= EVENT_EVERY {
-                        last = Instant::now();
-                        let slot = ((f.clamp(0.0, 1.0) * 20.0) as usize).min(20);
-                        pending.push(RunEvent::Progress {
-                            stage,
-                            stage_progress: f,
-                            overall: overall[slot],
-                            section_index: section as u32,
-                            section_count: count,
-                            eta_seconds: eta,
-                        });
+        let on_event = &mut *self.on_event;
+        let pacer = &mut self.pacer;
+        let mut fraction = 0.0f32;
+        let result = sidecar
+            .run_with_retry(req, &mut |ev| {
+                let now = Instant::now();
+                let due = match ev {
+                    Event::Progress(f) => {
+                        fraction = f.clamp(0.0, 1.0);
+                        pacer.progress_due(now)
                     }
+                    Event::Tick => pacer.heartbeat_due(now),
+                    _ => false,
+                };
+                if due {
+                    on_event(RunEvent::Progress {
+                        stage,
+                        stage_progress: fraction,
+                        overall: from + (to - from) * fraction,
+                        section_index: section as u32,
+                        section_count: count as u32,
+                        eta_seconds: eta,
+                    });
                 }
             })
-            .await
-        };
+            .await;
         watcher.abort();
-        self.last_event = last;
-        events.append(&mut pending);
-        for e in events {
-            self.emit(e);
+        self.sidecar = Some(sidecar);
+        if let Ok(done) = &result {
+            self.emit(RunEvent::Stat(StageStat {
+                stage,
+                model_id,
+                wall_ms: done.stats.wall_ms,
+                peak_ram_mb: done.stats.peak_ram_mb,
+            }));
         }
-        match result {
-            Err(e) if e.code == CANCELLED => Err(e),
-            other => other,
-        }
+        result
     }
 
     async fn drive(&mut self) -> Result<(), AppError> {
@@ -417,8 +496,8 @@ impl Runner<'_> {
             && read_json(&work.join("source-info.json"))
                 .is_some_and(|v| v["fingerprint"] == self.fingerprint.as_str());
         if !have {
-            let mut last = Instant::now() - EVENT_EVERY;
-            let mut pending = Vec::new();
+            let on_event = &mut *self.on_event;
+            let pacer = &mut self.pacer;
             extract(
                 &self.cfg.ffmpeg,
                 Path::new(&source.path),
@@ -426,23 +505,19 @@ impl Runner<'_> {
                 source.duration_ms,
                 &self.fingerprint,
                 &mut |p| {
-                    if last.elapsed() >= EVENT_EVERY {
-                        last = Instant::now();
-                        pending.push(p);
+                    if pacer.progress_due(Instant::now()) {
+                        on_event(RunEvent::Progress {
+                            stage: Stage::Extract,
+                            stage_progress: p,
+                            overall: 0.05 * p,
+                            section_index: 0,
+                            section_count: 0,
+                            eta_seconds: None,
+                        });
                     }
                 },
             )
             .await?;
-            for p in pending {
-                self.emit(RunEvent::Progress {
-                    stage: Stage::Extract,
-                    stage_progress: p,
-                    overall: 0.05 * p,
-                    section_index: 0,
-                    section_count: 0,
-                    eta_seconds: None,
-                });
-            }
         }
         self.set_stage(Stage::Extract, StageStatus::Done);
         self.check_cancel()?;
@@ -478,6 +553,7 @@ impl Runner<'_> {
         }
         for index in 0..count {
             let started = Instant::now();
+            let already = self.section_complete(index, fast, subtitles_only);
             let mut lines = Vec::new();
             for (stage_index, stage) in Stage::PER_SECTION.into_iter().enumerate() {
                 if (fast && stage == Stage::Separate)
@@ -487,23 +563,30 @@ impl Runner<'_> {
                 }
                 self.check_cancel()?;
                 self.set_stage(stage, StageStatus::Running);
-                let outcome = match stage {
-                    Stage::Separate => self.separate(index).await.map(|_| ()),
-                    Stage::Transcribe => self.transcribe(index).await.map(|l| lines = l),
-                    Stage::Translate => self.translate(index).await.map(|l| lines = l),
-                    Stage::Synthesize => self.synthesize(index).await.map(|l| lines = l),
-                    _ => Ok(()),
+                let outcome = match self.check_source(stage) {
+                    Err(e) => Err(e),
+                    Ok(()) => match stage {
+                        Stage::Separate => self.separate(index).await.map(|_| ()),
+                        Stage::Transcribe => self.transcribe(index).await.map(|l| lines = l),
+                        Stage::Translate => self.translate(index).await.map(|l| lines = l),
+                        Stage::Synthesize => self.synthesize(index).await.map(|l| lines = l),
+                        _ => Ok(()),
+                    },
                 };
                 if let Err(e) = outcome {
                     self.mark(index, stage, StageStatus::Failed);
                     self.set_stage(stage, StageStatus::Failed);
-                    return Err(e);
+                    return Err(if e.code == NO_SPACE {
+                        self.with_space_numbers(e, index)
+                    } else {
+                        e
+                    });
                 }
                 self.mark(index, stage, StageStatus::Done);
                 self.save()?;
                 let overall = self.overall(index, stage_index + 1, 0.0);
-                let eta = self.eta(index);
-                self.emit(RunEvent::Progress {
+                let eta = self.eta.seconds(count);
+                self.emit_progress(RunEvent::Progress {
                     stage,
                     stage_progress: 1.0,
                     overall,
@@ -516,7 +599,11 @@ impl Runner<'_> {
                 self.emit(RunEvent::Line(line.clone()));
             }
             self.dub.lines.extend(lines);
-            self.finished.push(started.elapsed());
+            if already {
+                self.eta.already_done(1);
+            } else {
+                self.eta.section_done(started.elapsed());
+            }
         }
         for stage in Stage::PER_SECTION {
             self.set_stage(stage, StageStatus::Done);
@@ -531,7 +618,7 @@ impl Runner<'_> {
         }
         self.set_stage(Stage::Mix, StageStatus::Done);
         let count = self.run.sections.len() as u32;
-        self.emit(RunEvent::Progress {
+        self.emit_progress(RunEvent::Progress {
             stage: Stage::Mix,
             stage_progress: 1.0,
             overall: 1.0,
@@ -540,6 +627,17 @@ impl Runner<'_> {
             eta_seconds: Some(0),
         });
         Ok(())
+    }
+
+    /// Every stage this run would do for the section is already done (a resume skipping it).
+    fn section_complete(&self, index: usize, fast: bool, subtitles_only: bool) -> bool {
+        let sec = &self.run.sections[index];
+        Stage::PER_SECTION
+            .into_iter()
+            .filter(|s| {
+                !(fast && *s == Stage::Separate || subtitles_only && *s == Stage::Synthesize)
+            })
+            .all(|s| sec.status.get(&s) == Some(&StageStatus::Done))
     }
 
     fn mark(&mut self, index: usize, stage: Stage, status: StageStatus) {

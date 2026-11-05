@@ -1,0 +1,30 @@
+{
+  "voiceId": "vits-km-test",
+  "status": "granted",
+  "licence": {
+    "name": "Signed licence from the station and the narrator",
+    "class": "permissive",
+    "spdx": null
+  },
+  "covers": [
+    "train",
+    "ship",
+    "commercial"
+  ],
+  "rightsHolders": [
+    {
+      "name": "Example Station",
+      "role": "station",
+      "grantedOn": "2026-11-05",
+      "evidenceKind": "signed-licence",
+      "evidence": "docs/voice-rights/example-station-licence.pdf"
+    }
+  ],
+  "speakers": [],
+  "source": {
+    "description": "Studio recordings made for this project",
+    "hours": 3.5,
+    "origin": "commissioned"
+  },
+  "notes": ""
+}

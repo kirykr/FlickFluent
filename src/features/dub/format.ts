@@ -60,12 +60,14 @@ export function dubError(
   const d = (e.details ?? {}) as {
     neededBytes?: number;
     freeBytes?: number;
+    shortfallBytes?: number;
     missing?: string[];
     stage?: string;
   };
   const params: Record<string, string> = {};
   if (typeof d.neededBytes === "number") params.needed = formatBytes(d.neededBytes);
   if (typeof d.freeBytes === "number") params.free = formatBytes(d.freeBytes);
+  if (typeof d.shortfallBytes === "number") params.shortfall = formatBytes(d.shortfallBytes);
   if (Array.isArray(d.missing)) params.missing = d.missing.join(", ");
   if (stage ?? d.stage) params.stage = (stage ?? d.stage) as string;
   return { key, params };
@@ -81,4 +83,30 @@ export function baseName(path: string): string {
 /** The file name with its extension, without folders. */
 export function fileName(path: string): string {
   return path.split(/[\\/]/).pop() ?? path;
+}
+
+export type NextAction = "resume" | "restart" | "chooseAnother" | "download" | "none";
+
+/** What the one button under an error does, from the next-step key the core sent. */
+export function nextAction(nextStepKey: string): NextAction {
+  switch (nextStepKey) {
+    case "dub.next.retry":
+    case "dub.next.freeDiskSpace":
+    case "dub.next.resume":
+    case "dub.next.finishRun":
+      return "resume";
+    case "dub.next.restartRun":
+    case "dub.next.startRun":
+    case "dub.next.confirmOrChange":
+    case "dub.next.chooseFallback":
+      return "restart";
+    case "dub.next.chooseAnotherFile":
+    case "dub.next.chooseAnotherName":
+      return "chooseAnother";
+    case "dub.next.downloadModels":
+    case "dub.next.reinstallRuntime":
+      return "download";
+    default:
+      return "none";
+  }
 }

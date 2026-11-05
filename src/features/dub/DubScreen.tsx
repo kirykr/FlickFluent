@@ -6,7 +6,7 @@ import type { AppErrorShape } from "../projects/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NewDub } from "./NewDub";
 import { Result } from "./Result";
-import { RunProgress } from "./RunProgress";
+import { RunProgress } from "./Progress";
 import { dubError } from "./format";
 import { useDubRun } from "./useDubRun";
 
@@ -71,6 +71,7 @@ export function DubScreen({ handle, readOnly }: Props) {
       <div className="flex flex-col gap-3">
         {errorBanner}
         <RunProgress
+          handle={handle}
           view={view}
           onCancel={() => view.runId && guard(() => dubCancel(view.runId as string))}
           onResume={() =>

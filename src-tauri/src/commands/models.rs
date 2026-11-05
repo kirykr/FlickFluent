@@ -50,6 +50,13 @@ pub struct ModelRecord {
     /// i18n key of the notice to show before download, when the licence needs one.
     licence_notice_key: Option<String>,
     size_bytes: u64,
+    /// What the model is for: `transcribe`, `translate`, `speak`, `separate` and so on.
+    step: flickfluent_core::models::Step,
+    /// Language codes it handles; empty when it is not tied to a language.
+    languages: Vec<String>,
+    machine_class: flickfluent_core::models::MachineClass,
+    /// Why this computer cannot use it, or `None`.
+    unavailable: Option<flickfluent_core::models::Unavailable>,
     /// `notInstalled`, `downloading`, `paused`, `verifying`, `installed` or `failed`.
     state: &'static str,
     bytes_done: u64,
@@ -71,6 +78,15 @@ fn find(id: &str) -> Result<CatalogueEntry, AppError> {
         .into_iter()
         .find(|e| e.id == id)
         .ok_or_else(|| AppError::new("NOT_FOUND", "error.notFound"))
+}
+
+/// What this computer can run, read once: the probe is slow and records are built often.
+fn this_machine() -> flickfluent_core::models::MachineClass {
+    static CLASS: std::sync::OnceLock<flickfluent_core::models::MachineClass> =
+        std::sync::OnceLock::new();
+    *CLASS.get_or_init(|| {
+        flickfluent_core::pipeline::plan::machine_class(&flickfluent_core::hardware::probe())
+    })
 }
 
 fn record(
@@ -101,6 +117,18 @@ fn record(
         licence_class: entry.licence_class,
         licence_notice_key: entry.licence_notice_key.clone(),
         size_bytes: entry.total_download_bytes(),
+        step: entry.step,
+        languages: entry.languages.clone(),
+        machine_class: entry.machine_class,
+        unavailable: entry.unavailable(
+            if cfg!(windows) { "windows" } else { "macos" },
+            if cfg!(target_arch = "aarch64") {
+                "arm64"
+            } else {
+                "x64"
+            },
+            this_machine(),
+        ),
         state,
         bytes_done,
         error_code,

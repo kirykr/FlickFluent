@@ -4,6 +4,7 @@ Params the tests use: `speech` (false gives no transcript lines), `slowWorker` +
 + `slowSeconds` (the named worker lingers in the named section so a test can kill the run).
 """
 
+import errno
 import json
 import math
 import struct
@@ -18,12 +19,20 @@ from flickfluent_sidecar.protocol import Server, atomic_write  # noqa: E402
 
 
 def linger(ctx, req, worker):
+    disk_full(ctx, req, worker)
     p = ctx.params
     if p.get("slowWorker") == worker and f"/{p.get('slowSection')}" in req["output"]["dir"].replace("\\", "/"):
         end = time.time() + float(p.get("slowSeconds", 30))
         while time.time() < end:
             ctx.check_cancel()
             time.sleep(0.02)
+
+
+def disk_full(ctx, req, worker):
+    """`diskFullWorker` + `diskFullSection`: that worker fails in that section as a full disk does."""
+    p = ctx.params
+    if p.get("diskFullWorker") == worker and f"/{p.get('diskFullSection')}" in req["output"]["dir"].replace("\\", "/"):
+        raise OSError(errno.ENOSPC, "No space left on device")
 
 
 def separate(ctx, req):

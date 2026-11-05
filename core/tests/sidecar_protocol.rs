@@ -173,3 +173,31 @@ async fn a_missing_program_gives_start_failed() {
     let err = Sidecar::start(cfg).await.err().expect("must fail");
     assert_eq!(err.code, "SIDECAR_START_FAILED");
 }
+
+#[tokio::test]
+async fn a_worker_over_its_memory_ceiling_gets_a_fresh_process_for_the_next_call() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut sc = Sidecar::start(config(dir.path())).await.unwrap();
+    let mut pids = Vec::new();
+    for ceiling in [1, 1, 1_000_000] {
+        let done = sc
+            .run_with_retry(
+                request("pid", dir.path(), json!({ "ramCeilingMb": ceiling })),
+                &mut |_| {},
+            )
+            .await
+            .unwrap();
+        pids.push(done.result["pid"].as_u64().unwrap());
+    }
+    assert_ne!(pids[0], pids[1], "over the ceiling: the next call restarts");
+    assert_ne!(pids[1], pids[2], "the call after that still got a restart");
+    // Under the ceiling nothing restarts.
+    let again = sc
+        .run_with_retry(
+            request("pid", dir.path(), json!({ "ramCeilingMb": 1_000_000 })),
+            &mut |_| {},
+        )
+        .await
+        .unwrap();
+    assert_eq!(again.result["pid"].as_u64().unwrap(), pids[2]);
+}

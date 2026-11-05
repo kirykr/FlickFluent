@@ -1,5 +1,5 @@
 import type { AppErrorShape } from "../projects/types";
-import type { ModelRecord } from "./types";
+import type { MachineClass, ModelRecord, Unavailable } from "./types";
 
 /** Human size with binary units, one decimal for MB and up: 1090 -> "1.1 KB". */
 export function formatBytes(n: number): string {
@@ -44,4 +44,25 @@ export function modelError(
     params.free = formatBytes(d.freeBytes ?? 0);
   }
   return { key: KEYS[code] ?? "models.error.generic", params };
+}
+
+/** Language names for a model: the first few by name, then how many more. */
+export function languageSummary(
+  codes: string[],
+  name: (code: string) => string,
+  shown = 6,
+): { names: string[]; more: number } {
+  const names = codes.map(name).sort((a, b) => a.localeCompare(b));
+  return { names: names.slice(0, shown), more: Math.max(0, names.length - shown) };
+}
+
+/** i18n key and params for why a model is unavailable. */
+export function unavailableReason(
+  u: Unavailable,
+  className: (c: MachineClass) => string,
+): { key: string; params: Record<string, string> } {
+  if (u.reason === "machine" && u.needs) {
+    return { key: "models.unavailable.machine", params: { needs: className(u.needs) } };
+  }
+  return { key: "models.unavailable.platform", params: {} };
 }

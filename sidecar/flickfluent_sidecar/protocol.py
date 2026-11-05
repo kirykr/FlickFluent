@@ -6,6 +6,7 @@ stdout carries only protocol lines; anything else the workers print must go to s
 
 from __future__ import annotations
 
+import errno
 import json
 import os
 import queue
@@ -221,6 +222,11 @@ class Server:
             ctx = Context(self, rid, cancel, req.get("params") or {})
             out = worker(ctx, req) or {}
             peak = peak_ram_mb()
+            ceiling = (req.get("params") or {}).get("ramCeilingMb")
+            if ceiling and peak > ceiling:
+                # Before the answer: the core reads up to the answer and no further, so a request
+                # sent afterwards would be missed until the next call.
+                self.send({"id": rid, "event": "restart_requested"})
             self.send(
                 {
                     "id": rid,
@@ -230,15 +236,17 @@ class Server:
                     "stats": {"wallMs": int((time.monotonic() - started) * 1000), "peakRamMb": peak},
                 }
             )
-            ceiling = (req.get("params") or {}).get("ramCeilingMb")
-            if ceiling and peak > ceiling:
-                self.send({"id": rid, "event": "restart_requested"})
         except Cancelled:
             self.send({"id": rid, "ok": False, "error": {"code": "CANCELLED", "retryable": False}})
         except WorkerError as e:
             self.send(
                 {"id": rid, "ok": False, "error": {"code": e.code, "message": str(e), "retryable": e.retryable}}
             )
+        except OSError as e:
+            if e.errno != errno.ENOSPC:
+                print(f"worker error: {e!r}", file=sys.stderr, flush=True)
+            code = "NO_SPACE" if e.errno == errno.ENOSPC else "WORKER_FAILED"
+            self.send({"id": rid, "ok": False, "error": {"code": code, "message": str(e), "retryable": code != "NO_SPACE"}})
         except Exception as e:  # a worker bug must not kill the loop
             print(f"worker error: {e!r}", file=sys.stderr, flush=True)
             self.send({"id": rid, "ok": False, "error": {"code": "WORKER_FAILED", "message": str(e), "retryable": True}})

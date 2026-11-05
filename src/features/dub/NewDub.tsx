@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { listen } from "@tauri-apps/api/event";
 import { FileVideo } from "lucide-react";
 import { t } from "../../i18n";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import {
   dubConfigure,
@@ -16,14 +14,13 @@ import {
   dubStart,
   languagesCheckPair,
   languagesList,
-  modelDownloadStart,
 } from "../../app/ipc";
 import { asAppError } from "../projects/errors";
 import { formatBytes } from "../models/format";
-import type { ModelRecord } from "../models/types";
 import type { AppErrorShape } from "../projects/types";
-import { baseName, dubError, formatClock, percent } from "./format";
+import { baseName, dubError, formatClock } from "./format";
 import { LanguagePicker } from "./LanguagePicker";
+import { ModelPrompt } from "./ModelPrompt";
 import { pairResolved } from "./languages";
 import { PairCheck } from "./PairCheck";
 import {
@@ -59,7 +56,7 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
   const [error, setError] = useState<AppErrorShape | null>(null);
   const [busy, setBusy] = useState(false);
   const [sameOk, setSameOk] = useState(false);
-  const [downloads, setDownloads] = useState<Record<string, ModelRecord>>({});
+  const [downloading, setDownloading] = useState(false);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [pair, setPair] = useState<PairCheckResult | null>(null);
   const [fallbacks, setFallbacks] = useState<FallbackChoices>(
@@ -136,16 +133,6 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, source, target, mute, quality, sameOk, fallbacks]);
 
-  useEffect(() => {
-    let off: (() => void) | undefined;
-    void listen<ModelRecord>("model:progress", (e) => {
-      setDownloads((d) => ({ ...d, [e.payload.id]: e.payload }));
-      if (e.payload.state === "installed") void checkRef.current();
-    }).then((u) => (off = u));
-    return () => off?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handle]);
-
   const choose = async () => {
     const picked = await open({
       multiple: false,
@@ -161,12 +148,6 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
     }
   };
 
-  const downloadMissing = async () => {
-    for (const m of pre?.missingModels ?? []) {
-      await attempt(() => modelDownloadStart(m.id));
-    }
-  };
-
   const start = async () => {
     setBusy(true);
     const runId = await attempt(() => dubStart(handle));
@@ -175,10 +156,6 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
   };
 
   const sameLanguage = source !== "auto" && source === target && !sameOk;
-  const downloading = (pre?.missingModels ?? []).some((m) => {
-    const d = downloads[m.id];
-    return d && (d.state === "downloading" || d.state === "verifying");
-  });
   // Language limits are shown by the pair panel; only machine limits are listed separately.
   const machineBlockers = (pre?.blockers ?? []).filter((b) => b.reason === "machine");
   const ready =
@@ -191,12 +168,6 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
   const err = error
     ? dubError(error as AppErrorShape & { details?: Record<string, unknown> })
     : null;
-  const total = (pre?.missingModels ?? []).reduce((sum, m) => sum + m.sizeBytes, 0);
-  const done = (pre?.missingModels ?? []).reduce(
-    (sum, m) => sum + (downloads[m.id]?.bytesDone ?? 0),
-    0,
-  );
-
   return (
     <section
       className="mx-auto flex w-full max-w-2xl flex-col gap-4 py-2"
@@ -313,35 +284,14 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
         </Alert>
       ))}
 
-      {pre && pre.missingModels.length > 0 && (
-        <Card size="sm" data-testid="dub-missing">
-          <CardHeader>
-            <CardTitle>{t("dub.new.missingTitle")}</CardTitle>
-            <CardDescription>
-              {t("dub.new.missingBody", { size: formatBytes(total) })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <ul className="text-sm">
-              {pre.missingModels.map((m) => (
-                <li key={m.id} className="flex justify-between gap-3">
-                  <span className="truncate">{m.name}</span>
-                  <span className="text-muted-foreground">{formatBytes(m.sizeBytes)}</span>
-                </li>
-              ))}
-            </ul>
-            {downloading ? (
-              <Progress
-                value={percent(total ? done / total : 0)}
-                aria-label={t("dub.new.downloading")}
-              />
-            ) : (
-              <Button onClick={downloadMissing} disabled={readOnly}>
-                {t("dub.new.download", { size: formatBytes(total) })}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+      {pre && (
+        <ModelPrompt
+          models={pre.missingModels}
+          disabled={readOnly}
+          onDownloading={setDownloading}
+          onInstalled={() => void checkRef.current()}
+          onError={(e) => setError(asAppError(e))}
+        />
       )}
 
       {pre && (

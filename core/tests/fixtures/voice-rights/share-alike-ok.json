@@ -1,0 +1,38 @@
+{
+  "voiceId": "vits-km-test",
+  "status": "granted",
+  "licence": {
+    "name": "CC-BY-SA-4.0",
+    "class": "copyleftFile",
+    "spdx": "CC-BY-SA-4.0"
+  },
+  "covers": [
+    "train",
+    "ship",
+    "commercial"
+  ],
+  "rightsHolders": [
+    {
+      "name": "Example Station",
+      "role": "station",
+      "grantedOn": "2026-11-05",
+      "evidenceKind": "open-licence",
+      "evidence": "docs/voice-rights/example-station-licence.pdf"
+    }
+  ],
+  "speakers": [
+    {
+      "id": "spk1",
+      "displayName": "Dataset speaker",
+      "consent": "open-licence",
+      "consentOn": "2026-11-05",
+      "evidence": "https://example.org/dataset-licence"
+    }
+  ],
+  "source": {
+    "description": "Studio recordings made for this project",
+    "hours": 3.5,
+    "origin": "open dataset"
+  },
+  "notes": ""
+}

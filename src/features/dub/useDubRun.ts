@@ -101,8 +101,10 @@ export function useDubRun(handle: string) {
       runId: string;
       code: string;
       stage: Stage | null;
+      sectionIndex?: number | null;
       message: string;
       nextStep: string;
+      details?: Record<string, unknown> | null;
     }>("dub:error", (p) => {
       if (!mine(p)) return;
       setView((v) => ({
@@ -110,9 +112,10 @@ export function useDubRun(handle: string) {
         error: {
           code: p.code,
           stage: p.stage ?? null,
-          sectionIndex: null,
+          sectionIndex: p.sectionIndex ?? null,
           messageKey: p.message,
           nextStepKey: p.nextStep ?? "dub.next.retry",
+          details: p.details ?? null,
         },
       }));
     });

@@ -59,8 +59,8 @@ pub fn run() {
             commands::dub::dub_status,
             commands::dub::dub_export,
             commands::dub::dub_discard_run,
-            commands::dub::bench_run,
-            commands::dub::bench_records,
+            commands::bench::bench_run,
+            commands::bench::bench_records,
             commands::dub::dub_installed_models,
         ])
         .run(tauri::generate_context!())

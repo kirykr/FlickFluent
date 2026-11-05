@@ -1,4 +1,4 @@
-"""Translation with CTranslate2 and an M2M100 model (int8)."""
+"""Translation with CTranslate2 (int8): M2M100 by default, NLLB-200 when its model folder is used."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 from ..protocol import Context, WorkerError
 from .common import model_dir, normalise_code, require
+from .nllb_codes import NLLB_TOKENS
 
 BATCH = 200
 
@@ -13,6 +14,19 @@ BATCH = 200
 def lang_token(code: str) -> str:
     """M2M100 writes a language as `__fr__`. Chinese and Portuguese variants lose the region."""
     return f"__{code.split('-')[0]}__"
+
+
+def nllb_token(code: str) -> str:
+    """NLLB writes a language as a FLORES-200 token such as `khm_Khmr`."""
+    token = NLLB_TOKENS.get(code.split("-")[0])
+    if token is None:
+        raise WorkerError("UNSUPPORTED_LANGUAGE", f"NLLB has no token for language '{code}'")
+    return token
+
+
+def is_nllb(folder) -> bool:
+    """Model folders are named by catalogue id, so the id says which language tokens apply."""
+    return folder.name.lower().startswith("nllb")
 
 
 def batches(items: List[Any], size: int = BATCH):
@@ -29,6 +43,8 @@ def run(ctx: Context, req: Dict[str, Any]) -> Dict[str, Any]:
     if source == target:
         raise WorkerError("SAME_LANGUAGE", "source and target are the same")
     folder = model_dir(ctx, req)
+    token = nllb_token if is_nllb(folder) else lang_token
+    source_token, target_token = token(source), token(target)
     sp_file = next(folder.glob("*.model"), None)
     if sp_file is None:
         raise WorkerError("MODEL_MISSING", f"no sentencepiece model in {folder}")
@@ -46,10 +62,10 @@ def run(ctx: Context, req: Dict[str, Any]) -> Dict[str, Any]:
     done = 0
     for chunk in batches(lines):
         ctx.check_cancel()
-        sources = [[lang_token(source)] + sp.encode(l["text"], out_type=str) + ["</s>"] for l in chunk]
+        sources = [[source_token] + sp.encode(l["text"], out_type=str) + ["</s>"] for l in chunk]
         results = translator.translate_batch(
             sources,
-            target_prefix=[[lang_token(target)]] * len(sources),
+            target_prefix=[[target_token]] * len(sources),
             beam_size=4,
             max_decoding_length=256,
         )

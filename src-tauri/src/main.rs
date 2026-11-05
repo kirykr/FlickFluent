@@ -8,5 +8,11 @@ fn main() {
         print!("{}", out.stdout);
         std::process::exit(out.exit_code);
     }
+    // `flickfluent --bench [--json]` runs the benchmark without opening a window.
+    if flickfluent_core::bench::cli::is_bench(&args) {
+        let out = tauri::async_runtime::block_on(flickfluent_core::bench::cli::run(&args));
+        print!("{}", out.stdout);
+        std::process::exit(out.exit_code);
+    }
     flickfluent_lib::run()
 }

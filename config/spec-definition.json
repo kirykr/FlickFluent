@@ -1,6 +1,7 @@
 {
   "version": 1,
   "provisional": true,
+  "basis": "simulated",
   "minimum": {
     "cpuBits": 64,
     "cpuCores": 4,
