@@ -41,11 +41,22 @@ export const FLAG_KEYS: Record<LineFlag, string> = {
 };
 
 /** Message key and numbers for a dub error, as the core sent it. */
-export function dubError(e: AppErrorShape & { details?: Record<string, unknown> | null }): {
+export function dubError(
+  e: AppErrorShape & { details?: Record<string, unknown> | null },
+  stage?: string | null,
+): {
   key: string;
   params: Record<string, string>;
 } {
-  const key = e.messageKey && e.messageKey.startsWith("dub.") ? e.messageKey : "dub.error.generic";
+  let key = e.messageKey && e.messageKey.startsWith("dub.") ? e.messageKey : "dub.error.generic";
+  // "The {{stage}} step failed" needs a stage; without one, say that a step failed.
+  if (
+    key === "dub.error.stageFailed" &&
+    !stage &&
+    !(e.details as { stage?: string } | null)?.stage
+  ) {
+    key = "dub.error.stageFailedUnknown";
+  }
   const d = (e.details ?? {}) as {
     neededBytes?: number;
     freeBytes?: number;
@@ -56,7 +67,7 @@ export function dubError(e: AppErrorShape & { details?: Record<string, unknown> 
   if (typeof d.neededBytes === "number") params.needed = formatBytes(d.neededBytes);
   if (typeof d.freeBytes === "number") params.free = formatBytes(d.freeBytes);
   if (Array.isArray(d.missing)) params.missing = d.missing.join(", ");
-  if (d.stage) params.stage = d.stage;
+  if (stage ?? d.stage) params.stage = (stage ?? d.stage) as string;
   return { key, params };
 }
 

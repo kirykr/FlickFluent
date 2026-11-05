@@ -455,7 +455,11 @@ impl Runner<'_> {
 
         // 3. language detection when the source language is `auto`
         if self.source_lang == "auto" {
-            self.detect_language().await?;
+            self.set_stage(Stage::Transcribe, StageStatus::Running);
+            if let Err(e) = self.detect_language().await {
+                self.set_stage(Stage::Transcribe, StageStatus::Failed);
+                return Err(e);
+            }
         }
 
         // 4. per-section stages

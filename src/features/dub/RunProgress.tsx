@@ -27,13 +27,14 @@ export function RunProgress({ view, onCancel, onResume, onRestart }: Props) {
   view.state === "running" || view.state === "queued" || view.state === "cancelling";
   const overall = view.progress?.overallProgress ?? 0;
   const eta = etaMinutes(view.progress?.etaSeconds ?? null);
+  const stageName = view.error?.stage ? t(STAGE_KEYS[view.error.stage]).toLowerCase() : null;
   const err = view.error
-    ? dubError({
-        code: view.error.code,
-        messageKey: view.error.messageKey,
-        details: view.error.details,
-      })
+    ? dubError(
+        { code: view.error.code, messageKey: view.error.messageKey, details: view.error.details },
+        stageName,
+      )
     : null;
+  const detail = (view.error?.details as { message?: string } | null | undefined)?.message;
   const canResume = view.state === "cancelled" || view.state === "failed" || interrupted;
 
   return (
@@ -95,7 +96,10 @@ export function RunProgress({ view, onCancel, onResume, onRestart }: Props) {
             role="alert"
             data-testid="dub-run-error"
           >
-            <AlertDescription>{t(err.key, err.params)}</AlertDescription>
+            <AlertDescription>
+              {t(err.key, err.params)}
+              {detail && <span className="mt-1 block text-xs opacity-70">{detail}</span>}
+            </AlertDescription>
           </Alert>
         )}
 

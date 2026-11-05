@@ -176,6 +176,7 @@
       "sidecarStart": "The speech and translation engine could not start.",
       "sidecarCrashed": "The speech and translation engine stopped unexpectedly.",
       "stageFailed": "The {{stage}} step failed.",
+      "stageFailedUnknown": "A step of the dub failed.",
       "sourceChanged": "The video file has changed or moved since the dub started.",
       "nothingToResume": "There is no unfinished dub to resume.",
       "fileExists": "A file with that name already exists.",
