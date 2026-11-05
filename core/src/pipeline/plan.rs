@@ -162,7 +162,11 @@ pub fn plan_models_with(
             pick(Step::Separate, &|_| true)
         },
         transcribe: pick(Step::Transcribe, &|e| source == "auto" || covers(e, source)),
-        translate: pick(Step::Translate, &|e| covers(e, source) && covers(e, target)),
+        // With `auto` the source is not known until the language is detected, so only the target
+        // must be covered now; the run plans again once the language is known.
+        translate: pick(Step::Translate, &|e| {
+            (source == "auto" || covers(e, source)) && covers(e, target)
+        }),
         speaker: pick(Step::Speaker, &|_| true),
         ..Default::default()
     };

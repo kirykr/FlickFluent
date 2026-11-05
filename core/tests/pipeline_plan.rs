@@ -304,3 +304,30 @@ fn disk_estimate_grows_with_length() {
     assert!(two_min > 60_000_000 && two_min < 100_000_000, "{two_min}");
     assert!(disk_needed_bytes(3 * 3600 * 1000) > 80 * two_min);
 }
+
+#[test]
+fn auto_detect_needs_only_the_target_language_for_translation() {
+    let cat = catalogue();
+    let plan = plan_models(
+        &cat,
+        MachineClass::Minimum,
+        "macos",
+        "arm64",
+        "auto",
+        "en",
+        false,
+    );
+    assert_eq!(plan.translate.as_deref(), Some("m2m-small"));
+    assert!(plan.unsupported.is_empty(), "{:?}", plan.unsupported);
+    // A target nobody translates into is still unsupported.
+    let none = plan_models(
+        &cat,
+        MachineClass::Minimum,
+        "macos",
+        "arm64",
+        "auto",
+        "km",
+        false,
+    );
+    assert!(none.unsupported.iter().any(|(s, _)| *s == Step::Translate));
+}
