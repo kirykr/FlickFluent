@@ -70,6 +70,13 @@ async fn a_full_run_completes_with_lines_a_mix_and_events() {
     let work = WorkFolder::folder_for(&cfg.project_path);
     assert!(work.join("dub-mix.wav").exists());
     assert!(!walk_any(&work, "part"), "no .part files left");
+    // A project closed before saving can read the lines back from the section folders.
+    let reread = WorkFolder::open(&cfg.project_path).unwrap().load_lines(run);
+    assert_eq!(reread.len(), out.lines.len());
+    assert_eq!(
+        reread.iter().map(|l| &l.id).collect::<Vec<_>>(),
+        out.lines.iter().map(|l| &l.id).collect::<Vec<_>>()
+    );
     let events = events.lock().unwrap();
     assert!(events
         .iter()

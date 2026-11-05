@@ -343,10 +343,12 @@ fn payload(run_id: &str, event: &RunEvent) -> Option<(&'static str, Value)> {
             event::ERROR,
             json!({
                 "runId": run_id, "code": e.code, "stage": e.stage, "sectionIndex": e.section_index,
-                "message": e.message_key, "nextStep": e.next_step_key,
+                "message": e.message_key, "nextStep": e.next_step_key, "details": e.details,
             }),
         ),
-        RunEvent::Done(state) => (event::DONE, json!({ "runId": run_id, "state": state })),
+        // `dub:done` is sent by the command after the project is saved, so the screen that
+        // reloads on it sees the finished lines and a run that is no longer active.
+        RunEvent::Done(_) => return None,
         RunEvent::Line(_) => return None, // sent by the line queue
     })
 }
@@ -433,6 +435,7 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
 
     let task_app = app.clone();
     let task_id = run_id.clone();
+    let project_path = path.clone();
     tauri::async_runtime::spawn(async move {
         let sink_app = task_app.clone();
         let sink_id = task_id.clone();
@@ -446,19 +449,19 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
         .await;
         let _ = lines_task.await; // drain queued lines before reporting the end
         let projects = task_app.state::<ProjectState>();
-        match result {
+        let state = match result {
             Ok(dub) => {
+                let state = dub.run.as_ref().map_or(RunState::Failed, |r| r.state);
                 let _ = store(&projects, &handle, &dub);
+                state
             }
-            Err(e) => {
-                // The failure is in run-state.json; keep what the project knew, drop the error.
-                let _ = task_app.emit(
-                    event::ERROR,
-                    json!({ "runId": task_id, "code": e.code, "message": e.message_key }),
-                );
-            }
-        }
+            // The runner already sent `dub:error` with the details; the run file has the state.
+            Err(_) => WorkFolder::open(&project_path)
+                .and_then(|w| w.load_run().ok().flatten())
+                .map_or(RunState::Failed, |r| r.state),
+        };
         task_app.state::<DubState>().lock().remove(&task_id);
+        let _ = task_app.emit(event::DONE, json!({ "runId": task_id, "state": state }));
     });
     Ok(run_id)
 }
@@ -510,6 +513,13 @@ pub fn dub_status(
         .as_ref()
         .and_then(|w| w.load_run().ok().flatten())
         .or(dub.run.clone());
+    // The project may have been closed before it saved a finished run's lines: read them back.
+    let mut dub = dub;
+    if dub.lines.is_empty() && run.as_ref().is_some_and(|r| r.state == RunState::Completed) {
+        if let (Some(w), Some(r)) = (&work, &run) {
+            dub.lines = w.load_lines(r);
+        }
+    }
     let interrupted = !running && work.as_ref().is_some_and(|w| w.is_interrupted());
     Ok(Status {
         run,

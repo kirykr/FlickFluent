@@ -79,6 +79,22 @@ impl WorkFolder {
         }
     }
 
+    /// The lines of every section, read back from the section folders. Used when the project
+    /// was closed before it saved the lines of a finished run.
+    pub fn load_lines(&self, run: &PipelineRun) -> Vec<crate::project::dub::TranscriptLine> {
+        let mut lines: Vec<crate::project::dub::TranscriptLine> = run
+            .sections
+            .iter()
+            .filter_map(|s| std::fs::read(self.section_dir(s.index).join("lines.json")).ok())
+            .filter_map(|b| {
+                serde_json::from_slice::<Vec<crate::project::dub::TranscriptLine>>(&b).ok()
+            })
+            .flatten()
+            .collect();
+        lines.sort_by_key(|l| (l.start_ms, l.id.clone()));
+        lines
+    }
+
     /// A run still marked running or cancelling when the app starts was cut short.
     pub fn is_interrupted(&self) -> bool {
         matches!(

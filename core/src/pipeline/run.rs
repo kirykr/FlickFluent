@@ -519,6 +519,15 @@ impl Runner<'_> {
         self.set_stage(Stage::Mix, StageStatus::Running);
         self.mix_all().await?;
         self.set_stage(Stage::Mix, StageStatus::Done);
+        let count = self.run.sections.len() as u32;
+        self.emit(RunEvent::Progress {
+            stage: Stage::Mix,
+            stage_progress: 1.0,
+            overall: 1.0,
+            section_index: count.saturating_sub(1),
+            section_count: count,
+            eta_seconds: Some(0),
+        });
         Ok(())
     }
 

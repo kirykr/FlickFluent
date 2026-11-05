@@ -44,7 +44,8 @@ export function useDubRun(handle: string) {
     setView((v) => ({
       ...v,
       status,
-      lines: status.running ? v.lines : status.dub.lines,
+      // Lines that arrived as events stay if the saved project has none yet.
+      lines: status.running || status.dub.lines.length === 0 ? v.lines : status.dub.lines,
       state: status.run?.state ?? null,
       error: status.run?.error ?? null,
     }));
