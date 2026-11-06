@@ -7,7 +7,7 @@ use serde::Serialize;
 
 use super::plan::{disk_needed_bytes, plan_models, ModelPlan};
 use crate::cloud::consent::Reason;
-use crate::cloud::estimate::estimate_chars;
+use crate::cloud::estimate::{estimate_chars, read_floor};
 use crate::cloud::keys::KeyState;
 use crate::cloud::runtime::CloudRuntime;
 use crate::cloud::services::Step as CloudStep;
@@ -66,9 +66,10 @@ pub struct CloudPreflight {
 pub fn cloud_preflight(
     dub: &DubData,
     rt: Option<&CloudRuntime>,
+    work: &std::path::Path,
 ) -> Result<Vec<CloudPreflight>, AppError> {
     let engines = &dub.options.fallbacks.engines;
-    let estimate = estimate_chars(dub.source.as_ref().map(|s| s.duration_ms).unwrap_or(0));
+    let base = estimate_chars(dub.source.as_ref().map(|s| s.duration_ms).unwrap_or(0));
     let mut out = Vec::new();
     for step in [CloudStep::Translate, CloudStep::Speak] {
         if step == CloudStep::Speak && dub.options.fallbacks.subtitles_only {
@@ -77,6 +78,8 @@ pub fn cloud_preflight(
         let Some(id) = engines.cloud(step) else {
             continue;
         };
+        // An earlier try that outgrew its agreement left the amount it projected.
+        let estimate = base.max(read_floor(work, step, id));
         let name = rt
             .and_then(|r| crate::cloud::services::find(r.book.services(), id))
             .map(|s| s.name.clone())

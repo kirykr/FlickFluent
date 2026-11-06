@@ -62,9 +62,9 @@ Same rules for both services, implemented once behind an adapter trait.
 
 ## R6. Amount of text and consent
 
-- **Decision**: the amount shown before a run is an **estimate from the video's length**: `duration seconds × 15` characters for translation and the same for speech, labelled "about". The actual count is recorded afterwards in the usage record. A consent stores the amount it was given for. A later run shows its own estimate and asks again only above 5 times the stored amount (clarified).
+- **Decision**: the amount shown before a run is an **estimate from the video's length**: `duration seconds × 10` characters for translation and the same for speech, labelled "about". The actual count is recorded afterwards in the usage record, and a run stops before a send that would take it past 5 times the agreed amount (the real text is checked per section; the projected total for the whole video is kept, so the next preflight asks for that). A consent stores the amount it was given for. A later run shows its own estimate and asks again only above 5 times the stored amount (clarified).
 - **Why an estimate**: the transcript does not exist before the run begins, so an exact count is impossible at the moment the clarified rule needs it.
-- **Verify**: the 15 characters per second constant against the two French fixtures at implementation; change the constant if it is off by more than 30%.
+- **Verify**: the characters per second constant (15, then 10 after T066) against the two French fixtures at implementation; change the constant if it is off by more than 30%.
 - **Alternative rejected**: pausing the run after transcription to ask with exact numbers. It matches the numbers better but breaks "before it starts" and strands the user mid-run.
 
 ## R7. Speech audio and fitting

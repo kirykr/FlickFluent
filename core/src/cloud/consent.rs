@@ -11,7 +11,7 @@ use crate::error::AppError;
 pub const NOTICE_VERSION: u32 = 1;
 
 /// A run asks again only when it will send more than this many times the agreed amount.
-const ASK_AGAIN_FACTOR: u64 = 5;
+pub const ASK_AGAIN_FACTOR: u64 = 5;
 
 /// The user's agreement to send one kind of data to one service for one step. Kept on this
 /// computer only, never in a project.
@@ -80,6 +80,17 @@ impl ConsentBook {
             return Ok(Some(Reason::LargerRun));
         }
         Ok(None)
+    }
+
+    /// Most characters a run may send for this service and step on the agreement given, or `None`
+    /// when there is no agreement.
+    pub fn allowed_chars(&self, service_id: &str, step: Step) -> Result<Option<u64>, AppError> {
+        Ok(self
+            .read()?
+            .records
+            .iter()
+            .find(|r| r.service_id == service_id && r.step == step)
+            .map(|r| r.agreed_chars.saturating_mul(ASK_AGAIN_FACTOR)))
     }
 
     /// Record the agreement. A new one replaces the old, including its amount.

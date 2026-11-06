@@ -51,5 +51,5 @@ Details and numbers: `docs/verification/002-benchmarks.md`.
 **Open:**
 - Windows has not run anything of 003 (OS store test, quickstart, no-leak search). Do not close the feature before that.
 - No real service was called: run `core/tests/cloud_real.rs` with your keys (T071), then the Gemini listening test (T072). Model ids, voice genders and language lists are marked unverified in the data file.
-- The 15 characters per second estimate was checked against one 20 s fixture only (T066), and idle RAM was not measured (T068).
+- The estimate (10 characters per second) was checked against two synthetic French fixtures only (T066); the run now also stops before any send past 5 times the agreed amount. Idle RAM was measured once and needs a like-for-like comparison (T068).
 - If no Gemini Khmer voice is acceptable, Khmer cloud speech stays unsolved and the local-model decision comes back to the owner.

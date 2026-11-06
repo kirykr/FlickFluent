@@ -21,7 +21,7 @@ use super::sections::plan as plan_sections;
 use super::stages::{extract, fingerprint};
 use super::state::{input_hash, WorkFolder};
 use crate::cloud::engine::{CloudEngine, SpeakJob};
-use crate::cloud::estimate::estimate_chars;
+use crate::cloud::estimate::{clear_floor, estimate_chars, project_chars, read_floor, write_floor};
 use crate::cloud::rotation::PoolEvent;
 use crate::cloud::runtime::CloudRuntime;
 use crate::cloud::services::{Gender as CloudGender, Step as CloudStep};
@@ -39,6 +39,10 @@ use crate::sidecar::{Event, Request, Sidecar, SidecarConfig};
 /// A line is `tooLong` above this share of its slot, `tooShort` below the other one.
 pub const TOO_LONG: f64 = 1.25;
 pub const TOO_SHORT: f64 = 0.5;
+/// A dubbed line may run into the silence after it, but stops this short of the next line, and
+/// never takes more than `GAP_MAX_MS` of it.
+const GAP_MARGIN_MS: u64 = 80;
+const GAP_MAX_MS: u64 = 600;
 /// Below this transcription confidence a line is flagged.
 pub const LOW_CONFIDENCE: f64 = 0.5;
 
@@ -162,7 +166,8 @@ fn prepare_cloud(
     dub: &DubData,
 ) -> Result<(Option<CloudEngine>, Option<CloudEngine>), AppError> {
     let engines = &dub.options.fallbacks.engines;
-    let estimate = estimate_chars(dub.source.as_ref().map(|s| s.duration_ms).unwrap_or(0));
+    let base = estimate_chars(dub.source.as_ref().map(|s| s.duration_ms).unwrap_or(0));
+    let work = WorkFolder::folder_for(&cfg.project_path);
     let wanted: Vec<(CloudStep, String)> = [CloudStep::Translate, CloudStep::Speak]
         .into_iter()
         .filter(|step| !(*step == CloudStep::Speak && dub.options.fallbacks.subtitles_only))
@@ -177,6 +182,7 @@ fn prepare_cloud(
         .ok_or_else(|| AppError::new(CLOUD_NO_KEY, "dub.error.cloudNoKey"))?;
     let mut missing = Vec::new();
     for (step, id) in &wanted {
+        let estimate = base.max(read_floor(&work, *step, id));
         if rt.consent.needs(id, *step, estimate)?.is_some() {
             missing.push(json!({ "step": step.as_str(), "serviceId": id }));
         }
@@ -244,6 +250,17 @@ fn run_error(e: &AppError, stage: Option<Stage>, section: Option<u32>) -> RunErr
         },
         details: e.details.clone(),
     }
+}
+
+/// Time the dub of line `i` may fill: its own slot plus the silence before the next line.
+pub fn window_ms(lines: &[TranscriptLine], i: usize) -> u64 {
+    let l = &lines[i];
+    let slot = l.end_ms.saturating_sub(l.start_ms);
+    let gap = lines
+        .get(i + 1)
+        .map(|n| n.start_ms.saturating_sub(l.end_ms))
+        .unwrap_or(GAP_MAX_MS);
+    slot + gap.saturating_sub(GAP_MARGIN_MS).min(GAP_MAX_MS)
 }
 
 /// Flags for one line from its synthesized length, its slot and its transcription confidence.
@@ -371,6 +388,7 @@ pub async fn run_dub(
             .unwrap_or_default()
     } else {
         let _ = std::fs::remove_file(work.path().join("cloud-usage.json"));
+        clear_floor(work.path());
         Vec::new()
     };
 
@@ -431,6 +449,46 @@ impl Runner<'_> {
             }
         }
         out
+    }
+
+    /// Stop before a cloud send that would take the run past what the user agreed to. The amount
+    /// shown beforehand is only an estimate; this is the check against the real text. Nothing is
+    /// sent when it fails. The projected total for the whole video is kept, so the next preflight
+    /// asks for that amount and the resumed run goes on from where it stopped.
+    fn guard_cloud_amount(
+        &self,
+        step: CloudStep,
+        service_id: &str,
+        about_to_send: u64,
+        section_end_ms: u64,
+    ) -> Result<(), AppError> {
+        let Some(rt) = self.cfg.cloud.as_ref() else {
+            return Ok(());
+        };
+        let Some(allowed) = rt.consent.allowed_chars(service_id, step)? else {
+            return Ok(());
+        };
+        let used = self
+            .merged_usage()
+            .iter()
+            .find(|u| u.step == step.as_str() && u.service_id == service_id)
+            .map(|u| u.chars)
+            .unwrap_or(0);
+        let total = used + about_to_send;
+        if total <= allowed {
+            return Ok(());
+        }
+        let duration = self.dub.source.as_ref().map(|s| s.duration_ms).unwrap_or(0);
+        let projected = project_chars(total, section_end_ms, duration);
+        write_floor(self.work.path(), step, service_id, projected);
+        Err(
+            AppError::new(CLOUD_CONSENT_REQUIRED, "dub.error.cloudConsentRequired").with_details(
+                json!({
+                    "steps": [{ "step": step.as_str(), "serviceId": service_id }],
+                    "projectedChars": projected,
+                }),
+            ),
+        )
     }
 
     /// Keep the usage next to the run, so a stop or a crash does not lose the count.
@@ -1145,6 +1203,16 @@ impl Runner<'_> {
             lines.iter().map(|l| l.text.clone()).collect()
         } else if let Some(mut engine) = self.translate_engine.take() {
             let texts: Vec<String> = lines.iter().map(|l| l.text.clone()).collect();
+            let about: u64 = texts.iter().map(|t| t.chars().count() as u64).sum();
+            if let Err(e) = self.guard_cloud_amount(
+                CloudStep::Translate,
+                engine.service_id(),
+                about,
+                sec.end_ms,
+            ) {
+                self.translate_engine = Some(engine);
+                return Err(e);
+            }
             let (source, target) = (self.source_lang.clone(), self.dub.target_language.clone());
             let cancel = self.cancel.clone();
             let stop = move || cancel.is_cancelled();
@@ -1280,14 +1348,22 @@ impl Runner<'_> {
                 .to_string();
             let jobs: Vec<SpeakJob> = lines
                 .iter()
-                .map(|l| SpeakJob {
+                .enumerate()
+                .map(|(i, l)| SpeakJob {
                     id: l.id.clone(),
                     text: l.translated.clone().unwrap_or_else(|| l.text.clone()),
                     language: language.clone(),
                     gender: self.cloud_gender(&l.speaker_id),
-                    target_ms: l.end_ms.saturating_sub(l.start_ms),
+                    target_ms: window_ms(&lines, i),
                 })
                 .collect();
+            let about: u64 = jobs.iter().map(|j| j.text.chars().count() as u64).sum();
+            if let Err(e) =
+                self.guard_cloud_amount(CloudStep::Speak, engine.service_id(), about, sec.end_ms)
+            {
+                self.speak_engine = Some(engine);
+                return Err(e);
+            }
             let cancel = self.cancel.clone();
             let stop = move || cancel.is_cancelled();
             let service = engine.service_id().to_string();
@@ -1335,7 +1411,7 @@ impl Runner<'_> {
             models.insert("espeak".into(), json!(espeak));
         }
         let mut request_lines = Vec::new();
-        for l in &lines {
+        for (i, l) in lines.iter().enumerate() {
             let voice = self
                 .voice_for(&l.speaker_id)
                 .ok_or_else(|| AppError::new(MODELS_MISSING, "dub.error.modelsMissing"))?;
@@ -1346,7 +1422,7 @@ impl Runner<'_> {
                 "speakerId": voice.speaker_id,
                 "lang": voice.lang,
                 "lexicon": voice.lexicon,
-                "targetMs": l.end_ms - l.start_ms,
+                "targetMs": window_ms(&lines, i),
             }));
         }
         let req = self.request(
@@ -1369,7 +1445,8 @@ impl Runner<'_> {
     }
 
     fn apply_clips(&self, lines: &mut [TranscriptLine], items: &[Value], clips: &Path) {
-        for l in lines.iter_mut() {
+        let windows: Vec<u64> = (0..lines.len()).map(|i| window_ms(lines, i)).collect();
+        for (l, window) in lines.iter_mut().zip(windows) {
             let Some(item) = items.iter().find(|i| i["id"] == l.id.as_str()) else {
                 continue;
             };
@@ -1386,14 +1463,15 @@ impl Runner<'_> {
             } else {
                 1.0
             };
-            let fresh = flags_for(Some(ms), l.start_ms, l.end_ms, confidence);
+            // Too long is judged against the slot plus the silence after it, too short against the slot.
+            let long = flags_for(Some(ms), l.start_ms, l.start_ms + window, confidence);
+            let short = flags_for(Some(ms), l.start_ms, l.end_ms, confidence);
             l.flags
                 .retain(|f| !matches!(f, LineFlag::TooLong | LineFlag::TooShort));
-            l.flags.extend(
-                fresh
-                    .into_iter()
-                    .filter(|f| matches!(f, LineFlag::TooLong | LineFlag::TooShort)),
-            );
+            l.flags
+                .extend(long.into_iter().filter(|f| *f == LineFlag::TooLong));
+            l.flags
+                .extend(short.into_iter().filter(|f| *f == LineFlag::TooShort));
         }
     }
 

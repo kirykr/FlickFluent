@@ -304,7 +304,7 @@ fn preflight_for(
         dub.options.quality == Quality::Fast,
         source.duration_ms,
     );
-    pre.cloud = cloud_preflight(&dub, Some(&cloud.runtime()))?;
+    pre.cloud = cloud_preflight(&dub, Some(&cloud.runtime()), &work)?;
     Ok(pre)
 }
 
@@ -434,7 +434,7 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
     } else {
         // A resume still needs a key and an agreement for every cloud step. Say so now, not
         // after the run has started.
-        let pre = cloud_preflight(&dub, Some(&cloud.runtime()))?;
+        let pre = cloud_preflight(&dub, Some(&cloud.runtime()), &WorkFolder::folder_for(&path))?;
         check_cloud(&pre)?;
     }
     let work = WorkFolder::folder_for(&path);

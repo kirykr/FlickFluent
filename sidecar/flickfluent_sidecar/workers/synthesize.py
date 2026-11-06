@@ -94,7 +94,7 @@ def run(ctx: Context, req: Dict[str, Any]) -> Dict[str, Any]:
         if not audio.sample_rate or len(audio.samples) == 0:
             raise WorkerError("SYNTH_EMPTY", f"the voice produced no sound for line {line['id']}")
         ms = int(len(audio.samples) * 1000 / audio.sample_rate)
-        if ms > slot_ms * 1.25:  # one retry, faster, within the allowed limit
+        if ms > slot_ms * 1.05:  # one retry, faster, within the allowed limit
             speed = min(ms / slot_ms, MAX_SPEEDUP)
             audio = tts.generate(line["text"], sid=sid, speed=speed)
             ms = int(len(audio.samples) * 1000 / audio.sample_rate)

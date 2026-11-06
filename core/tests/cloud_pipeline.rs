@@ -192,3 +192,57 @@ async fn the_engine_is_part_of_the_stage_input_hashes() {
     assert_ne!(ct, lt, "changing the engine must redo translation");
     assert_ne!(cs, ls, "changing the engine must redo speech");
 }
+
+#[tokio::test]
+async fn a_run_that_outgrows_its_agreement_stops_before_sending_and_resumes_after_a_new_one() {
+    let root = tempfile::tempdir().unwrap();
+    let fake = FakeCloud::start();
+    let c = cloud(root.path(), &fake, &[("google-gemini", "mine", KEY, None)]);
+    let mut dub = dub_for(&clip("clip-20s-fr.mp4"), "en").await;
+    use_cloud(&mut dub, Some("google-gemini"), Some("google-gemini"));
+    // The fake transcript is short, so make the video short too: the estimate (10 for 1 s) just
+    // fits 5 times the agreed 2, so the start passes; the real 14 characters do not.
+    dub.source.as_mut().unwrap().duration_ms = 1_000;
+    for step in [Step::Translate, Step::Speak] {
+        c.consent.grant("google-gemini", step, 2).unwrap();
+    }
+    let mut cfg = config(root.path(), "c.flick", json!({}));
+    cfg.cloud = Some(c.runtime.clone());
+    let err = run_dub(
+        &cfg,
+        dub.clone(),
+        Mode::Fresh,
+        CancelToken::default(),
+        &mut |_| {},
+    )
+    .await
+    .unwrap_err();
+    assert_eq!(err.code, CLOUD_CONSENT_REQUIRED);
+    let details = err.details.unwrap();
+    let projected = details["projectedChars"].as_u64().unwrap();
+    assert!(projected > 10, "projected {projected}");
+    // Translation fitted its agreement and went out; speech did not, and nothing of it was sent.
+    assert_eq!(details["steps"][0]["step"], "speak");
+    let sent_before = fake.count();
+    assert_eq!(sent_before, 1, "only the translation request: {details:?}");
+
+    // The next preflight asks for the projected amount, not the estimate.
+    let pre = flickfluent_core::pipeline::preflight::cloud_preflight(
+        &dub,
+        Some(&c.runtime),
+        &WorkFolder::folder_for(&cfg.project_path),
+    )
+    .unwrap();
+    let speak = pre.iter().find(|p| p.step == Step::Speak).unwrap();
+    assert_eq!(speak.estimated_chars, projected);
+    assert!(speak.needs_consent);
+
+    for step in [Step::Translate, Step::Speak] {
+        c.consent.grant("google-gemini", step, projected).unwrap();
+    }
+    let out = run_dub(&cfg, dub, Mode::Resume, CancelToken::default(), &mut |_| {})
+        .await
+        .unwrap();
+    assert_eq!(out.run.unwrap().state, RunState::Completed);
+    assert!(fake.count() > sent_before);
+}

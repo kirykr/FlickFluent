@@ -71,7 +71,7 @@ Never contains a key, a fingerprint, or any sent text. A resumed run adds to the
 
 ## Estimate (computed, not stored)
 
-`chars ≈ durationSeconds × 15` for each cloud step in the run (R6). Shown as "about N characters". `Preflight.cloud[].estimatedChars`.
+`chars ≈ durationSeconds × 10` for each cloud step in the run (R6). Shown as "about N characters". `Preflight.cloud[].estimatedChars`.
 
 ## State transitions
 
