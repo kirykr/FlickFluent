@@ -189,6 +189,8 @@ export function ProjectsScreen({ defaultSaveFolder }: { defaultSaveFolder?: stri
       <section className="flex h-full min-h-0 flex-col gap-3">
         {notices}
         <EditorLayout
+          handle={current.id}
+          readOnly={current.readOnly}
           main={
             dubOpen ? (
               <DubScreen key={current.id} handle={current.id} readOnly={current.readOnly} />

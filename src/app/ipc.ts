@@ -14,6 +14,22 @@ import type { SettingsView } from "../features/settings/types";
 import type { ModelRecord } from "../features/models/types";
 import type { OpenResult, ProjectHandle, RecentEntry } from "../features/projects/types";
 import type {
+  EditorState,
+  EditResult,
+  FitMode,
+  FitReport,
+  ImportChoice,
+  ImportPreview,
+  CaptionTemplate,
+  SubtitleFormat,
+  SubtitleSource,
+  SpeakerGender,
+  LineEdit,
+  LineInsert,
+  SearchMatch,
+  SearchQuery,
+} from "../features/editor/types";
+import type {
   DubOptions,
   DubStatus,
   ExportKind,
@@ -74,8 +90,8 @@ export const dubConfigure = (
     confirmSame,
   });
 export const dubPreflight = (handle: string) => invoke<Preflight>("dub_preflight", { handle });
-export const dubStart = (handle: string) =>
-  invoke<string>("dub_start", { handle, fallbackChoices: null });
+export const dubStart = (handle: string, discardEdits = false) =>
+  invoke<string>("dub_start", { handle, fallbackChoices: null, discardEdits });
 export const dubResume = (handle: string) => invoke<string>("dub_resume", { handle });
 export const dubCancel = (runId: string) => invoke<void>("dub_cancel", { runId });
 export const dubStatus = (handle: string) => invoke<DubStatus>("dub_status", { handle });
@@ -88,6 +104,55 @@ export const dubExport = (
 ) => invoke<ExportResult>("dub_export", { handle, kind, fileName, folder, overwrite });
 export const dubDiscardRun = (handle: string) => invoke<void>("dub_discard_run", { handle });
 
+export const editorOpen = (handle: string) => invoke<EditorState>("editor_open", { handle });
+export const editorState = (handle: string) => invoke<EditorState>("editor_state", { handle });
+export const editorUpdateLine = (handle: string, edit: LineEdit) =>
+  invoke<EditResult>("editor_update_line", { handle, edit });
+export const editorInsertLine = (handle: string, edit: LineInsert) =>
+  invoke<EditResult>("editor_insert_line", { handle, edit });
+export const editorDeleteLines = (handle: string, ids: string[]) =>
+  invoke<EditResult>("editor_delete_lines", { handle, ids });
+export const editorUndo = (handle: string) => invoke<EditResult>("editor_undo", { handle });
+export const editorRedo = (handle: string) => invoke<EditResult>("editor_redo", { handle });
+export const editorSearch = (handle: string, q: SearchQuery) =>
+  invoke<{ matches: SearchMatch[] }>("editor_search", {
+    handle,
+    query: q.query,
+    field: q.field,
+    matchCase: q.matchCase,
+    wholeWord: q.wholeWord,
+  });
+export const editorReplace = (handle: string, matches: SearchMatch[], replacement: string) =>
+  invoke<EditResult>("editor_replace", { handle, matches, replacement });
+export const editorResynthesize = (handle: string, ids?: string[]) =>
+  invoke<string>("editor_resynthesize", { handle, ids: ids ?? null });
+export const editorFit = (handle: string, mode: FitMode, ids?: string[]) =>
+  invoke<FitReport>("editor_fit", { handle, mode, ids: ids ?? null });
+export const subtitlesExport = (
+  handle: string,
+  source: SubtitleSource,
+  format: SubtitleFormat,
+  path: string,
+) => invoke<{ cueCount: number }>("subtitles_export", { handle, source, format, path });
+export const subtitlesImportPreview = (handle: string, path: string) =>
+  invoke<ImportPreview>("subtitles_import_preview", { handle, path });
+export const subtitlesImportApply = (handle: string, previewId: string, choice: ImportChoice) =>
+  invoke<EditResult>("subtitles_import_apply", { handle, previewId, choice });
+export const captionTemplatesList = () => invoke<CaptionTemplate[]>("caption_templates_list");
+export const captionTemplateSet = (handle: string, id: string) =>
+  invoke<void>("caption_template_set", { handle, id });
+export const editorMergeLines = (handle: string, ids: string[]) =>
+  invoke<EditResult>("editor_merge_lines", { handle, ids });
+export const editorSplitLine = (handle: string, id: string, textOffset: number) =>
+  invoke<EditResult>("editor_split_line", { handle, id, textOffset });
+export const editorDuplicateLine = (handle: string, id: string) =>
+  invoke<EditResult>("editor_duplicate_line", { handle, id });
+export const editorBulkText = (handle: string, texts: { id: string; translated: string }[]) =>
+  invoke<EditResult>("editor_bulk_text", { handle, texts });
+export const editorSetSpeakerGender = (handle: string, speakerId: string, gender: SpeakerGender) =>
+  invoke<EditResult>("editor_set_speaker_gender", { handle, speakerId, gender });
+export const editorStop = (handle: string) => invoke<void>("editor_stop", { handle });
+
 export const languagesList = (optIn: string[] = []) =>
   invoke<Language[]>("languages_list", { optIn });
 export const languagesCheckPair = (source: string, target: string, optIn: string[] = []) =>
@@ -95,8 +160,7 @@ export const languagesCheckPair = (source: string, target: string, optIn: string
 
 export const cloudServices = () => invoke<CloudService[]>("cloud_services");
 export const cloudKeysList = () => invoke<CloudKey[]>("cloud_keys_list");
-export const cloudKeyAdd = (input: AddKeyInput) =>
-  invoke<CloudKey>("cloud_key_add", { ...input });
+export const cloudKeyAdd = (input: AddKeyInput) => invoke<CloudKey>("cloud_key_add", { ...input });
 export const cloudKeyVerify = (keyId: string) =>
   invoke<VerifyResult>("cloud_key_verify", { keyId });
 export const cloudKeyRemove = (keyId: string) => invoke<void>("cloud_key_remove", { keyId });

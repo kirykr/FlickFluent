@@ -27,6 +27,8 @@ time = { version = "0.3", features = ["serde", "formatting", "parsing"] }
 keyring-core = "1.0.1"
 zeroize = "1"
 base64 = "0.22"
+chardetng = "1.0.0"
+encoding_rs = "0.8.44"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 apple-native-keyring-store = { version = "1.0.2", features = ["keychain"] }

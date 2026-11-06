@@ -21,13 +21,16 @@ use super::sections::plan as plan_sections;
 use super::stages::{extract, fingerprint};
 use super::state::{input_hash, WorkFolder};
 use crate::cloud::engine::{CloudEngine, SpeakJob};
-use crate::cloud::estimate::{clear_floor, estimate_chars, project_chars, read_floor, write_floor};
+use crate::cloud::estimate::{clear_floor, estimate_chars, read_floor};
+use crate::cloud::guard::{guard_amount, merge_usage, used_chars};
 use crate::cloud::rotation::PoolEvent;
 use crate::cloud::runtime::CloudRuntime;
 use crate::cloud::services::{Gender as CloudGender, Step as CloudStep};
+use crate::editor::hash::{speech_hash_of, speech_identity};
 use crate::error::{
-    AppError, CANCELLED, CLOUD_CONSENT_REQUIRED, CLOUD_NO_KEY, MODELS_MISSING, NOTHING_TO_RESUME,
-    NO_SPACE, NO_SPEECH_FOUND, SAME_LANGUAGE, SOURCE_CHANGED, STAGE_FAILED,
+    AppError, CANCELLED, CLOUD_CONSENT_REQUIRED, CLOUD_NO_KEY, DUB_EDITS_WOULD_BE_LOST,
+    MODELS_MISSING, NOTHING_TO_RESUME, NO_SPACE, NO_SPEECH_FOUND, SAME_LANGUAGE, SOURCE_CHANGED,
+    STAGE_FAILED,
 };
 use crate::models::{CatalogueEntry, Gender, MachineClass};
 use crate::project::dub::{
@@ -131,7 +134,7 @@ pub struct CloudNote {
     pub wait_seconds: Option<u64>,
 }
 
-fn cloud_note(event: PoolEvent, step: &'static str, service_id: &str) -> RunEvent {
+pub(crate) fn cloud_note(event: PoolEvent, step: &'static str, service_id: &str) -> RunEvent {
     let mut note = CloudNote {
         kind: "resumed",
         step,
@@ -286,6 +289,72 @@ pub fn flags_for(
     flags
 }
 
+/// Lines the user edited. A fresh run would replace them (feature 004).
+pub fn edited_lines(dub: &DubData) -> u32 {
+    dub.lines.iter().filter(|l| l.user_edited).count() as u32
+}
+
+/// A fresh run replaces every line. Refuse it while edited lines exist, unless the user said the
+/// edits may go. Nothing is deleted here.
+pub fn check_fresh_start(dub: &DubData, discard_edits: bool) -> Result<(), AppError> {
+    let edited = edited_lines(dub);
+    if edited == 0 || discard_edits {
+        return Ok(());
+    }
+    Err(
+        AppError::new(DUB_EDITS_WOULD_BE_LOST, "editor.error.editsWouldBeLost")
+            .with_details(json!({ "editedLines": edited })),
+    )
+}
+
+/// The models a project's languages, quality and fallback choices call for, and the source
+/// language they were planned for. A run and the editor both use this, so they never disagree.
+pub fn plan_for_dub(
+    catalogue: &[CatalogueEntry],
+    class: MachineClass,
+    os: &str,
+    arch: &str,
+    models_dir: &Path,
+    dub: &DubData,
+) -> (ModelPlan, String) {
+    let source_lang = if dub.source_language == "auto" {
+        dub.detected_language
+            .clone()
+            .unwrap_or_else(|| "auto".into())
+    } else {
+        dub.source_language.clone()
+    };
+    let have: Vec<String> = crate::models::installed(models_dir)
+        .into_iter()
+        .map(|m| m.id)
+        .collect();
+    let plan = plan_models_full(
+        catalogue,
+        class,
+        os,
+        arch,
+        &source_lang,
+        &dub.target_language,
+        dub.options.quality == Quality::Fast,
+        &have,
+        &dub.options.fallbacks,
+    );
+    (plan, source_lang)
+}
+
+/// The voice for a speaker: the one for their gender, else any the plan has.
+pub fn voice_pick(plan: &ModelPlan, speakers: &[Speaker], speaker_id: &str) -> Option<VoicePick> {
+    let gender = speakers
+        .iter()
+        .find(|s| s.id == speaker_id)
+        .and_then(|s| gender_of(s.gender))
+        .unwrap_or(Gender::Female);
+    plan.voices
+        .get(&gender)
+        .or_else(|| plan.voices.values().next())
+        .cloned()
+}
+
 struct Runner<'a> {
     cfg: &'a RunConfig,
     work: WorkFolder,
@@ -303,6 +372,8 @@ struct Runner<'a> {
     speak_engine: Option<CloudEngine>,
     /// Usage from before this process (a resumed run adds to it).
     usage_base: Vec<CloudUsage>,
+    /// Lines of sections the editor changed, taken from the project on a resume.
+    kept: Vec<TranscriptLine>,
 }
 
 /// Run (or resume) the dub. Returns the project data with `run` and `lines` filled in. A
@@ -332,12 +403,22 @@ pub async fn run_dub(
         (Mode::Resume, Some(prev))
             if prev.state != RunState::Completed && !prev.sections.is_empty() =>
         {
-            PipelineRun {
+            let mut run = PipelineRun {
                 state: RunState::Running,
                 error: None,
                 ended_at: None,
                 ..prev
+            };
+            // The editor records its marks in the project, not in the work folder.
+            if let Some(saved) = dub.run.as_ref() {
+                for sec in &mut run.sections {
+                    if let Some(s) = saved.sections.iter().find(|s| s.index == sec.index) {
+                        sec.edited |= s.edited;
+                        sec.mix_stale |= s.mix_stale;
+                    }
+                }
             }
+            run
         }
         (Mode::Resume, _) => {
             return Err(AppError::new(
@@ -357,28 +438,30 @@ pub async fn run_dub(
         let _ = std::fs::remove_file(work.path().join("run-state.json"));
     }
 
-    let source_lang = if dub.source_language == "auto" {
-        dub.detected_language
-            .clone()
-            .unwrap_or_else(|| "auto".into())
-    } else {
-        dub.source_language.clone()
-    };
-    let have: Vec<String> = crate::models::installed(&cfg.models_dir)
-        .into_iter()
-        .map(|m| m.id)
-        .collect();
-    let plan = plan_models_full(
+    let (plan, source_lang) = plan_for_dub(
         &cfg.catalogue,
         cfg.class,
         &cfg.os,
         &cfg.arch,
-        &source_lang,
-        &dub.target_language,
-        dub.options.quality == Quality::Fast,
-        &have,
-        &dub.options.fallbacks,
+        &cfg.models_dir,
+        &dub,
     );
+    // An edited section is kept as the editor left it; the run rebuilds the others.
+    let kept: Vec<TranscriptLine> = if mode == Mode::Resume {
+        let edited: BTreeSet<u32> = run
+            .sections
+            .iter()
+            .filter(|s| s.edited)
+            .map(|s| s.index)
+            .collect();
+        dub.lines
+            .iter()
+            .filter(|l| edited.contains(&l.section_index))
+            .cloned()
+            .collect()
+    } else {
+        Vec::new()
+    };
     dub.lines.clear();
     let (translate_engine, speak_engine) = prepare_cloud(cfg, &dub)?;
     let usage_base = if mode == Mode::Resume {
@@ -408,6 +491,7 @@ pub async fn run_dub(
         translate_engine,
         speak_engine,
         usage_base,
+        kept,
     };
     runner.save()?;
     let outcome = runner.drive().await;
@@ -421,40 +505,16 @@ impl Runner<'_> {
 
     /// What the cloud steps used so far, including before a restart.
     fn merged_usage(&self) -> Vec<CloudUsage> {
-        let mut out = self.usage_base.clone();
-        for e in [&self.translate_engine, &self.speak_engine]
+        let add = [&self.translate_engine, &self.speak_engine]
             .into_iter()
             .flatten()
-        {
-            let u = e.usage();
-            match out
-                .iter_mut()
-                .find(|b| b.step == u.step && b.service_id == u.service_id)
-            {
-                Some(b) => {
-                    b.chars += u.chars;
-                    b.requests += u.requests;
-                    b.switches += u.switches;
-                    b.waited_seconds += u.waited_seconds;
-                    for k in u.keys_used {
-                        if !b.keys_used.contains(&k) {
-                            b.keys_used.push(k);
-                        }
-                    }
-                }
-                None => out.push(CloudUsage {
-                    run_id: self.run.id.clone(),
-                    ..u
-                }),
-            }
-        }
-        out
+            .map(|e| e.usage())
+            .collect();
+        merge_usage(self.usage_base.clone(), add, &self.run.id)
     }
 
-    /// Stop before a cloud send that would take the run past what the user agreed to. The amount
-    /// shown beforehand is only an estimate; this is the check against the real text. Nothing is
-    /// sent when it fails. The projected total for the whole video is kept, so the next preflight
-    /// asks for that amount and the resumed run goes on from where it stopped.
+    /// Stop before a cloud send that would take the run past what the user agreed to
+    /// (`cloud::guard`).
     fn guard_cloud_amount(
         &self,
         step: CloudStep,
@@ -465,29 +525,17 @@ impl Runner<'_> {
         let Some(rt) = self.cfg.cloud.as_ref() else {
             return Ok(());
         };
-        let Some(allowed) = rt.consent.allowed_chars(service_id, step)? else {
-            return Ok(());
-        };
-        let used = self
-            .merged_usage()
-            .iter()
-            .find(|u| u.step == step.as_str() && u.service_id == service_id)
-            .map(|u| u.chars)
-            .unwrap_or(0);
-        let total = used + about_to_send;
-        if total <= allowed {
-            return Ok(());
-        }
+        let used = used_chars(&self.merged_usage(), step, service_id);
         let duration = self.dub.source.as_ref().map(|s| s.duration_ms).unwrap_or(0);
-        let projected = project_chars(total, section_end_ms, duration);
-        write_floor(self.work.path(), step, service_id, projected);
-        Err(
-            AppError::new(CLOUD_CONSENT_REQUIRED, "dub.error.cloudConsentRequired").with_details(
-                json!({
-                    "steps": [{ "step": step.as_str(), "serviceId": service_id }],
-                    "projectedChars": projected,
-                }),
-            ),
+        guard_amount(
+            &rt.consent,
+            self.work.path(),
+            step,
+            service_id,
+            used,
+            about_to_send,
+            section_end_ms,
+            duration,
         )
     }
 
@@ -776,6 +824,30 @@ impl Runner<'_> {
         }
         for index in 0..count {
             let started = Instant::now();
+            if self.run.sections[index].edited {
+                // The editor changed this section: its lines are the project's, and no stage
+                // runs for it again (research R16).
+                let sec_index = self.run.sections[index].index;
+                for stage in Stage::PER_SECTION {
+                    if !(fast && stage == Stage::Separate
+                        || subtitles_only && stage == Stage::Synthesize)
+                    {
+                        self.mark(index, stage, StageStatus::Done);
+                    }
+                }
+                let lines: Vec<TranscriptLine> = self
+                    .kept
+                    .iter()
+                    .filter(|l| l.section_index == sec_index)
+                    .cloned()
+                    .collect();
+                for line in &lines {
+                    self.emit(RunEvent::Line(line.clone()));
+                }
+                self.dub.lines.extend(lines);
+                self.eta.already_done(1);
+                continue;
+            }
             let already = self.section_complete(index, fast, subtitles_only);
             let mut lines = Vec::new();
             for (stage_index, stage) in Stage::PER_SECTION.into_iter().enumerate() {
@@ -1016,6 +1088,7 @@ impl Runner<'_> {
                     },
                     voice_id: String::new(),
                     confidence: s["confidence"].as_f64().unwrap_or(1.0) as f32,
+                    gender_source: Default::default(),
                 });
             }
         }
@@ -1115,6 +1188,7 @@ impl Runner<'_> {
                 audio_ms: None,
                 flags,
                 status: LineStatus::Transcribed,
+                ..Default::default()
             });
         }
         self.save_lines(&sec, &lines)?;
@@ -1281,18 +1355,7 @@ impl Runner<'_> {
     }
 
     fn voice_for(&self, speaker_id: &str) -> Option<VoicePick> {
-        let gender = self
-            .dub
-            .speakers
-            .iter()
-            .find(|s| s.id == speaker_id)
-            .and_then(|s| gender_of(s.gender))
-            .unwrap_or(Gender::Female);
-        self.plan
-            .voices
-            .get(&gender)
-            .or_else(|| self.plan.voices.values().next())
-            .cloned()
+        voice_pick(&self.plan, &self.dub.speakers, speaker_id)
     }
 
     async fn synthesize(&mut self, index: usize) -> Result<Vec<TranscriptLine>, AppError> {
@@ -1458,6 +1521,21 @@ impl Runner<'_> {
                 .map(|p| p.to_string_lossy().replace('\\', "/"));
             l.audio_ms = Some(ms);
             l.status = LineStatus::Synthesized;
+            // The editor starts from these: the clip as the engine made it, and what it was
+            // made from (feature 004).
+            l.raw_audio = l.audio.clone();
+            l.raw_ms = Some(ms);
+            let gender = self
+                .dub
+                .speakers
+                .iter()
+                .find(|s| s.id == l.speaker_id)
+                .map(|s| s.gender)
+                .unwrap_or_default();
+            let cloud = self.speak_engine.as_ref().map(|e| e.service_id());
+            let (voice, engine) =
+                speech_identity(&self.plan, &self.dub.speakers, cloud, &l.speaker_id);
+            l.speech_hash = speech_hash_of(l, gender, &self.dub.target_language, &voice, &engine);
             let confidence = if l.flags.contains(&LineFlag::LowConfidence) {
                 0.0
             } else {
@@ -1505,7 +1583,7 @@ impl Runner<'_> {
                     .filter(|l| l.section_index == sec.index)
                     .filter_map(|l| {
                         l.audio.as_ref().map(|a| MixLine {
-                            start_ms: l.start_ms,
+                            start_ms: l.dub_start_ms.unwrap_or(l.start_ms),
                             clip: work.join(a),
                         })
                     })

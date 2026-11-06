@@ -1,0 +1,11 @@
+WEBVTT
+
+STYLE
+::cue { color: #fff; }
+
+intro
+00:00:01.000 --> 00:00:03.000 line:90% position:50% align:center
+<c.yellow>Styled</c> &amp; positioned
+
+00:00:03.500 --> 00:00:05.000
+Plain cue

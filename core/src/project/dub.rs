@@ -88,6 +88,17 @@ pub struct Speaker {
     pub voice_id: String,
     /// 0 to 1. A low value is shown to the user as a hint.
     pub confidence: f32,
+    /// Where `gender` came from. A later run does not overwrite a value the user set.
+    #[serde(default)]
+    pub gender_source: GenderSource,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum GenderSource {
+    #[default]
+    Detected,
+    User,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -98,6 +109,8 @@ pub enum LineFlag {
     TooShort,
     MixedLanguage,
     LowConfidence,
+    /// The editor emptied the text: the line is kept without speech (feature 004).
+    EmptyText,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -110,7 +123,7 @@ pub enum LineStatus {
     Failed,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TranscriptLine {
     pub id: String,
@@ -126,6 +139,58 @@ pub struct TranscriptLine {
     pub audio_ms: Option<u64>,
     pub flags: BTreeSet<LineFlag>,
     pub status: LineStatus,
+    /// The clip as the engine returned it, relative to the work folder (feature 004).
+    #[serde(default)]
+    pub raw_audio: Option<String>,
+    #[serde(default)]
+    pub raw_ms: Option<u64>,
+    /// Post-chain speed, volume and pitch applied to the raw clip to make `audio`.
+    #[serde(default = "neutral_speed")]
+    pub speed: f64,
+    #[serde(default)]
+    pub volume_db: f64,
+    #[serde(default)]
+    pub pitch_semitones: f64,
+    /// Where the mix places the clip. Absent means `start_ms`.
+    #[serde(default)]
+    pub dub_start_ms: Option<u64>,
+    /// Hash of what the current clip was made from. Empty on a project from before 004.
+    #[serde(default)]
+    pub speech_hash: String,
+    /// The user touched this line, so a later run does not overwrite it.
+    #[serde(default)]
+    pub user_edited: bool,
+}
+
+fn neutral_speed() -> f64 {
+    1.0
+}
+
+impl Default for TranscriptLine {
+    fn default() -> Self {
+        Self {
+            id: String::new(),
+            section_index: 0,
+            start_ms: 0,
+            end_ms: 0,
+            speaker_id: String::new(),
+            language: String::new(),
+            text: String::new(),
+            translated: None,
+            audio: None,
+            audio_ms: None,
+            flags: BTreeSet::new(),
+            status: LineStatus::default(),
+            raw_audio: None,
+            raw_ms: None,
+            speed: 1.0,
+            volume_db: 0.0,
+            pitch_semitones: 0.0,
+            dub_start_ms: None,
+            speech_hash: String::new(),
+            user_edited: false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -181,6 +246,14 @@ pub struct Section {
     /// Resume skips a `Done` stage only if this hash matches the current input and settings.
     #[serde(default)]
     pub input_hash: BTreeMap<Stage, String>,
+    /// The editor changed a line of this section. A resume never runs its stages again, and a
+    /// fresh run asks before replacing it (feature 004, research R16).
+    #[serde(default)]
+    pub edited: bool,
+    /// A line of this section changed in a way `dub-mix.wav` does not show yet. The editor
+    /// rebuilds the section's piece of the mix and clears this (feature 004).
+    #[serde(default)]
+    pub mix_stale: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -245,7 +318,7 @@ pub struct PipelineRun {
 }
 
 /// Everything feature 002 adds to `project.json`.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct DubData {
     pub source: Option<Source>,
@@ -259,6 +332,25 @@ pub struct DubData {
     pub run: Option<PipelineRun>,
     /// What each cloud step sent, if any step used a cloud service. Never holds a key or text.
     pub cloud_usage: Vec<CloudUsage>,
+    /// Id from `config/caption-templates.json` (feature 004).
+    pub caption_template: String,
+}
+
+impl Default for DubData {
+    fn default() -> Self {
+        Self {
+            source: None,
+            source_language: String::new(),
+            detected_language: None,
+            target_language: String::new(),
+            options: Options::default(),
+            speakers: Vec::new(),
+            lines: Vec::new(),
+            run: None,
+            cloud_usage: Vec::new(),
+            caption_template: "classic".into(),
+        }
+    }
 }
 
 /// What one cloud step used in a project. A resumed run adds to the same record.

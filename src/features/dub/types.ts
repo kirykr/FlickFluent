@@ -2,7 +2,8 @@ export type Stage =
   "extract" | "separate" | "transcribe" | "translate" | "synthesize" | "mix" | "export";
 export type StageStatus = "pending" | "running" | "done" | "failed";
 export type RunState = "queued" | "running" | "cancelling" | "cancelled" | "failed" | "completed";
-export type LineFlag = "overlap" | "tooLong" | "tooShort" | "mixedLanguage" | "lowConfidence";
+export type LineFlag =
+  "overlap" | "tooLong" | "tooShort" | "mixedLanguage" | "lowConfidence" | "emptyText";
 export type Quality = "fast" | "standard";
 export type ExportKind = "video" | "audio" | "subtitles";
 
@@ -38,6 +39,8 @@ export interface Preflight {
   blockers: Blocker[];
   /** One entry per step that will use a cloud service. Empty when everything is local. */
   cloud: CloudPreflight[];
+  /** Edited lines a fresh run would replace. */
+  editsWillBeLost?: number;
 }
 
 export interface FallbackChoices {
@@ -129,6 +132,15 @@ export interface TranscriptLine {
   audioMs: number | null;
   flags: LineFlag[];
   status: string;
+  /** Fields from the editor (feature 004). Absent on a line from before it. */
+  rawAudio?: string | null;
+  rawMs?: number | null;
+  speed?: number;
+  volumeDb?: number;
+  pitchSemitones?: number;
+  dubStartMs?: number | null;
+  speechHash?: string;
+  userEdited?: boolean;
 }
 
 export interface RunError {

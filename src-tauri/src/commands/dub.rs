@@ -10,11 +10,13 @@ use flickfluent_core::error::{AppError, NOTHING_TO_RESUME, RUN_NOT_COMPLETE, SAM
 use flickfluent_core::hardware;
 use flickfluent_core::models::{bundled_catalogue, installed};
 use flickfluent_core::pipeline::ffmpeg::{Ffmpeg, SourceInfo};
-use flickfluent_core::pipeline::plan::{machine_class, plan_models_full};
+use flickfluent_core::pipeline::plan::machine_class;
 use flickfluent_core::pipeline::preflight::{
     check_cloud, check_start, cloud_preflight, preflight, Preflight,
 };
-use flickfluent_core::pipeline::run::{run_dub, CancelToken, Mode, RunConfig, RunEvent};
+use flickfluent_core::pipeline::run::{
+    check_fresh_start, edited_lines, plan_for_dub, run_dub, CancelToken, Mode, RunConfig, RunEvent,
+};
 use flickfluent_core::pipeline::stages::{
     export, fingerprint, probe_source, ExportRequest, ExportResult,
 };
@@ -61,7 +63,7 @@ impl DubState {
         self.runs.lock().unwrap_or_else(|e| e.into_inner())
     }
 
-    fn running_for(&self, handle: &str) -> bool {
+    pub(super) fn running_for(&self, handle: &str) -> bool {
         self.lock().values().any(|a| a.handle == handle)
     }
 }
@@ -134,7 +136,7 @@ pub fn dub_of(state: &ProjectState, handle: &str) -> Result<(DubData, PathBuf, S
     })
 }
 
-fn store(state: &ProjectState, handle: &str, dub: &DubData) -> Result<(), AppError> {
+pub(super) fn store(state: &ProjectState, handle: &str, dub: &DubData) -> Result<(), AppError> {
     state.with(handle, |s| {
         let mut data = s.project.data.clone();
         write_into(&mut data, dub);
@@ -234,33 +236,21 @@ fn plan_for(
     flickfluent_core::models::MachineClass,
     String,
 ) {
-    let machine = hardware::probe();
-    let class = machine_class(&machine);
-    let source = if dub.source_language == "auto" {
-        dub.detected_language
-            .clone()
-            .unwrap_or_else(|| "auto".into())
-    } else {
-        dub.source_language.clone()
-    };
-    let have: Vec<String> = installed(models).into_iter().map(|m| m.id).collect();
-    let plan = plan_models_full(
+    let class = machine_class(&hardware::probe());
+    let (plan, source) = plan_for_dub(
         &bundled_catalogue(),
         class,
         os_name(),
         arch_name(),
-        &source,
-        &dub.target_language,
-        dub.options.quality == Quality::Fast,
-        &have,
-        &dub.options.fallbacks,
+        models,
+        dub,
     );
     (plan, class, source)
 }
 
 /// A step goes to a cloud service when this run chose one, or else when the settings did. Local
 /// is the default; nothing is ever switched to the cloud on its own.
-fn with_settings_engines(mut dub: DubData, settings: &SettingsState) -> DubData {
+pub(super) fn with_settings_engines(mut dub: DubData, settings: &SettingsState) -> DubData {
     use flickfluent_core::cloud::services::Step as CloudStep;
     let from_settings = settings.engines();
     for step in [CloudStep::Translate, CloudStep::Speak] {
@@ -305,6 +295,7 @@ fn preflight_for(
         source.duration_ms,
     );
     pre.cloud = cloud_preflight(&dub, Some(&cloud.runtime()), &work)?;
+    pre.edits_will_be_lost = edited_lines(&dub);
     Ok(pre)
 }
 
@@ -370,7 +361,7 @@ fn payload(run_id: &str, event: &RunEvent) -> Option<(&'static str, Value)> {
     })
 }
 
-fn build_config(
+pub(super) fn build_config(
     app: &tauri::AppHandle,
     models: &Path,
     project_path: &Path,
@@ -406,7 +397,12 @@ fn build_config(
     }
 }
 
-fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String, AppError> {
+fn start_run(
+    app: tauri::AppHandle,
+    handle: String,
+    mode: Mode,
+    discard_edits: bool,
+) -> Result<String, AppError> {
     let projects = app.state::<ProjectState>();
     let dubs = app.state::<DubState>();
     let settings = app.state::<SettingsState>();
@@ -420,6 +416,8 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
     let models = models_dir(&app, &settings)?;
     let (mut dub, path, project_id) = dub_of(&projects, &handle)?;
     if mode == Mode::Fresh {
+        // Edited lines are replaced only when the user said so.
+        check_fresh_start(&dub, discard_edits)?;
         // The engines of this run are fixed now, so a resume uses the same ones.
         dub = with_settings_engines(dub, &settings);
         store(&projects, &handle, &dub)?;
@@ -437,6 +435,8 @@ fn start_run(app: tauri::AppHandle, handle: String, mode: Mode) -> Result<String
         let pre = cloud_preflight(&dub, Some(&cloud.runtime()), &WorkFolder::folder_for(&path))?;
         check_cloud(&pre)?;
     }
+    // The editor's working copy would be out of date once the run stores its result.
+    app.state::<super::editor::EditorSessions>().close(&handle);
     let work = WorkFolder::folder_for(&path);
     std::fs::create_dir_all(&work).map_err(AppError::io)?;
     let cfg = build_config(&app, &models, &path, &project_id, &work, cloud.runtime());
@@ -501,14 +501,15 @@ pub fn dub_start(
     app: tauri::AppHandle,
     handle: String,
     fallback_choices: Option<Value>,
+    discard_edits: Option<bool>,
 ) -> Result<String, AppError> {
     let _ = fallback_choices; // fallbacks arrive with the language story (US2)
-    start_run(app, handle, Mode::Fresh)
+    start_run(app, handle, Mode::Fresh, discard_edits.unwrap_or(false))
 }
 
 #[tauri::command]
 pub fn dub_resume(app: tauri::AppHandle, handle: String) -> Result<String, AppError> {
-    start_run(app, handle, Mode::Resume)
+    start_run(app, handle, Mode::Resume, false)
 }
 
 #[tauri::command]

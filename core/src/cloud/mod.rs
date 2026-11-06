@@ -9,6 +9,7 @@ pub mod clock;
 pub mod consent;
 pub mod engine;
 pub mod estimate;
+pub mod guard;
 pub mod http;
 pub mod keys;
 pub mod keystore;

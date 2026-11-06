@@ -44,6 +44,10 @@ pub struct Preflight {
     /// by [`cloud_preflight`].
     #[serde(default)]
     pub cloud: Vec<CloudPreflight>,
+    /// Lines the user edited that a fresh run would replace (feature 004). Filled by the shell
+    /// from the project, so the screen can ask before the run starts.
+    #[serde(default)]
+    pub edits_will_be_lost: u32,
 }
 
 /// What a cloud step will do, so the screen can show the amount and ask first.
@@ -190,6 +194,7 @@ pub fn preflight(
         warnings,
         blockers: blockers(catalogue, plan, class, os, arch, source, target, fast),
         cloud: Vec::new(),
+        edits_will_be_lost: 0,
     }
 }
 

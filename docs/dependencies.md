@@ -104,3 +104,13 @@ Cloud services (the user's own key, billed to the user; the service's own terms 
 | Azure AI services (Translator, Speech) | translation, speech | https://www.microsoft.com/licensing/terms | 2026-11-05 |
 
 Model ids, voice genders and language lists in `config/cloud-services.json` come from vendor documents and stay marked unverified until tasks T071 and T072.
+
+## Feature 004: transcript editor and timeline (2026-11-06)
+
+| Item | Purpose | Version | Licence | Why |
+|------|---------|---------|---------|-----|
+| `chardetng` | Guess the text encoding of a subtitle file with no BOM | 1.0.0 | MIT OR Apache-2.0 | Used by Firefox; pure Rust |
+| `encoding_rs` | Decode the guessed encoding | 0.8.44 | (Apache-2.0 OR MIT) AND BSD-3-Clause | Already needed by `chardetng`; used by Firefox |
+| `@tanstack/react-virtual` | Draw only the table rows on screen (6,000 lines) | 3.14.26 | MIT | Headless, no styling to fight shadcn |
+
+`subtp` was tried first and dropped: the SRT and WebVTT reader is about 150 lines of our own (`core/src/subtitles/read.rs`), tested against the fixtures in `core/tests/fixtures/subtitles/`. `cargo deny check licenses` passes with the rest (2026-11-06).

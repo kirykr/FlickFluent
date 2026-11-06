@@ -201,35 +201,9 @@ pub async fn export(
     })
 }
 
-/// `00:01:02,500` from milliseconds.
-fn srt_time(ms: u64) -> String {
-    format!(
-        "{:02}:{:02}:{:02},{:03}",
-        ms / 3_600_000,
-        ms / 60_000 % 60,
-        ms / 1000 % 60,
-        ms % 1000
-    )
-}
-
 /// The lines as SubRip text: the translation when there is one, otherwise the original.
 pub fn subtitles_text(lines: &[TranscriptLine]) -> String {
-    let mut out = String::new();
-    for (i, l) in lines.iter().enumerate() {
-        let text = l
-            .translated
-            .as_deref()
-            .filter(|t| !t.trim().is_empty())
-            .unwrap_or(&l.text);
-        out.push_str(&format!(
-            "{}\n{} --> {}\n{}\n\n",
-            i + 1,
-            srt_time(l.start_ms),
-            srt_time(l.end_ms),
-            text.trim()
-        ));
-    }
-    out
+    crate::subtitles::write::srt_text(lines, crate::subtitles::write::Source::Translated)
 }
 
 /// Write `<file_name>.srt` in `folder`. Same name and overwrite rules as `export`.

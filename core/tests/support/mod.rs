@@ -280,4 +280,5 @@ pub mod run_fixture {
 }
 
 pub mod cloud_run;
+pub mod editor_fixture;
 pub mod fake_cloud;

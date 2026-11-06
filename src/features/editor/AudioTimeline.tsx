@@ -1,4 +1,4 @@
-import { Languages, Scissors, Sparkles } from "lucide-react";
+import { Languages, Scissors } from "lucide-react";
 import { t } from "../../i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
+import type { TranscriptLine } from "../dub/types";
 import { ComingSoon } from "./ComingSoon";
-import { SAMPLE_CLIPS } from "./placeholder";
+import { useEditorContext } from "./EditorContext";
+import { FitControls } from "./FitControls";
 
 function Knob({ label, value }: { label: string; value: number }) {
   return (
@@ -23,27 +25,69 @@ function Knob({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Track({ label, className }: { label: string; className: string }) {
+/** The colour of a clip: the track's own, or a warning when its line is flagged. */
+function clipClass(line: TranscriptLine, base: string): string {
+  if (line.flags.includes("tooLong")) return "border-destructive/60 bg-destructive/30";
+  if (line.flags.includes("overlap")) return "border-warning/60 bg-warning/30";
+  return base;
+}
+
+function Tracks() {
+  const ctx = useEditorContext();
+  if (!ctx || ctx.ed.view.lines.length === 0) return null;
+  const { ed, selected, setSelected } = ctx;
+  const { lines, speakers } = ed.view;
+  const total = Math.max(
+    1,
+    ...lines.map(
+      (l) => (l.dubStartMs ?? l.startMs) + Math.max(l.audioMs ?? 0, l.endMs - l.startMs),
+    ),
+  );
+  const ids = speakers.length
+    ? speakers.map((s) => s.id)
+    : [...new Set(lines.map((l) => l.speakerId))];
   return (
-    <div className="flex items-stretch gap-2">
-      <span className="w-8 shrink-0 self-center font-mono text-xs text-muted-foreground">
-        {label}
-      </span>
-      <div className="relative h-9 flex-1 rounded-md bg-muted/50">
-        {SAMPLE_CLIPS.map((c) => (
-          <div
-            key={c.left}
-            className={`absolute inset-y-1 rounded-md border ${className}`}
-            style={{ left: `${c.left}%`, width: `${c.width}%` }}
-          />
-        ))}
-      </div>
+    <div className="flex min-w-[40rem] flex-col gap-1.5" data-testid="timeline-tracks">
+      {ids.map((id) => (
+        <div key={id} className="flex items-stretch gap-2">
+          <span className="w-12 shrink-0 self-center truncate font-mono text-xs text-muted-foreground">
+            {id}
+          </span>
+          <div className="relative h-9 flex-1 rounded-md bg-muted/50">
+            {lines
+              .map((line, i) => ({ line, i }))
+              .filter(({ line }) => line.speakerId === id)
+              .map(({ line, i }) => {
+                const from = line.dubStartMs ?? line.startMs;
+                const width = line.audioMs ?? line.endMs - line.startMs;
+                return (
+                  <button
+                    key={line.id}
+                    type="button"
+                    data-testid="timeline-clip"
+                    data-line={line.id}
+                    data-left={from}
+                    aria-label={t("editor.clip", { n: i + 1, start: Math.round(from / 100) / 10 })}
+                    aria-pressed={selected.has(line.id)}
+                    onClick={() => setSelected(new Set([line.id]))}
+                    className={`absolute inset-y-1 rounded-md border ${clipClass(line, "border-success/50 bg-success/30")} ${selected.has(line.id) ? "ring-2 ring-primary" : ""}`}
+                    style={{
+                      left: `${(from / total) * 100}%`,
+                      width: `${Math.max(0.3, (width / total) * 100)}%`,
+                    }}
+                  />
+                );
+              })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
 
-/** Bottom strip of the editor: transport knobs, action buttons and two sample tracks. */
+/** Bottom strip of the editor: the fitting controls and one track of clips for each speaker. */
 export function AudioTimeline() {
+  const ctx = useEditorContext();
   return (
     <Card size="sm">
       <CardContent className="flex flex-col gap-3">
@@ -68,40 +112,16 @@ export function AudioTimeline() {
                 {t("editor.startTranscription")}
               </Button>
             </ComingSoon>
-            <ComingSoon>
-              <Button size="sm" variant="outline" disabled>
-                {t("editor.smartFit")}
-              </Button>
-            </ComingSoon>
-            <ComingSoon>
-              <Button size="sm" variant="outline" disabled>
-                {t("editor.endSync")}
-              </Button>
-            </ComingSoon>
-            <ComingSoon>
-              <Button size="sm" disabled className="bg-warning text-white">
-                <Sparkles data-icon="inline-start" />
-                {t("editor.synthesize")}
-              </Button>
-            </ComingSoon>
+            {ctx && (
+              <Badge variant="outline">
+                {t("editor.items", { count: ctx.ed.view.lines.length })}
+              </Badge>
+            )}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Knob label={t("editor.speed")} value={40} />
-          <Knob label={t("editor.vol")} value={60} />
-          <Knob label={t("editor.pitch")} value={50} />
-          <ComingSoon>
-            <Button size="sm" variant="secondary" disabled>
-              {t("editor.reverb")}
-            </Button>
-          </ComingSoon>
-          <Badge variant="outline">{t("editor.items", { count: SAMPLE_CLIPS.length })}</Badge>
-        </div>
+        {ctx ? <FitControls /> : null}
         <ScrollArea>
-          <div className="flex min-w-[40rem] flex-col gap-1.5">
-            <Track label={t("editor.trackText")} className="border-primary/50 bg-primary/30" />
-            <Track label={t("editor.trackAudio")} className="border-success/50 bg-success/30" />
-          </div>
+          <Tracks />
         </ScrollArea>
       </CardContent>
     </Card>

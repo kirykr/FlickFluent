@@ -125,6 +125,56 @@ pub const DUB_ERRORS: &[(&str, &str, &str)] = &[
         "dub.error.keyStoreUnavailable",
         "dub.next.useKeyThisSession",
     ),
+    (
+        EDIT_END_BEFORE_START,
+        "editor.error.endBeforeStart",
+        "editor.next.fixTimes",
+    ),
+    (
+        EDIT_OUT_OF_RANGE,
+        "editor.error.outOfRange",
+        "editor.next.useSafeRange",
+    ),
+    (
+        EDIT_CANNOT_MERGE,
+        "editor.error.cannotMerge",
+        "editor.next.pickNeighbours",
+    ),
+    (
+        EDIT_NOTHING_TO_UNDO,
+        "editor.error.nothingToUndo",
+        "editor.next.continueEditing",
+    ),
+    (
+        EDIT_NOT_FOUND,
+        "editor.error.notFound",
+        "editor.next.reopenEditor",
+    ),
+    (
+        EDIT_WORK_FOLDER_MISSING,
+        "editor.error.workFolderMissing",
+        "editor.next.runDubAgain",
+    ),
+    (
+        SUBTITLE_PARSE_FAILED,
+        "editor.error.subtitleParseFailed",
+        "editor.next.chooseAnotherSubtitleFile",
+    ),
+    (
+        SUBTITLE_ENCODING_UNKNOWN,
+        "editor.error.subtitleEncodingUnknown",
+        "editor.next.saveAsUtf8",
+    ),
+    (
+        SUBTITLE_PREVIEW_EXPIRED,
+        "editor.error.subtitlePreviewExpired",
+        "editor.next.previewAgain",
+    ),
+    (
+        DUB_EDITS_WOULD_BE_LOST,
+        "editor.error.editsWouldBeLost",
+        "editor.next.confirmOrKeepEdits",
+    ),
 ];
 
 pub fn next_step_key(code: &str) -> &'static str {

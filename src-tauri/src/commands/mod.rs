@@ -1,6 +1,7 @@
 pub mod bench;
 pub mod cloud;
 pub mod dub;
+pub mod editor;
 pub mod hardware;
 pub mod languages;
 pub mod models;

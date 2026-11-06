@@ -18,6 +18,7 @@ import {
 } from "../../app/ipc";
 import { asAppError } from "../projects/errors";
 import { ConsentDialog } from "../cloud/ConsentDialog";
+import { DiscardEditsDialog } from "./DiscardEditsDialog";
 import { roundChars, type CloudPreflight } from "../cloud/types";
 import { formatBytes } from "../models/format";
 import type { AppErrorShape } from "../projects/types";
@@ -64,6 +65,7 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
   const [pair, setPair] = useState<PairCheckResult | null>(null);
   // Cloud steps that still need the user's yes before the run starts (one question at a time).
   const [asking, setAsking] = useState<CloudPreflight[]>([]);
+  const [askDiscard, setAskDiscard] = useState(false);
   const [declined, setDeclined] = useState(false);
   const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
   const [fallbacks, setFallbacks] = useState<FallbackChoices>(
@@ -161,9 +163,9 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
     }
   };
 
-  const go = async () => {
+  const go = async (discardEdits = false) => {
     setBusy(true);
-    const runId = await attempt(() => dubStart(handle));
+    const runId = await attempt(() => dubStart(handle, discardEdits));
     setBusy(false);
     if (runId) onStarted(runId);
   };
@@ -173,13 +175,19 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
     const need = (pre?.cloud ?? []).filter((c) => c.needsConsent);
     // Nothing is sent before the notice has been read and agreed to.
     if (need.length > 0) return setAsking(need);
+    await begin();
+  };
+
+  // A new dub replaces edited lines only after the user said so.
+  const begin = async () => {
+    if ((pre?.editsWillBeLost ?? 0) > 0) return setAskDiscard(true);
     await go();
   };
 
   const agreed = () => {
     const rest = asking.slice(1);
     setAsking(rest);
-    if (rest.length === 0) void go();
+    if (rest.length === 0) void begin();
   };
 
   const declinedNow = () => {
@@ -381,6 +389,15 @@ export function NewDub({ handle, saved, readOnly, onStarted }: Props) {
         </Button>
       </div>
       <ConsentDialog item={asking[0] ?? null} onAgree={agreed} onDecline={declinedNow} />
+      <DiscardEditsDialog
+        count={pre?.editsWillBeLost ?? 0}
+        open={askDiscard}
+        onKeep={() => setAskDiscard(false)}
+        onReplace={() => {
+          setAskDiscard(false);
+          void go(true);
+        }}
+      />
     </section>
   );
 }

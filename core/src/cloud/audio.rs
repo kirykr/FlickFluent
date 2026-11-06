@@ -29,3 +29,23 @@ pub fn wav_duration_ms_of(bytes: &[u8]) -> Option<u64> {
     }
     None
 }
+
+/// Sample rate of a PCM WAV file, read from its header. `None` for anything else.
+pub fn wav_sample_rate(path: &Path) -> Option<u32> {
+    let bytes = std::fs::read(path).ok()?;
+    if bytes.len() < 12 || &bytes[..4] != b"RIFF" || &bytes[8..12] != b"WAVE" {
+        return None;
+    }
+    let mut at = 12;
+    while at + 8 <= bytes.len() {
+        let size = u32::from_le_bytes(bytes[at + 4..at + 8].try_into().ok()?) as usize;
+        let body = at + 8;
+        if &bytes[at..at + 4] == b"fmt " && body + 8 <= bytes.len() {
+            return Some(u32::from_le_bytes(
+                bytes[body + 4..body + 8].try_into().ok()?,
+            ));
+        }
+        at = body + size + (size & 1);
+    }
+    None
+}

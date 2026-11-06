@@ -15,6 +15,7 @@ fn line(start_ms: u64, end_ms: u64) -> TranscriptLine {
         audio_ms: None,
         flags: Default::default(),
         status: LineStatus::Transcribed,
+        ..Default::default()
     }
 }
 

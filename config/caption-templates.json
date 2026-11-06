@@ -1,0 +1,38 @@
+[
+  {
+    "id": "classic",
+    "nameKey": "editor.captions.classic",
+    "fontFamily": "Inter, \"Noto Sans Khmer\", \"Khmer UI\", \"Khmer Sangam MN\", sans-serif",
+    "sizePercent": 5,
+    "color": "#ffffff",
+    "outlineColor": "#000000",
+    "outlineWidth": 2,
+    "background": null,
+    "position": "bottom",
+    "marginPercent": 6
+  },
+  {
+    "id": "soft-box",
+    "nameKey": "editor.captions.softBox",
+    "fontFamily": "Inter, \"Noto Sans Khmer\", \"Khmer UI\", \"Khmer Sangam MN\", sans-serif",
+    "sizePercent": 4.5,
+    "color": "#ffffff",
+    "outlineColor": "#000000",
+    "outlineWidth": 0,
+    "background": "#000000b3",
+    "position": "bottom",
+    "marginPercent": 6
+  },
+  {
+    "id": "top-note",
+    "nameKey": "editor.captions.topNote",
+    "fontFamily": "Inter, \"Noto Sans Khmer\", \"Khmer UI\", \"Khmer Sangam MN\", sans-serif",
+    "sizePercent": 4,
+    "color": "#ffd84a",
+    "outlineColor": "#000000",
+    "outlineWidth": 2,
+    "background": null,
+    "position": "top",
+    "marginPercent": 6
+  }
+]

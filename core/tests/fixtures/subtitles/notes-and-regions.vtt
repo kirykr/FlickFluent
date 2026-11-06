@@ -1,0 +1,20 @@
+WEBVTT - a header with text
+
+NOTE
+This is a note
+that spans lines.
+
+REGION
+id:fred
+width:40%
+
+STYLE
+::cue { background: #000; }
+
+00:00:01.000 --> 00:00:02.000
+First after notes
+
+NOTE inline note
+
+00:00:02.500 --> 00:00:04.000
+Second one

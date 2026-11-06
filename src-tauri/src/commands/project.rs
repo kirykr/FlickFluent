@@ -227,7 +227,12 @@ pub fn project_set_notes(
 }
 
 #[tauri::command]
-pub fn project_close(state: tauri::State<ProjectState>, handle: String) {
+pub fn project_close(
+    state: tauri::State<ProjectState>,
+    editors: tauri::State<super::editor::EditorSessions>,
+    handle: String,
+) {
+    editors.close(&handle);
     if let Some(s) = state.lock().remove(&handle) {
         s.close();
     }

@@ -42,6 +42,19 @@ Details and numbers: `docs/verification/002-benchmarks.md`.
 - **What remains open:** all Windows runs (the `.ps1` limiter was never executed); a real 8 GB computer; a full-length film; the slow, non-linear Whisper large-v3 time; the eSpeak source offer in About (T085); NLLB inference with the real model; the macOS LGPL FFmpeg build; Windows on ARM has no local engine.
 - **Owner decisions this feature:** eSpeak NG stays in the separate-process pack with the matching source published (2026-11-05); NLLB-200 is an opt-in non-commercial model.
 
+## Feature 004 hand-off (2026-11-07)
+
+**Built (macOS):** the transcript editor and timeline on top of a finished dub. A table of the lines (virtualised, 6,000 rows) with inline edits, insert, delete, merge, split, duplicate, search and replace, a bulk text dialog, undo and redo kept in the core, and a project file that always equals what is on screen. A line is "changed" when a hash of what its clip was made from differs (text, voice, speaker, gender, engine, speed, volume, pitch); making speech again sends only those lines to the voice engine (local or the 003 cloud engines under the shared amount guard), swaps each clip in when complete, and rebuilds the mix for the touched sections only, spliced in by sample number. Smart Fit and End Sync fit speech to its window with ffmpeg only; speed, volume and pitch are a post chain on the raw clip. SRT and WebVTT import and export with a preview and three choices, and three caption templates with Khmer font fallbacks. A section the editor changed is kept by a resume, and a fresh dub asks before it replaces edited lines.
+
+**Verified:** 399 Rust tests, all Vitest and Playwright cases on macOS, against the fake sidecar and fake cloud server (`docs/verification/004.md`).
+
+**Open:**
+- Windows has not run anything of 004. Do not close the feature before that (T084).
+- Real models (T081): the time for one edited line (SC-001), Smart Fit on a real run (SC-002), a listen at the splice join and at the pitch limits, Khmer in the preview. `core/tests/editor_real.rs` is ready.
+- Usability check (T083) and idle RAM (T076) not done.
+- The CI npm licence check already fails on six packages from before 004 (Geist font OFL-1.1, `dompurify`, `json-schema`, `khroma`, `lightningcss`, `robust-predicates`); decide the allow-list.
+- Each edit saves the whole project file (20 to 29 ms at 6,000 lines, fine) but also rotates the backups, so the copy from before an editing session is lost after three edits; consider rotating only on the first save of a session.
+
 ## Feature 003 hand-off (2026-11-06)
 
 **Built (macOS):** optional cloud engines for translation and speech with the user's own keys. Services: Google Gemini API and Azure AI services, both described in `config/cloud-services.json`. Keys live only in the OS secure storage (`keyring-core`); `cloud-keys.json` and `cloud-consent.json` hold no secret. Cloud is off by default; each service and step needs a notice that names the amount (agreed again only above 5 times the agreed amount). Several keys per service rotate on a limit or refusal, wait up to 10 minutes, then pause the run so it can resume. The language pair check offers a cloud engine or a "set up a key" hint, and cloud-only languages appear in the list once a key is verified.

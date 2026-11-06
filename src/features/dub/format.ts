@@ -38,6 +38,7 @@ export const FLAG_KEYS: Record<LineFlag, string> = {
   tooShort: "dub.flag.tooShort",
   mixedLanguage: "dub.flag.mixedLanguage",
   lowConfidence: "dub.flag.lowConfidence",
+  emptyText: "dub.flag.emptyText",
 };
 
 /** Message key and numbers for a dub error, as the core sent it. */

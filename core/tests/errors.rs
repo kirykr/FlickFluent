@@ -93,6 +93,7 @@ fn every_message_with_a_placeholder_names_one_the_run_can_fill() {
         "labels",
         "detail",
         "seconds",
+        "count",
     ];
     for (code, message, _) in DUB_ERRORS {
         let text = message

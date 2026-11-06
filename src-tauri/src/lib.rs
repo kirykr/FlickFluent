@@ -13,6 +13,7 @@ pub fn run() {
         .manage(commands::project::ProjectState::default())
         .manage(commands::models::ModelsState::default())
         .manage(commands::dub::DubState::default())
+        .manage(commands::editor::EditorSessions::default())
         .setup(|app| {
             app.manage(commands::settings::SettingsState::load(app.handle()));
             app.manage(commands::cloud::CloudState::load(app.handle()));
@@ -63,6 +64,28 @@ pub fn run() {
             commands::bench::bench_run,
             commands::bench::bench_records,
             commands::dub::dub_installed_models,
+            commands::editor::editor_open,
+            commands::editor::editor_state,
+            commands::editor::editor_update_line,
+            commands::editor::editor_insert_line,
+            commands::editor::editor_delete_lines,
+            commands::editor::editor_undo,
+            commands::editor::editor_redo,
+            commands::editor::editor_search,
+            commands::editor::editor_replace,
+            commands::editor::editor_resynthesize,
+            commands::editor::editor_stop,
+            commands::editor::editor_fit,
+            commands::editor::editor_merge_lines,
+            commands::editor::editor_split_line,
+            commands::editor::editor_duplicate_line,
+            commands::editor::editor_bulk_text,
+            commands::editor::editor_set_speaker_gender,
+            commands::editor::subtitles_export,
+            commands::editor::subtitles_import_preview,
+            commands::editor::subtitles_import_apply,
+            commands::editor::caption_templates_list,
+            commands::editor::caption_template_set,
             commands::cloud::cloud_services,
             commands::cloud::cloud_keys_list,
             commands::cloud::cloud_key_add,

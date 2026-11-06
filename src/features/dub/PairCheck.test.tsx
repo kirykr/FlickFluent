@@ -84,7 +84,13 @@ describe("pair check with cloud engines", () => {
   it("with no verified key it says to set one up and links to Settings", async () => {
     const opened = vi.fn();
     window.addEventListener(OPEN_SETTINGS, opened);
-    render(<PairCheck check={speakMissing([subtitles, setup])} choices={NO_FALLBACKS} onChoices={() => {}} />);
+    render(
+      <PairCheck
+        check={speakMissing([subtitles, setup])}
+        choices={NO_FALLBACKS}
+        onChoices={() => {}}
+      />,
+    );
     expect(screen.getByText(/Add a key for it in Settings first/)).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Open Settings" }));
     expect(opened).toHaveBeenCalled();

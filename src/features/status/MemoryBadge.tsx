@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { appMemory, systemPercent, type MemorySample } from "./format";
 
 /** Memory use, refreshed by the core every two seconds. Turns to a warning on a crowded computer. */
-export function MemoryBadge() {
+export function MemoryBadge({ testId = "memory" }: { testId?: string }) {
   const [sample, setSample] = useState<MemorySample | null>(null);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export function MemoryBadge() {
   return (
     <Badge
       variant={warning ? "destructive" : "outline"}
-      data-testid="memory"
+      data-testid={testId}
       data-level={sample.level}
       title={warning ? t("memory.hint") : undefined}
     >

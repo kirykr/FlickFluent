@@ -1,7 +1,9 @@
 """A sidecar with fake model workers, for run tests. Real protocol, no ML, stdlib only.
 
 Params the tests use: `speech` (false gives no transcript lines), `slowWorker` + `slowSection`
-+ `slowSeconds` (the named worker lingers in the named section so a test can kill the run).
++ `slowSeconds` (the named worker lingers in the named section so a test can kill the run),
+`synthLog` (a file that gets one JSON line of line ids per synthesize request) and
+`lineDelayMs` (synthesize waits this long after each line, so a test can stop it half way).
 """
 
 import errno
@@ -82,6 +84,10 @@ def translate(ctx, req):
 def synthesize(ctx, req):
     out_dir = Path(req["output"]["dir"])
     clips, names = [], []
+    log = ctx.params.get("synthLog")
+    if log:
+        with open(log, "a") as f:
+            f.write(json.dumps([l["id"] for l in req["input"]["lines"]]) + "\n")
     for i, line in enumerate(req["input"]["lines"]):
         ms = int(line["targetMs"] * 0.9)
         rate = 22050
@@ -96,8 +102,14 @@ def synthesize(ctx, req):
         part.replace(target)
         names.append(target.name)
         clips.append({"id": line["id"], "audioMs": ms, "sampleRate": rate, "speed": 1.0})
+        ctx.item("clip", clips[-1])
         ctx.progress((i + 1) / len(req["input"]["lines"]))
         linger(ctx, req, "synthesize")
+        delay = float(ctx.params.get("lineDelayMs", 0)) / 1000
+        end = time.time() + delay
+        while time.time() < end:
+            ctx.check_cancel()
+            time.sleep(0.01)
     return {"result": {"clips": clips}, "files": names}
 
 

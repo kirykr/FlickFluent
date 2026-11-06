@@ -69,7 +69,7 @@ export function PairCheck({ check, choices, onChoices, readOnly, serviceNames = 
       const step = stepKey(f);
       if (!step) return;
       const engines = { translate: "local", speak: "local", ...choices.engines };
-      engines[step] = on ? (f.serviceIds ?? [])[0] ?? "local" : "local";
+      engines[step] = on ? ((f.serviceIds ?? [])[0] ?? "local") : "local";
       onChoices({ ...choices, engines });
       return;
     }
@@ -120,7 +120,9 @@ export function PairCheck({ check, choices, onChoices, readOnly, serviceNames = 
                     />
                     <Label htmlFor={`fb-${f.kind}-${f.step ?? ""}`} className="font-normal">
                       {t(f.labelKey, {
-                        service: (f.serviceIds ?? []).map((id) => serviceNames[id] ?? id).join(", "),
+                        service: (f.serviceIds ?? [])
+                          .map((id) => serviceNames[id] ?? id)
+                          .join(", "),
                       })}
                     </Label>
                   </>
