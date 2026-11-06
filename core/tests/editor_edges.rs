@@ -105,3 +105,44 @@ async fn a_cloud_line_without_an_agreement_asks_first_and_sends_nothing() {
     );
     assert_eq!(fake.count(), 0);
 }
+
+#[test]
+fn paths_and_ids_from_a_project_file_cannot_leave_the_work_folder() {
+    use flickfluent_core::editor::paths::{file_part, inside};
+    let work = std::path::Path::new("/w/proj-work");
+    assert!(inside(work, "sections/0000/clips/a.wav").is_some());
+    for bad in [
+        "../x.wav",
+        "a/../../x.wav",
+        "/etc/passwd",
+        "C:\\x.wav",
+        "a\\..\\x",
+        "",
+    ] {
+        assert!(inside(work, bad).is_none(), "{bad}");
+    }
+    assert_eq!(file_part("s0001-l0002"), "s0001-l0002");
+    for bad in ["../../x", "a/b", "a\\b", "", ".."] {
+        let part = file_part(bad);
+        assert!(
+            part.starts_with("id-") && !part.contains(['/', '\\', '.']),
+            "{bad} -> {part}"
+        );
+    }
+}
+
+#[tokio::test]
+async fn a_clip_path_that_climbs_out_is_never_deleted_by_a_remake() {
+    let live = Live::finished(json!({})).await;
+    let outside = live.root.path().join("precious.txt");
+    std::fs::write(&outside, "keep me").unwrap();
+    let id = live.lines()[0].id.clone();
+    // A hostile project file: the line's clip points at a file outside the work folder.
+    let rel = format!("../{}", outside.file_name().unwrap().to_string_lossy());
+    live.with(|s| s.set_clip_for_test(&id, &rel));
+    live.edit_text(&id, "Make me again");
+    resynthesize(&live.shared, None, CancelToken::default(), &mut |_| {})
+        .await
+        .unwrap();
+    assert_eq!(std::fs::read_to_string(&outside).unwrap(), "keep me");
+}

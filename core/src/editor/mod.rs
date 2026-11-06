@@ -5,6 +5,7 @@ pub mod flags;
 pub mod hash;
 pub mod limits;
 pub mod ops;
+pub mod paths;
 pub mod post;
 pub mod resynth;
 pub mod runtime;

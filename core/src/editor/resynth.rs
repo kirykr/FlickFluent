@@ -9,6 +9,7 @@ use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 
+use super::paths::{file_part, inside};
 use super::post::make_line_clip;
 use super::session::{EditSession, MadeClip, SynthJob};
 use crate::cloud::audio::wav_duration_ms;
@@ -548,13 +549,16 @@ async fn finish_line(
     let mut created: Vec<PathBuf> = Vec::new();
     let raw_abs = match made {
         Some(made) => {
-            let raw = clips.join(format!("{}.{}.raw.wav", job.id, job.raw_name));
+            let raw = clips.join(format!("{}.{}.raw.wav", file_part(&job.id), job.raw_name));
             std::fs::rename(made, &raw).map_err(AppError::io)?;
             created.push(raw.clone());
             raw
         }
         None => match &job.raw_audio {
-            Some(r) => ctx.work.join(r),
+            Some(r) => match inside(&ctx.work, r) {
+                Some(p) => p,
+                None => return Ok(None),
+            },
             None => return Ok(None),
         },
     };
@@ -595,7 +599,10 @@ async fn finish_line(
     match swapped {
         Ok(Some((line, unused))) => {
             for path in unused {
-                let _ = std::fs::remove_file(ctx.work.join(path));
+                // Only files inside the work folder are ever removed.
+                if let Some(p) = inside(&ctx.work, &path) {
+                    let _ = std::fs::remove_file(p);
+                }
             }
             Ok(Some(line))
         }

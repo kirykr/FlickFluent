@@ -579,9 +579,10 @@ impl EditSession {
                     .iter()
                     .filter(|l| l.section_index == sec.index)
                     .filter_map(|l| {
-                        l.audio.as_ref().map(|a| MixLine {
+                        let clip = super::paths::inside(&work, l.audio.as_ref()?)?;
+                        Some(MixLine {
                             start_ms: l.dub_start_ms.unwrap_or(l.start_ms),
-                            clip: work.join(a),
+                            clip,
                         })
                     })
                     .collect(),
@@ -679,5 +680,16 @@ impl EditSession {
         (self.saver)(&next)?;
         self.dub = next;
         Ok(())
+    }
+}
+
+impl EditSession {
+    /// Point a line's clip at any path, as a hand-made project file could. Tests only.
+    #[doc(hidden)]
+    pub fn set_clip_for_test(&mut self, id: &str, path: &str) {
+        if let Some(l) = self.dub.lines.iter_mut().find(|l| l.id == id) {
+            l.audio = Some(path.to_string());
+            l.raw_audio = Some(path.to_string());
+        }
     }
 }
