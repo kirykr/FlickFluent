@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { dubPreflight } from "../../app/ipc";
 import { dubError, nextAction, STAGE_KEYS } from "./format";
 import { languageName } from "./languages";
@@ -35,6 +36,8 @@ export function RunError({
     stageName ? t(stageName) : null,
   );
   const detail = (error.details as { message?: string } | null | undefined)?.message;
+  const tail = (error.details as { stderrTail?: unknown } | null | undefined)?.stderrTail;
+  const engineLog = Array.isArray(tail) ? tail.filter((l) => typeof l === "string").join("\n") : "";
   const action = nextAction(error.nextStepKey);
   const [missing, setMissing] = useState<MissingModel[]>([]);
 
@@ -59,6 +62,18 @@ export function RunError({
           {t(shown.key, shown.params)}
           {detail && <span className="mt-1 block text-xs opacity-70">{detail}</span>}
           <span className="mt-1 block">{t(error.nextStepKey)}</span>
+          {engineLog && (
+            <Collapsible className="mt-2" data-testid="engine-log">
+              <CollapsibleTrigger className="text-xs underline">
+                {t("dub.run.engineLog")}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap text-xs select-text">
+                  {engineLog}
+                </pre>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </AlertDescription>
       </Alert>
 

@@ -122,6 +122,27 @@ describe("run progress", () => {
     expect(h.onResume).toHaveBeenCalled();
   });
 
+  it("shows the engine's last lines when it stopped unexpectedly", async () => {
+    const error = failure({
+      code: "SIDECAR_CRASHED",
+      messageKey: "dub.error.sidecarCrashed",
+      details: { stderrTail: ["Traceback (most recent call last):", "OSError: model.bin missing"] },
+    });
+    render(<RunProgress view={view({ state: "failed", runId: null, error })} {...handlers()} />);
+    await userEvent.click(screen.getByRole("button", { name: "Engine log" }));
+    expect(screen.getByTestId("engine-log").textContent).toContain("OSError: model.bin missing");
+  });
+
+  it("shows no engine log when the error carries none", () => {
+    render(
+      <RunProgress
+        view={view({ state: "failed", runId: null, error: failure() })}
+        {...handlers()}
+      />,
+    );
+    expect(screen.queryByTestId("engine-log")).toBeNull();
+  });
+
   it("gives the exact disk numbers and the shortfall", () => {
     const error = failure({
       code: "NO_SPACE",
