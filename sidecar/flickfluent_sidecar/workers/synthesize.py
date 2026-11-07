@@ -22,13 +22,19 @@ def find_voice_files(folder: Path, espeak: Path | None = None) -> Dict[str, Any]
     # The pronunciation data is its own download shared by all voices (`models.espeak`);
     # a voice folder that carries its own copy still works.
     data_dir = espeak or folder / "espeak-ng-data"
+    # Both voice kinds phonemize with espeak-ng. Without its data, espeak-ng ends the whole
+    # process instead of raising, which the core can only report as an engine crash.
+    # espeak-ng takes the data folder itself or a folder holding one named `espeak-ng-data`
+    # (the shared download unpacks that way).
+    if not any((d / "phontab").is_file() for d in (data_dir, data_dir / "espeak-ng-data")):
+        raise WorkerError("MODEL_MISSING", f"pronunciation data (espeak-ng-data) not found: {data_dir}")
     return {
         "kind": "kokoro" if (folder / "voices.bin").exists() else "vits",
         "folder": folder,
         "model": onnx[0],
         "tokens": tokens,
         "voices": folder / "voices.bin",
-        "data_dir": data_dir if data_dir.exists() else None,
+        "data_dir": data_dir,
         # Chinese needs a word list and number rules that ship in the Kokoro folder.
         "dict_dir": folder / "dict" if (folder / "dict").is_dir() else None,
         "fsts": sorted(folder.glob("*-zh.fst")),

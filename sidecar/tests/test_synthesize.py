@@ -39,7 +39,18 @@ def test_a_slot_too_short_speeds_the_line_up_within_the_limit(call):
 
 
 KOKORO = "kokoro-multi-lang-v1_0"
-ESPEAK = "voice/vits-piper-fr_FR-siwis-medium-int8/espeak-ng-data"
+# The app's shared pronunciation download (`models.espeak`); older test model sets carry a copy
+# inside the French Piper voice instead.
+ESPEAK_SHARED = "espeak-ng-data"
+ESPEAK_IN_VOICE = "voice/vits-piper-fr_FR-siwis-medium-int8/espeak-ng-data"
+
+
+@pytest.fixture
+def espeak(models):
+    for rel in (ESPEAK_SHARED, ESPEAK_IN_VOICE):
+        if any((models / rel / sub / "phontab").is_file() for sub in ("", "espeak-ng-data")):
+            return rel
+    pytest.skip("no espeak-ng-data folder")
 
 
 def kokoro_lines():
@@ -53,10 +64,10 @@ def kokoro_lines():
     ]
 
 
-def test_kokoro_speaks_several_languages_in_one_request(call, tmp_path, models):
+def test_kokoro_speaks_several_languages_in_one_request(call, tmp_path, models, espeak):
     if not (models / KOKORO).is_dir():
         pytest.skip("no Kokoro model folder")
-    out = call(synthesize.run, {"lines": kokoro_lines()}, {"kokoro": KOKORO, "espeak": ESPEAK})
+    out = call(synthesize.run, {"lines": kokoro_lines()}, {"kokoro": KOKORO, "espeak": espeak})
     assert sorted(out["files"]) == ["en-male.wav", "en.wav", "es.wav", "fr.wav", "zh.wav"]
     audio = {}
     for clip in out["result"]["clips"]:
@@ -70,7 +81,7 @@ def test_kokoro_speaks_several_languages_in_one_request(call, tmp_path, models):
     assert not np.allclose(audio["en"][:n], audio["en-male"][:n])
 
 
-def test_an_empty_result_is_an_error_not_a_crash(call, tmp_path, models):
+def test_an_empty_result_is_an_error_not_a_crash(call, tmp_path, models, espeak):
     if not (models / KOKORO).is_dir():
         pytest.skip("no Kokoro model folder")
     from flickfluent_sidecar.protocol import WorkerError
@@ -78,4 +89,17 @@ def test_an_empty_result_is_an_error_not_a_crash(call, tmp_path, models):
     # A language tag the engine does not know gives no sound.
     bad = [{"id": "x", "text": "Hello.", "voiceId": "kokoro", "speakerId": 3, "lang": "xx-nope", "targetMs": 2000}]
     with pytest.raises(WorkerError):
-        call(synthesize.run, {"lines": bad}, {"kokoro": KOKORO, "espeak": ESPEAK})
+        call(synthesize.run, {"lines": bad}, {"kokoro": KOKORO, "espeak": espeak})
+
+
+def test_missing_pronunciation_data_is_an_error_not_a_crash(tmp_path):
+    from flickfluent_sidecar.protocol import WorkerError
+
+    # Without espeak-ng-data the native engine would end the whole process.
+    voice = tmp_path / "voice"
+    voice.mkdir()
+    (voice / "model.onnx").write_bytes(b"")
+    (voice / "tokens.txt").write_text("")
+    with pytest.raises(WorkerError) as e:
+        synthesize.find_voice_files(voice, tmp_path / "no-espeak-here")
+    assert e.value.code == "MODEL_MISSING"
