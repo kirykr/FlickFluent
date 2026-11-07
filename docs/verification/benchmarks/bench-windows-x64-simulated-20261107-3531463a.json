@@ -1,0 +1,76 @@
+{
+  "id": "3531463a-76a1-48c2-8c8f-2e89ba3dbfc2",
+  "createdAt": "2026-11-07T16:27:31.2829601Z",
+  "machine": {
+    "os": "windows",
+    "osVersion": "11 (22631)",
+    "arch": "x64",
+    "cpuModel": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+    "cores": 4,
+    "ramGb": 8.0,
+    "freeDiskGb": 484.3,
+    "accelerator": "none",
+    "simulated": true,
+    "simulatedLimits": {
+      "cpuCores": 4,
+      "ramGb": 8.0
+    }
+  },
+  "fixture": {
+    "id": "clip-2min-fr",
+    "durationMs": 120116
+  },
+  "results": [
+    {
+      "stage": "extract",
+      "modelId": "ffmpeg",
+      "wallMs": 761,
+      "peakRamMb": null,
+      "realTimeFactor": 0.006
+    },
+    {
+      "stage": "separate",
+      "modelId": "htdemucs",
+      "wallMs": 142313,
+      "peakRamMb": 1155,
+      "realTimeFactor": 1.185
+    },
+    {
+      "stage": "transcribe",
+      "modelId": "whisper-small",
+      "wallMs": 44344,
+      "peakRamMb": 688,
+      "realTimeFactor": 0.369
+    },
+    {
+      "stage": "translate",
+      "modelId": "m2m100-418m",
+      "wallMs": 7140,
+      "peakRamMb": 1581,
+      "realTimeFactor": 0.059
+    },
+    {
+      "stage": "synthesize",
+      "modelId": "kokoro-multi-lang-v1_0",
+      "wallMs": 23155,
+      "peakRamMb": 556,
+      "realTimeFactor": 0.193
+    },
+    {
+      "stage": "mix",
+      "modelId": "ffmpeg",
+      "wallMs": 1252,
+      "peakRamMb": null,
+      "realTimeFactor": 0.01
+    }
+  ],
+  "verdict": {
+    "canRunMinimum": true,
+    "canRunFullLocal": false,
+    "notes": [
+      "Heaviest stage used 1581 MB; the minimum spec allows 6144 MB (75% of 8 GB) and the full-local spec 12288 MB.",
+      "Whole dub ran at 1.84x real time (1.00 means one minute of video takes one minute).",
+      "This machine does not meet the full-local spec, so it says nothing about it."
+    ]
+  }
+}

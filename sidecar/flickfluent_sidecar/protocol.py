@@ -60,10 +60,17 @@ def peak_ram_mb() -> int:
                 ("PeakPagefileUsage", ctypes.c_size_t),
             ]
 
+        # Without declared types ctypes passes the process handle as a 32-bit int, which 64-bit
+        # Windows rejects, so the call failed silently and every stage reported 0 MB.
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        get_info = kernel32.K32GetProcessMemoryInfo
+        get_info.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+        get_info.restype = wintypes.BOOL
         counters = Counters()
         counters.cb = ctypes.sizeof(Counters)
-        handle = ctypes.windll.kernel32.GetCurrentProcess()
-        ctypes.windll.psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), counters.cb)
+        if not get_info(kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb):
+            return 0
         return int(counters.PeakWorkingSetSize / (1024 * 1024))
     except Exception:
         return 0

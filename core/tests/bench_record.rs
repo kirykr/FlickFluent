@@ -154,8 +154,13 @@ fn the_verdict_needs_a_finished_run_and_memory_inside_the_share() {
     let over = [result(Stage::Transcribe, Some(share + 1))];
     assert!(!verdict(&over, true, &full, &spec, 0.5).can_run_minimum);
     assert!(!verdict(&fits, false, &full, &spec, 0.5).can_run_minimum);
-    // No memory figure at all proves nothing.
-    assert!(!verdict(&[result(Stage::Extract, None)], true, &full, &spec, 0.5).can_run_minimum);
+    // No memory figure at all proves nothing, and the notes say so.
+    let unmeasured = verdict(&[result(Stage::Extract, None)], true, &full, &spec, 0.5);
+    assert!(!unmeasured.can_run_minimum);
+    assert!(unmeasured
+        .notes
+        .iter()
+        .any(|n| n.contains("did not report their memory")));
 }
 
 #[test]

@@ -179,6 +179,11 @@ pub fn verdict(
             spec.minimum.ram_gb,
             full_limit
         ));
+    } else {
+        notes.push(
+            "The workers did not report their memory, so the memory limits are not proven."
+                .to_string(),
+        );
     }
     notes.push(format!(
         "Whole dub ran at {total_rtf:.2}x real time (1.00 means one minute of video takes one minute)."
@@ -308,7 +313,8 @@ pub async fn run_bench(
         } else {
             (
                 of.iter().map(|s| s.wall_ms).sum(),
-                of.iter().map(|s| s.peak_ram_mb).max(),
+                // A worker sends 0 when it could not read its memory: that is unknown, not tiny.
+                of.iter().map(|s| s.peak_ram_mb).max().filter(|&p| p > 0),
                 of[0].model_id.clone(),
             )
         };
