@@ -379,6 +379,16 @@ struct Runner<'a> {
 /// Run (or resume) the dub. Returns the project data with `run` and `lines` filled in. A
 /// cancelled run returns `Ok` with state `Cancelled`; failures are in `run.error` and also
 /// returned as `Err`, after the state is saved.
+/// Send an error that happens before the runner exists, so the screen shows it. Without this a
+/// refused resume (no source, source changed, nothing to resume) ended silently and the window
+/// waited on a run that never started.
+fn early_error(on_event: &mut (dyn FnMut(RunEvent) + Send), e: AppError) -> AppError {
+    if e.code != CANCELLED {
+        on_event(RunEvent::Error(run_error(&e, None, None)));
+    }
+    e
+}
+
 pub async fn run_dub(
     cfg: &RunConfig,
     mut dub: DubData,
@@ -389,16 +399,20 @@ pub async fn run_dub(
     let source = dub
         .source
         .clone()
-        .ok_or_else(|| AppError::new(STAGE_FAILED, "dub.error.stageFailed"))?;
-    let work = WorkFolder::create(&cfg.project_path, &cfg.project_id)?;
+        .ok_or_else(|| AppError::new(STAGE_FAILED, "dub.error.stageFailed"))
+        .map_err(|e| early_error(on_event, e))?;
+    let work = WorkFolder::create(&cfg.project_path, &cfg.project_id)
+        .map_err(|e| early_error(on_event, e))?;
 
     let fp = fingerprint(Path::new(&source.path))
-        .map_err(|_| AppError::new(SOURCE_CHANGED, "dub.error.sourceChanged"))?;
+        .map_err(|_| AppError::new(SOURCE_CHANGED, "dub.error.sourceChanged"))
+        .map_err(|e| early_error(on_event, e))?;
     if fp != source.fingerprint {
-        return Err(AppError::new(SOURCE_CHANGED, "dub.error.sourceChanged"));
+        let e = AppError::new(SOURCE_CHANGED, "dub.error.sourceChanged");
+        return Err(early_error(on_event, e));
     }
 
-    let previous = work.load_run()?;
+    let previous = work.load_run().map_err(|e| early_error(on_event, e))?;
     let run = match (mode, previous) {
         (Mode::Resume, Some(prev))
             if prev.state != RunState::Completed && !prev.sections.is_empty() =>
@@ -421,10 +435,8 @@ pub async fn run_dub(
             run
         }
         (Mode::Resume, _) => {
-            return Err(AppError::new(
-                NOTHING_TO_RESUME,
-                "dub.error.nothingToResume",
-            ))
+            let e = AppError::new(NOTHING_TO_RESUME, "dub.error.nothingToResume");
+            return Err(early_error(on_event, e));
         }
         (Mode::Fresh, _) => PipelineRun {
             id: uuid::Uuid::new_v4().to_string(),
@@ -463,7 +475,8 @@ pub async fn run_dub(
         Vec::new()
     };
     dub.lines.clear();
-    let (translate_engine, speak_engine) = prepare_cloud(cfg, &dub)?;
+    let (translate_engine, speak_engine) =
+        prepare_cloud(cfg, &dub).map_err(|e| early_error(on_event, e))?;
     let usage_base = if mode == Mode::Resume {
         read_json(&work.path().join("cloud-usage.json"))
             .filter(|v| v["runId"] == run.id.as_str())
@@ -493,7 +506,10 @@ pub async fn run_dub(
         usage_base,
         kept,
     };
-    runner.save()?;
+    if let Err(e) = runner.save() {
+        runner.emit(RunEvent::Error(run_error(&e, None, None)));
+        return Err(e);
+    }
     let outcome = runner.drive().await;
     runner.finish(outcome).await
 }

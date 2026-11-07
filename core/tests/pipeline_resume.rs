@@ -329,6 +329,42 @@ async fn resume_needs_an_unfinished_run_and_an_unchanged_source() {
     assert_eq!(err.code, SOURCE_CHANGED);
 }
 
+/// A resume refused before the run starts must still reach the screen as an error. It used to end
+/// silently, so the window showed the old cancelled run and looked hung (found on Windows when the
+/// project was reopened without its unsaved dub settings).
+#[tokio::test]
+async fn a_refused_resume_sends_an_error_event() {
+    let root = tempfile::tempdir().unwrap();
+    let cfg = config(root.path(), "r.flick", json!({}));
+    let source = root.path().join("src.mp4");
+    std::fs::copy(clip("clip-20s-fr.mp4"), &source).unwrap();
+    let dub = dub_for(&source, "en").await;
+
+    let errors = |mode: Mode, dub| {
+        let cfg = &cfg;
+        async move {
+            let mut seen = Vec::new();
+            let err = run_dub(cfg, dub, mode, CancelToken::default(), &mut |e| {
+                if let RunEvent::Error(r) = e {
+                    seen.push(r.code);
+                }
+            })
+            .await
+            .unwrap_err();
+            (err.code, seen)
+        }
+    };
+
+    // Nothing to resume yet.
+    let (code, seen) = errors(Mode::Resume, dub.clone()).await;
+    assert_eq!(code, NOTHING_TO_RESUME);
+    assert_eq!(seen, vec![NOTHING_TO_RESUME.to_string()]);
+
+    // A project whose dub settings were lost: no source at all.
+    let (code, seen) = errors(Mode::Resume, Default::default()).await;
+    assert_eq!(seen, vec![code]);
+}
+
 #[tokio::test]
 async fn a_speech_free_video_completes_with_the_original_audio_and_a_notice() {
     let root = tempfile::tempdir().unwrap();
