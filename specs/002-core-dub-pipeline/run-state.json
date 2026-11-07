@@ -1,0 +1,75 @@
+{
+  "id": "c46c0f90-4c5c-479f-a80e-ce2adc14d9e8",
+  "startedAt": "2026-11-07T09:56:38.2274969Z",
+  "endedAt": null,
+  "state": "running",
+  "settingsHash": "",
+  "sections": [
+    {
+      "index": 0,
+      "startMs": 0,
+      "endMs": 20000,
+      "status": {},
+      "inputHash": {}
+    }
+  ],
+  "stages": [
+    {
+      "stage": "extract",
+      "status": "done",
+      "progress": 0.0,
+      "etaSeconds": null,
+      "startedAt": "2026-11-07T09:56:55.6733184Z",
+      "endedAt": "2026-11-07T09:56:55.6737935Z"
+    },
+    {
+      "stage": "separate",
+      "status": "pending",
+      "progress": 0.0,
+      "etaSeconds": null,
+      "startedAt": null,
+      "endedAt": null
+    },
+    {
+      "stage": "transcribe",
+      "status": "pending",
+      "progress": 0.0,
+      "etaSeconds": null,
+      "startedAt": "2026-11-07T09:56:39.1130727Z",
+      "endedAt": null
+    },
+    {
+      "stage": "translate",
+      "status": "pending",
+      "progress": 0.0,
+      "etaSeconds": null,
+      "startedAt": null,
+      "endedAt": null
+    },
+    {
+      "stage": "synthesize",
+      "status": "pending",
+      "progress": 0.0,
+      "etaSeconds": null,
+      "startedAt": null,
+      "endedAt": null
+    },
+    {
+      "stage": "mix",
+      "status": "pending",
+      "progress": 0.0,
+      "etaSeconds": null,
+      "startedAt": null,
+      "endedAt": null
+    },
+    {
+      "stage": "export",
+      "status": "pending",
+      "progress": 0.0,
+      "etaSeconds": null,
+      "startedAt": null,
+      "endedAt": null
+    }
+  ],
+  "error": null
+}
